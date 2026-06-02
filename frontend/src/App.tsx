@@ -1,0 +1,42 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './pages/Login';
+import Onboarding from './pages/Onboarding';
+import Home from './pages/Home';
+import MyInterests from './pages/MyInterests';
+import Requests from './pages/Requests';
+import Chat from './pages/Chat';
+import RoseBoutique from './pages/RoseBoutique';
+import FloatingRose from './components/FloatingRose';
+import { SocketProvider } from './context/SocketContext';
+
+// A simple protected route wrapper
+const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const user = localStorage.getItem('user');
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
+function App() {
+  return (
+    <Router>
+      <SocketProvider>
+        <div className="font-sans antialiased text-gray-900 bg-gray-50 min-h-screen relative">
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+            <Route path="/" element={<ProtectedRoute><><FloatingRose /><Home /></></ProtectedRoute>} />
+            <Route path="/interests" element={<ProtectedRoute><><FloatingRose /><MyInterests /></></ProtectedRoute>} />
+            <Route path="/requests" element={<ProtectedRoute><><FloatingRose /><Requests /></></ProtectedRoute>} />
+            <Route path="/chat" element={<ProtectedRoute><><FloatingRose /><Chat /></></ProtectedRoute>} />
+            <Route path="/store" element={<ProtectedRoute><RoseBoutique /></ProtectedRoute>} />
+          </Routes>
+        </div>
+      </SocketProvider>
+    </Router>
+  );
+}
+
+export default App;
