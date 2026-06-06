@@ -1,5 +1,5 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import type { ReactElement } from 'react';
 import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import Home from './pages/Home';
@@ -11,7 +11,7 @@ import FloatingRose from './components/FloatingRose';
 import { SocketProvider } from './context/SocketContext';
 
 // A simple protected route wrapper
-const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+const ProtectedRoute = ({ children }: { children: ReactElement }) => {
   const user = localStorage.getItem('user');
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -23,7 +23,7 @@ function App() {
   return (
     <Router>
       <SocketProvider>
-        <div className="font-sans antialiased text-gray-900 bg-gray-50 min-h-screen relative">
+        <div className="font-sans antialiased min-h-screen relative" style={{ background: '#050005', color: '#FFF8F0' }}>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />

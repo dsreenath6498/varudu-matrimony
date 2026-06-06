@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import TinderCard from 'react-tinder-card';
 import api from '../api';
 import Navbar from '../components/Navbar';
-import { MapPin, Info, LogOut, MessageSquareHeart, Flower2, X, Heart } from 'lucide-react';
+import { MapPin, Info, LogOut, MessageSquareHeart, X, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Profile {
@@ -16,6 +16,7 @@ interface Profile {
 export default function Home() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [swipeDirection, setSwipeDirection] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,7 +24,6 @@ export default function Home() {
       const userStr = localStorage.getItem('user');
       if (!userStr) return;
       const user = JSON.parse(userStr);
-
       try {
         const response = await api.get('/profile/feed', {
           params: { userId: user.id, interestedIn: user.interested_in }
@@ -35,17 +35,16 @@ export default function Home() {
         setLoading(false);
       }
     };
-
     fetchFeed();
   }, []);
 
-  const swiped = async (direction: string, receiverId: string, interactionType = 'standard', attachedMessage = null) => {
+  const swiped = async (direction: string, receiverId: string, interactionType = 'standard', attachedMessage: string | null = null) => {
     const userStr = localStorage.getItem('user');
     if (!userStr) return;
     const user = JSON.parse(userStr);
-
     const isInterested = direction === 'right';
-
+    setSwipeDirection(direction);
+    setTimeout(() => setSwipeDirection(null), 600);
     try {
       await api.post('/interactions/swipe', {
         senderId: user.id,
@@ -54,13 +53,11 @@ export default function Home() {
         interactionType,
         attachedMessage
       });
-      // Fire event so floating rose updates its balance
       if (interactionType !== 'standard') {
         window.dispatchEvent(new Event('rose_balance_updated'));
       }
     } catch (error: any) {
       alert(error.response?.data?.error || 'Error recording swipe');
-      console.error('Error recording swipe', error);
     }
   };
 
@@ -73,7 +70,6 @@ export default function Home() {
     navigate('/login');
   };
 
-  // State for the Note Modal
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [noteText, setNoteText] = useState('');
   const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
@@ -86,36 +82,166 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-rose-50 flex flex-col md:ml-64 transition-all">
-      <div className="p-4 bg-gradient-to-r from-red-900 via-rose-900 to-amber-900 shadow-md flex items-center justify-between sticky top-0 z-10 border-b-2 border-amber-500 md:hidden">
-        <h1 className="text-2xl font-serif font-bold text-amber-300">Varudu</h1>
-        <button onClick={handleLogout} className="text-amber-100 hover:text-amber-400 transition flex flex-col items-center">
-          <LogOut className="w-5 h-5" />
-          <span className="text-[10px] mt-1 font-semibold">Logout</span>
-        </button>
-      </div>
-      
-      {/* Desktop logout button since header is hidden */}
-      <div className="hidden md:flex justify-end p-4 absolute top-0 right-0 z-20">
-        <button onClick={handleLogout} className="text-rose-900 hover:text-rose-700 transition flex items-center gap-2 bg-white/50 px-4 py-2 rounded-xl backdrop-blur shadow-sm">
-          <LogOut className="w-5 h-5" />
+    <div
+      className="min-h-screen flex flex-col md:ml-64 transition-all"
+      style={{ background: '#050005' }}
+    >
+      {/* Mobile Header */}
+      <div
+        className="md:hidden flex items-center justify-between px-4 py-3 sticky top-0 z-10"
+        style={{
+          background: 'rgba(5,0,5,0.85)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255,255,255,0.04)',
+        }}
+      >
+        <h1
+          className="text-2xl font-bold"
+          style={{
+            fontFamily: '"Cormorant Garamond", serif',
+            background: 'linear-gradient(135deg, #FFD700, #D4AF37)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
+        >
+          Varudu
+        </h1>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all"
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            color: 'rgba(180,120,150,0.7)',
+            fontSize: '12px',
+          }}
+        >
+          <LogOut className="w-3.5 h-3.5" />
           <span className="font-semibold">Logout</span>
         </button>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center overflow-hidden relative min-h-[calc(100vh-4rem)] md:min-h-screen bg-black">
+      {/* Desktop Logout */}
+      <div className="hidden md:flex justify-end p-4 absolute top-0 right-0 z-20">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            color: 'rgba(180,120,150,0.7)',
+            backdropFilter: 'blur(10px)',
+            fontSize: '13px',
+          }}
+        >
+          <LogOut className="w-4 h-4" />
+          <span className="font-semibold">Logout</span>
+        </button>
+      </div>
+
+      {/* Swipe Indicator Overlay */}
+      {swipeDirection && (
+        <div
+          className="fixed inset-0 z-30 pointer-events-none flex items-center justify-center"
+          style={{
+            background: swipeDirection === 'right'
+              ? 'radial-gradient(circle at center, rgba(34,197,94,0.15) 0%, transparent 70%)'
+              : 'radial-gradient(circle at center, rgba(225,29,72,0.15) 0%, transparent 70%)',
+            animation: 'fadeIn 0.1s ease both',
+          }}
+        >
+          <div
+            className="rounded-full p-6"
+            style={{
+              background: swipeDirection === 'right'
+                ? 'rgba(34,197,94,0.2)'
+                : 'rgba(225,29,72,0.2)',
+              border: `3px solid ${swipeDirection === 'right' ? 'rgba(34,197,94,0.6)' : 'rgba(225,29,72,0.6)'}`,
+              animation: 'bounceIn 0.3s ease',
+            }}
+          >
+            {swipeDirection === 'right'
+              ? <Heart className="w-16 h-16" style={{ color: '#22C55E', fill: '#22C55E' }} />
+              : <X className="w-16 h-16" style={{ color: '#E11D48' }} />
+            }
+          </div>
+        </div>
+      )}
+
+      {/* Card Stack Area */}
+      <div
+        className="flex-1 flex flex-col items-center justify-center overflow-hidden relative"
+        style={{ minHeight: 'calc(100vh - 4rem)' }}
+      >
         {loading ? (
-          <div className="animate-pulse flex flex-col items-center z-10">
-            <Flower2 className="w-12 h-12 text-rose-500 mb-4 opacity-50" />
-            <div className="text-rose-300 font-serif">Finding your perfect match...</div>
+          <div className="flex flex-col items-center gap-4 z-10">
+            <div
+              className="w-16 h-16 rounded-full flex items-center justify-center"
+              style={{
+                background: 'rgba(225,29,72,0.1)',
+                border: '1px solid rgba(225,29,72,0.2)',
+                animation: 'pulseGlow 2s ease-in-out infinite',
+              }}
+            >
+              <span style={{ fontSize: '28px', animation: 'float 2s ease-in-out infinite' }}>🌹</span>
+            </div>
+            <div>
+              <p
+                className="text-center font-medium"
+                style={{
+                  fontFamily: '"Cormorant Garamond", serif',
+                  color: 'rgba(212,175,55,0.7)',
+                  fontSize: '18px',
+                }}
+              >
+                Finding your perfect match...
+              </p>
+              <div className="flex justify-center gap-1.5 mt-2">
+                {[0, 1, 2].map(i => (
+                  <div
+                    key={i}
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{
+                      background: '#E11D48',
+                      animation: `heartbeat 1.2s ease-in-out ${i * 0.2}s infinite`,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         ) : profiles.length === 0 ? (
-          <div className="text-center text-rose-300 z-10 p-8 flex flex-col items-center">
-            <div className="w-24 h-24 bg-rose-900/50 rounded-full flex items-center justify-center mb-6 border border-rose-500/30 shadow-[0_0_30px_rgba(225,29,72,0.3)]">
-              <Heart className="w-10 h-10 text-rose-400" />
+          <div
+            className="text-center z-10 p-8 flex flex-col items-center"
+            style={{ animation: 'fadeUp 0.6s ease both' }}
+          >
+            <div
+              className="w-28 h-28 rounded-full flex items-center justify-center mb-6"
+              style={{
+                background: 'rgba(225,29,72,0.08)',
+                border: '1px solid rgba(225,29,72,0.2)',
+                animation: 'pulseGlow 3s ease-in-out infinite',
+              }}
+            >
+              <Heart className="w-12 h-12" style={{ color: '#E11D48', opacity: 0.6 }} />
             </div>
-            <h2 className="text-2xl font-serif font-bold text-white mb-2">You're all caught up!</h2>
-            <p className="text-rose-200/80 max-w-sm">We're searching the stars for more compatible matches. Check back soon.</p>
+            <h2
+              className="text-3xl font-bold mb-2"
+              style={{
+                fontFamily: '"Cormorant Garamond", serif',
+                background: 'linear-gradient(135deg, #FFD700, #D4AF37)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              You're all caught up!
+            </h2>
+            <p className="max-w-xs text-sm leading-relaxed" style={{ color: 'rgba(180,120,150,0.6)' }}>
+              We're searching the stars for more compatible matches. Check back soon.
+            </p>
           </div>
         ) : (
           <div className="absolute inset-0 w-full h-full">
@@ -127,26 +253,74 @@ export default function Home() {
                 onCardLeftScreen={() => outOfFrame(profile.name)}
                 preventSwipe={['up', 'down']}
               >
-                <div 
+                <div
                   className="w-full h-full relative bg-cover bg-center"
-                  style={{ backgroundImage: `url(${profile.photos && profile.photos.length > 0 ? profile.photos[0] : 'https://via.placeholder.com/600x800?text=No+Photo'})` }}
+                  style={{
+                    backgroundImage: `url(${profile.photos && profile.photos.length > 0 ? profile.photos[0] : 'https://via.placeholder.com/600x800?text=No+Photo'})`,
+                  }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/90"></div>
-                  
-                  {/* Content Overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6 pb-32 md:pb-40 text-amber-50">
-                    <div className="flex items-end justify-between mb-3">
+                  {/* Gradient overlays */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, transparent 30%, transparent 50%, rgba(0,0,0,0.95) 100%)',
+                    }}
+                  />
+                  {/* Top edge vignette */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background: 'radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.4) 0%, transparent 60%)',
+                    }}
+                  />
+
+                  {/* Profile Info */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 p-6"
+                    style={{ paddingBottom: 'calc(140px + env(safe-area-inset-bottom))' }}
+                  >
+                    {/* Name + Age */}
+                    <div className="flex items-end justify-between mb-2">
                       <div>
-                        <h2 className="text-4xl md:text-5xl font-serif font-bold text-white drop-shadow-lg mb-1">{profile.name}, {profile.age}</h2>
-                        <div className="flex items-center text-amber-200/90 text-sm md:text-base font-medium">
-                          <MapPin className="w-4 h-4 mr-1 text-amber-400" />
-                          {profile.place}
+                        <h2
+                          className="font-bold mb-1"
+                          style={{
+                            fontFamily: '"Cormorant Garamond", serif',
+                            fontSize: 'clamp(32px, 6vw, 48px)',
+                            color: 'white',
+                            textShadow: '0 2px 20px rgba(0,0,0,0.8)',
+                            lineHeight: 1.1,
+                          }}
+                        >
+                          {profile.name}, <span style={{ color: '#FFD700', fontWeight: 400 }}>{profile.age}</span>
+                        </h2>
+                        <div className="flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5" style={{ color: 'rgba(255,215,0,0.8)' }} />
+                          <span
+                            className="text-sm font-medium"
+                            style={{ color: 'rgba(255,248,240,0.8)' }}
+                          >
+                            {profile.place}
+                          </span>
                         </div>
                       </div>
-                      <button className="bg-white/10 p-3 rounded-full backdrop-blur-md border border-white/20 hover:bg-white/20 transition shadow-lg">
-                        <Info className="w-6 h-6 text-white" />
+                      <button
+                        className="rounded-full p-3 flex-shrink-0 transition-all duration-300 hover:scale-110"
+                        style={{
+                          background: 'rgba(255,255,255,0.1)',
+                          backdropFilter: 'blur(10px)',
+                          border: '1px solid rgba(255,255,255,0.15)',
+                        }}
+                      >
+                        <Info className="w-5 h-5 text-white" />
                       </button>
                     </div>
+
+                    {/* Subtle separator */}
+                    <div
+                      className="h-px w-20 mt-3"
+                      style={{ background: 'linear-gradient(90deg, rgba(212,175,55,0.6), transparent)' }}
+                    />
                   </div>
                 </div>
               </TinderCard>
@@ -155,78 +329,198 @@ export default function Home() {
         )}
       </div>
 
-      {/* Glassmorphism Floating Action Buttons */}
-      <div className="fixed md:absolute bottom-20 md:bottom-12 left-0 right-0 flex justify-center gap-4 z-40 px-4 pointer-events-none">
-        <div className="pointer-events-auto flex justify-center gap-4 items-center bg-black/20 backdrop-blur-xl p-3 md:p-4 rounded-full border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
-          <button 
-            onClick={() => {
-              if(profiles.length > 0) swiped('left', profiles[profiles.length-1].id);
+      {/* Floating Action Buttons */}
+      <div
+        className="fixed bottom-20 md:bottom-10 left-0 right-0 flex justify-center z-40 px-4 pointer-events-none"
+        style={{ marginLeft: '0', paddingLeft: '0' }}
+      >
+        <div
+          className="pointer-events-auto flex justify-center gap-3 md:gap-4 items-center px-5 py-3 rounded-full"
+          style={{
+            background: 'rgba(5,0,5,0.7)',
+            backdropFilter: 'blur(30px)',
+            WebkitBackdropFilter: 'blur(30px)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+          }}
+        >
+          {/* Pass */}
+          <button
+            onClick={() => { if (profiles.length > 0) swiped('left', profiles[profiles.length - 1].id); }}
+            className="rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
+            style={{
+              width: '56px',
+              height: '56px',
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,80,80,0.2)',
+              color: 'rgba(255,100,100,0.7)',
             }}
-            className="bg-white/10 p-4 md:p-5 rounded-full border border-white/20 text-slate-300 hover:text-rose-400 hover:bg-white/20 hover:scale-110 transition-all"
           >
-            <X className="w-7 h-7 md:w-8 md:h-8" />
-          </button>
-          
-          <button 
-            onClick={() => {
-              if(profiles.length > 0) swiped('right', profiles[profiles.length-1].id, 'standard');
-            }}
-            className="bg-white/10 p-4 md:p-5 rounded-full border border-white/20 text-emerald-400 hover:text-emerald-300 hover:bg-white/20 hover:scale-110 transition-all"
-          >
-            <Heart className="w-7 h-7 md:w-8 md:h-8" />
-          </button>
-          
-          <button 
-            onClick={() => {
-              if(profiles.length > 0) swiped('right', profiles[profiles.length-1].id, 'rose');
-            }}
-            className="bg-gradient-to-tr from-red-600 to-rose-400 p-4 md:p-5 rounded-full shadow-[0_0_20px_rgba(225,29,72,0.6)] text-white hover:scale-110 transition-all flex items-center justify-center relative group"
-          >
-            <Flower2 className="w-7 h-7 md:w-8 md:h-8 group-hover:rotate-12 transition-transform" />
-            <div className="absolute -top-2 -right-2 bg-amber-400 text-red-900 text-[10px] md:text-xs font-bold px-2 py-0.5 rounded-full border-2 border-rose-600 shadow-sm">1</div>
+            <X className="w-6 h-6" />
           </button>
 
-          <button 
-            onClick={handleNoteClick}
-            className="bg-gradient-to-tr from-amber-500 to-yellow-300 p-4 md:p-5 rounded-full shadow-[0_0_20px_rgba(245,158,11,0.4)] text-red-900 hover:scale-110 transition-all flex items-center justify-center relative group"
+          {/* Like */}
+          <button
+            onClick={() => { if (profiles.length > 0) swiped('right', profiles[profiles.length - 1].id, 'standard'); }}
+            className="rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
+            style={{
+              width: '64px',
+              height: '64px',
+              background: 'linear-gradient(135deg, rgba(34,197,94,0.25), rgba(16,185,129,0.15))',
+              border: '1px solid rgba(34,197,94,0.4)',
+              color: '#4ADE80',
+              boxShadow: '0 0 20px rgba(34,197,94,0.2)',
+              animation: 'heartbeat 3s ease-in-out infinite',
+            }}
           >
-            <MessageSquareHeart className="w-7 h-7 md:w-8 md:h-8 group-hover:-translate-y-1 transition-transform" />
-            <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] md:text-xs font-bold px-2 py-0.5 rounded-full border-2 border-amber-500 shadow-sm">3</div>
+            <Heart className="w-7 h-7" style={{ fill: 'rgba(74,222,128,0.3)' }} />
+          </button>
+
+          {/* Rose */}
+          <button
+            onClick={() => { if (profiles.length > 0) swiped('right', profiles[profiles.length - 1].id, 'rose'); }}
+            className="rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 relative"
+            style={{
+              width: '56px',
+              height: '56px',
+              background: 'linear-gradient(135deg, #7A0B2A, #E11D48)',
+              border: '1px solid rgba(255,100,120,0.3)',
+              color: 'white',
+              animation: 'pulseGlow 3s ease-in-out infinite',
+              boxShadow: '0 0 20px rgba(225,29,72,0.5)',
+            }}
+          >
+            <span style={{ fontSize: '22px' }}>🌹</span>
+            <div
+              className="absolute -top-1.5 -right-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+              style={{
+                background: 'linear-gradient(135deg, #D4AF37, #FFD700)',
+                color: '#0a0008',
+                border: '1px solid rgba(10,0,8,0.6)',
+              }}
+            >
+              1
+            </div>
+          </button>
+
+          {/* Note */}
+          <button
+            onClick={handleNoteClick}
+            className="rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 relative"
+            style={{
+              width: '56px',
+              height: '56px',
+              background: 'linear-gradient(135deg, rgba(212,175,55,0.25), rgba(255,215,0,0.1))',
+              border: '1px solid rgba(212,175,55,0.35)',
+              color: '#D4AF37',
+              boxShadow: '0 0 15px rgba(212,175,55,0.15)',
+            }}
+          >
+            <MessageSquareHeart className="w-6 h-6" />
+            <div
+              className="absolute -top-1.5 -right-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+              style={{
+                background: 'linear-gradient(135deg, #E11D48, #C41E3A)',
+                color: 'white',
+                border: '1px solid rgba(10,0,8,0.6)',
+              }}
+            >
+              3
+            </div>
           </button>
         </div>
       </div>
 
       {/* Note Modal */}
       {showNoteModal && activeProfileId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border-2 border-amber-300 relative">
-            <h3 className="text-xl font-serif font-bold text-red-900 mb-2 flex items-center gap-2">
-              <Flower2 className="w-5 h-5 text-amber-500" /> Send a Note
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{
+            background: 'rgba(0,0,0,0.7)',
+            backdropFilter: 'blur(8px)',
+            animation: 'fadeIn 0.2s ease both',
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowNoteModal(false); }}
+        >
+          <div
+            className="w-full max-w-md rounded-3xl p-6 relative overflow-hidden"
+            style={{
+              background: 'rgba(12,0,10,0.95)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              boxShadow: '0 30px 80px rgba(0,0,0,0.8)',
+              animation: 'slideInScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both',
+            }}
+          >
+            {/* Top shimmer */}
+            <div
+              className="absolute top-0 left-0 right-0 h-px"
+              style={{ background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent)' }}
+            />
+
+            <h3
+              className="text-xl font-bold mb-1 flex items-center gap-2"
+              style={{ fontFamily: '"Cormorant Garamond", serif', color: '#FFF8F0' }}
+            >
+              <span>🌹</span>
+              Send a Note
             </h3>
-            <p className="text-sm text-slate-500 mb-4">Cost: 3 Roses. Bypass the queue and send a direct message with your request.</p>
+            <p className="text-sm mb-4" style={{ color: 'rgba(180,120,150,0.6)' }}>
+              Costs 3 Roses · Bypass the queue with a direct message
+            </p>
+
             <textarea
-              className="w-full bg-rose-50 border border-rose-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none h-24 mb-4 text-slate-700"
-              placeholder="Write something romantic or funny..."
+              className="w-full rounded-xl p-4 resize-none h-28 mb-4 outline-none transition-all duration-300"
+              placeholder="Write something heartfelt..."
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
               maxLength={140}
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                color: '#FFF8F0',
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '14px',
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = 'rgba(212,175,55,0.4)';
+                e.target.style.background = 'rgba(212,175,55,0.03)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = 'rgba(255,255,255,0.08)';
+                e.target.style.background = 'rgba(255,255,255,0.04)';
+              }}
             />
+            <p className="text-xs text-right mb-4" style={{ color: 'rgba(120,80,100,0.5)' }}>
+              {noteText.length}/140
+            </p>
+
             <div className="flex gap-3">
-              <button 
+              <button
                 onClick={() => setShowNoteModal(false)}
-                className="flex-1 bg-slate-100 text-slate-600 font-bold py-3 rounded-xl hover:bg-slate-200 transition"
+                className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-[1.02]"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  color: 'rgba(180,120,150,0.7)',
+                }}
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={() => {
                   setShowNoteModal(false);
                   swiped('right', activeProfileId, 'rose_message', noteText);
                   setNoteText('');
                 }}
-                className="flex-1 bg-gradient-to-r from-red-600 to-amber-500 text-white font-bold py-3 rounded-xl hover:opacity-90 transition shadow-lg"
+                className="flex-1 py-3 rounded-xl font-bold text-sm transition-all duration-300 hover:scale-[1.02]"
+                style={{
+                  background: 'linear-gradient(135deg, #7A0B2A, #E11D48)',
+                  color: 'white',
+                  border: '1px solid rgba(255,100,120,0.3)',
+                  boxShadow: '0 6px 20px rgba(225,29,72,0.3)',
+                }}
               >
-                Send Note
+                Send Note 🌹
               </button>
             </div>
           </div>

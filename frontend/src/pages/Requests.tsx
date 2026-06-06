@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import api from '../api';
 import Navbar from '../components/Navbar';
-import { UserPlus, Flower2 } from 'lucide-react';
+import { UserPlus, MapPin, Check, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Request {
@@ -22,6 +22,7 @@ export default function Requests() {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'roses' | 'standard'>('roses');
+  const [acceptingId, setAcceptingId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,7 +33,6 @@ export default function Requests() {
     const userStr = localStorage.getItem('user');
     if (!userStr) return;
     const user = JSON.parse(userStr);
-
     try {
       const response = await api.get('/interactions/requests', {
         params: { userId: user.id }
@@ -46,14 +46,15 @@ export default function Requests() {
   };
 
   const handleAccept = async (interestId: string) => {
+    setAcceptingId(interestId);
     try {
       await api.post('/interactions/accept', { interestId });
-      // Remove from list
       setRequests(requests.filter(req => req.id !== interestId));
-      // Navigate to chat
       navigate('/chat');
     } catch (error) {
       alert('Error accepting request');
+    } finally {
+      setAcceptingId(null);
     }
   };
 
@@ -65,98 +66,272 @@ export default function Requests() {
     }
   });
 
+  const roseCount = requests.filter(r => r.interaction_type === 'rose' || r.interaction_type === 'rose_message').length;
+  const standardCount = requests.filter(r => r.interaction_type === 'standard' || !r.interaction_type).length;
+
   return (
-    <div className="min-h-screen bg-rose-50 flex flex-col pb-16 md:pb-0 md:ml-64 transition-all">
-      <div className="p-4 bg-gradient-to-r from-red-900 via-rose-900 to-amber-900 shadow-md sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-2xl font-serif font-bold text-amber-300 mb-4">Requests</h1>
-          
-          {/* Toggle Switch */}
-          <div className="flex bg-rose-950/50 p-1 rounded-2xl border border-rose-800/50">
-            <button 
+    <div
+      className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-64 transition-all"
+      style={{ background: '#050005' }}
+    >
+      {/* Header */}
+      <div
+        className="sticky top-0 z-10"
+        style={{
+          background: 'rgba(5,0,5,0.9)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255,255,255,0.04)',
+        }}
+      >
+        <div className="max-w-2xl mx-auto px-4 pt-4 pb-3">
+          <h1
+            className="text-2xl font-bold mb-4"
+            style={{
+              fontFamily: '"Cormorant Garamond", serif',
+              background: 'linear-gradient(135deg, #FFD700, #D4AF37)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            Requests
+          </h1>
+
+          {/* Premium Tab Switcher */}
+          <div
+            className="relative flex p-1 rounded-2xl"
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.06)',
+            }}
+          >
+            {/* Sliding indicator */}
+            <div
+              className="absolute top-1 bottom-1 rounded-xl transition-all duration-300"
+              style={{
+                left: activeTab === 'roses' ? '4px' : 'calc(50% + 4px)',
+                width: 'calc(50% - 8px)',
+                background: activeTab === 'roses'
+                  ? 'linear-gradient(135deg, rgba(225,29,72,0.25), rgba(159,18,57,0.15))'
+                  : 'rgba(255,255,255,0.06)',
+                border: activeTab === 'roses'
+                  ? '1px solid rgba(225,29,72,0.3)'
+                  : '1px solid rgba(255,255,255,0.08)',
+                boxShadow: activeTab === 'roses' ? '0 0 20px rgba(225,29,72,0.2)' : 'none',
+              }}
+            />
+
+            <button
               onClick={() => setActiveTab('roses')}
-              className={`flex-1 py-2 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition ${
-                activeTab === 'roses' ? 'bg-gradient-to-r from-red-600 to-rose-500 text-white shadow' : 'text-rose-300 hover:text-white'
-              }`}
+              className="relative flex-1 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 z-10"
+              style={{
+                color: activeTab === 'roses' ? '#FDA4AF' : 'rgba(180,120,150,0.4)',
+              }}
             >
-              <Flower2 className="w-4 h-4" /> The Rose Room
+              <span style={{ fontSize: '14px' }}>🌹</span>
+              The Rose Room
+              {roseCount > 0 && (
+                <span
+                  className="text-[10px] px-1.5 py-0.5 rounded-full font-bold"
+                  style={{
+                    background: 'rgba(225,29,72,0.3)',
+                    color: '#FDA4AF',
+                  }}
+                >
+                  {roseCount}
+                </span>
+              )}
             </button>
-            <button 
+
+            <button
               onClick={() => setActiveTab('standard')}
-              className={`flex-1 py-2 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition ${
-                activeTab === 'standard' ? 'bg-white text-rose-900 shadow' : 'text-rose-300 hover:text-white'
-              }`}
+              className="relative flex-1 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 z-10"
+              style={{
+                color: activeTab === 'standard' ? '#FFF8F0' : 'rgba(180,120,150,0.4)',
+              }}
             >
-              <UserPlus className="w-4 h-4" /> Standard ({requests.filter(r => r.interaction_type === 'standard' || !r.interaction_type).length})
+              <UserPlus className="w-3.5 h-3.5" />
+              Standard
+              {standardCount > 0 && (
+                <span
+                  className="text-[10px] px-1.5 py-0.5 rounded-full font-bold"
+                  style={{
+                    background: 'rgba(255,255,255,0.08)',
+                    color: 'rgba(255,248,240,0.6)',
+                  }}
+                >
+                  {standardCount}
+                </span>
+              )}
             </button>
           </div>
         </div>
       </div>
 
+      {/* Content */}
       <div className="flex-1 p-4">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-2xl mx-auto">
           {loading ? (
-            <div className="animate-pulse space-y-4">
+            <div className="space-y-3 mt-4">
               {[1, 2].map(i => (
-                <div key={i} className="bg-white/50 h-32 rounded-2xl"></div>
+                <div key={i} className="rounded-2xl shimmer-skeleton" style={{ height: '120px' }} />
               ))}
             </div>
           ) : displayedRequests.length === 0 ? (
-            <div className="text-center text-rose-400 mt-20">
-              <Flower2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-serif">No {activeTab} requests right now.</p>
-              {activeTab === 'roses' && <p className="text-sm mt-2">Premium matches will appear here.</p>}
+            <div
+              className="flex flex-col items-center justify-center mt-24 text-center"
+              style={{ animation: 'fadeUp 0.6s ease both' }}
+            >
+              <div
+                className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
+                style={{
+                  background: 'rgba(225,29,72,0.07)',
+                  border: '1px solid rgba(225,29,72,0.12)',
+                }}
+              >
+                <span style={{ fontSize: '32px', opacity: 0.4 }}>
+                  {activeTab === 'roses' ? '🌹' : '👋'}
+                </span>
+              </div>
+              <p
+                className="text-lg font-semibold"
+                style={{
+                  fontFamily: '"Cormorant Garamond", serif',
+                  color: 'rgba(255,248,240,0.35)',
+                }}
+              >
+                No {activeTab} requests yet
+              </p>
+              {activeTab === 'roses' && (
+                <p className="text-sm mt-1" style={{ color: 'rgba(180,120,150,0.3)' }}>
+                  Premium matches will appear here
+                </p>
+              )}
             </div>
           ) : (
-            <div className="space-y-4">
-              {displayedRequests.map((req) => {
+            <div className="space-y-3 mt-4">
+              {displayedRequests.map((req, i) => {
                 const isRose = req.interaction_type === 'rose';
                 const isRoseMsg = req.interaction_type === 'rose_message';
                 const hasPremium = isRose || isRoseMsg;
 
                 return (
-                  <div key={req.id} className={`p-4 rounded-2xl shadow-sm transition ${
-                    hasPremium 
-                      ? 'bg-gradient-to-r from-red-50 to-rose-50 border-2 border-red-500 shadow-red-200' 
-                      : 'bg-white border border-rose-100 hover:shadow-md'
-                  }`}>
+                  <div
+                    key={req.id}
+                    className="rounded-2xl p-4 transition-all duration-300"
+                    style={{
+                      background: hasPremium
+                        ? 'linear-gradient(135deg, rgba(225,29,72,0.08), rgba(212,175,55,0.05))'
+                        : 'rgba(255,255,255,0.03)',
+                      border: hasPremium
+                        ? '1px solid rgba(212,175,55,0.2)'
+                        : '1px solid rgba(255,255,255,0.06)',
+                      boxShadow: hasPremium
+                        ? '0 8px 30px rgba(225,29,72,0.1), inset 0 1px 0 rgba(212,175,55,0.05)'
+                        : '0 4px 16px rgba(0,0,0,0.3)',
+                      animation: `fadeUp 0.5s ${i * 0.08}s ease both`,
+                      opacity: 0,
+                    }}
+                  >
+                    {/* Premium badge */}
                     {hasPremium && (
-                      <div className="flex items-center gap-2 mb-3 bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full w-fit">
-                        <Flower2 className="w-4 h-4 text-red-600" />
-                        {isRoseMsg ? 'Sent you a Rose & Note!' : 'Sent you a Rose!'}
+                      <div
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold mb-3"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(212,175,55,0.2), rgba(225,29,72,0.15))',
+                          border: '1px solid rgba(212,175,55,0.3)',
+                          color: '#D4AF37',
+                          animation: 'borderShimmer 2.5s ease-in-out infinite',
+                        }}
+                      >
+                        <span>🌹</span>
+                        {isRoseMsg ? 'Rose & Note' : 'Sent you a Rose!'}
                       </div>
                     )}
-                    
-                    <div className="flex items-center gap-4 mb-4">
-                      <img 
-                        src={req.users.photos[0] || 'https://via.placeholder.com/150'} 
+
+                    {/* Profile row */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <img
+                        src={req.users.photos[0] || 'https://via.placeholder.com/150'}
                         alt={req.users.name}
-                        className={`w-16 h-16 rounded-full object-cover border-2 ${hasPremium ? 'border-red-500' : 'border-amber-200'}`}
+                        className="rounded-xl object-cover flex-shrink-0"
+                        style={{
+                          width: '60px',
+                          height: '60px',
+                          border: hasPremium ? '2px solid rgba(212,175,55,0.4)' : '2px solid rgba(255,255,255,0.06)',
+                        }}
                       />
-                      <div>
-                        <h3 className="font-bold text-slate-800">{req.users.name}, {req.users.age}</h3>
-                        <p className="text-sm text-slate-500">{req.users.place}</p>
+                      <div className="min-w-0">
+                        <h3
+                          className="font-semibold text-base"
+                          style={{ color: '#FFF8F0' }}
+                        >
+                          {req.users.name}, {req.users.age}
+                        </h3>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <MapPin className="w-3 h-3 flex-shrink-0" style={{ color: 'rgba(180,120,150,0.5)' }} />
+                          <span className="text-xs" style={{ color: 'rgba(180,120,150,0.5)' }}>
+                            {req.users.place}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
+                    {/* Attached message */}
                     {isRoseMsg && req.attached_message && (
-                      <div className="mb-4 bg-white p-3 rounded-xl border border-red-200 text-slate-700 italic shadow-sm">
+                      <div
+                        className="mb-3 p-3 rounded-xl italic text-sm"
+                        style={{
+                          background: 'rgba(255,255,255,0.03)',
+                          border: '1px solid rgba(255,255,255,0.05)',
+                          color: 'rgba(255,248,240,0.7)',
+                          fontFamily: '"Cormorant Garamond", serif',
+                          fontSize: '15px',
+                        }}
+                      >
                         "{req.attached_message}"
                       </div>
                     )}
 
+                    {/* Action buttons */}
                     <div className="flex gap-2">
-                      <button 
+                      <button
                         onClick={() => handleAccept(req.id)}
-                        className={`flex-1 font-bold py-2 rounded-xl shadow transition flex items-center justify-center gap-2 ${
-                          hasPremium
-                            ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white hover:opacity-90'
-                            : 'bg-gradient-to-r from-amber-500 to-yellow-400 text-red-900 hover:shadow-md'
-                        }`}
+                        disabled={acceptingId === req.id}
+                        className="flex-1 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] disabled:opacity-60"
+                        style={hasPremium ? {
+                          background: 'linear-gradient(135deg, #7A0B2A, #E11D48)',
+                          color: 'white',
+                          border: '1px solid rgba(255,100,120,0.3)',
+                          boxShadow: '0 6px 20px rgba(225,29,72,0.3)',
+                        } : {
+                          background: 'linear-gradient(135deg, rgba(34,197,94,0.2), rgba(16,185,129,0.1))',
+                          color: '#4ADE80',
+                          border: '1px solid rgba(34,197,94,0.3)',
+                        }}
                       >
-                        Accept
+                        {acceptingId === req.id ? (
+                          <span
+                            className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full"
+                            style={{ animation: 'spinSlow 0.8s linear infinite' }}
+                          />
+                        ) : (
+                          <>
+                            <Check className="w-4 h-4" />
+                            Accept
+                          </>
+                        )}
                       </button>
-                      <button className="flex-1 bg-slate-100 text-slate-600 font-bold py-2 rounded-xl hover:bg-slate-200 transition">
+                      <button
+                        className="flex-1 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02]"
+                        style={{
+                          background: 'rgba(255,255,255,0.03)',
+                          border: '1px solid rgba(255,255,255,0.06)',
+                          color: 'rgba(180,120,150,0.5)',
+                        }}
+                      >
+                        <X className="w-4 h-4" />
                         Decline
                       </button>
                     </div>
