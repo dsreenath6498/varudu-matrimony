@@ -41,16 +41,16 @@ export default function MyInterests() {
   return (
     <div
       className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-64 transition-all"
-      style={{ background: '#050005' }}
+      style={{ background: 'var(--bg-base)' }}
     >
       {/* Header */}
       <div
         className="sticky top-0 z-10 px-6 py-4"
         style={{
-          background: 'rgba(5,0,5,0.85)',
+          background: 'rgba(255, 255, 255, 0.85)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(255,255,255,0.04)',
+          borderBottom: '1px solid var(--glass-border)',
         }}
       >
         <div className="max-w-2xl mx-auto">
@@ -62,7 +62,7 @@ export default function MyInterests() {
                 boxShadow: '0 0 12px rgba(225,29,72,0.4)',
               }}
             >
-              <Heart className="w-4 h-4 text-white fill-current" />
+              <Heart className="w-4 h-4 text-[var(--bg-base)] fill-current" />
             </div>
             <h1
               className="text-2xl font-bold"
@@ -139,8 +139,8 @@ export default function MyInterests() {
                   key={interest.id}
                   className="rounded-2xl overflow-hidden flex items-center gap-4 p-4 transition-all duration-300 hover:scale-[1.01] cursor-default"
                   style={{
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.06)',
+                    background: 'var(--glass-bg)',
+                    border: '1px solid var(--glass-border)',
                     boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
                     animation: `fadeUp 0.5s ${i * 0.07}s ease both`,
                     opacity: 0,
@@ -175,7 +175,7 @@ export default function MyInterests() {
                   <div className="flex-1 min-w-0">
                     <h3
                       className="font-semibold text-base truncate"
-                      style={{ color: '#FFF8F0' }}
+                      style={{ color: 'var(--text-primary)' }}
                     >
                       {interest.users.name}, {interest.users.age}
                     </h3>

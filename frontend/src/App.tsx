@@ -8,6 +8,7 @@ import Requests from './pages/Requests';
 import Chat from './pages/Chat';
 import RoseBoutique from './pages/RoseBoutique';
 import FloatingRose from './components/FloatingRose';
+import FloralOverlay from './components/FloralOverlay';
 import { SocketProvider } from './context/SocketContext';
 
 // A simple protected route wrapper
@@ -23,7 +24,8 @@ function App() {
   return (
     <Router>
       <SocketProvider>
-        <div className="font-sans antialiased min-h-screen relative" style={{ background: '#050005', color: '#FFF8F0' }}>
+        <div className="font-sans antialiased min-h-screen relative bg-[var(--bg-base)] text-[var(--text-primary)]">
+          <FloralOverlay />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />

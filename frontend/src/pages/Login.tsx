@@ -13,7 +13,7 @@ function Petal({ style }: { style: React.CSSProperties }) {
         width: `${8 + Math.random() * 8}px`,
         height: `${8 + Math.random() * 8}px`,
         borderRadius: '50% 0 50% 0',
-        background: `radial-gradient(circle at 30% 30%, rgba(255,${80 + Math.floor(Math.random()*80)},150,0.9), rgba(180,40,80,0.5))`,
+        background: `radial-gradient(circle at 30% 30%, rgba(212,138,133,0.9), rgba(181,101,93,0.5))`,
         transform: `rotate(${Math.random() * 360}deg)`,
       }}
     />
@@ -75,13 +75,13 @@ export default function Login() {
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ background: 'radial-gradient(ellipse at 30% 20%, #1a0018 0%, #050005 60%, #0a000a 100%)' }}
+      style={{ background: 'radial-gradient(ellipse at 30% 20%, var(--bg-raised) 0%, var(--bg-base) 60%, var(--bg-deep) 100%)' }}
     >
       {/* Ambient orbs */}
       <div
         className="absolute w-[600px] h-[600px] rounded-full pointer-events-none"
         style={{
-          background: 'radial-gradient(circle, rgba(225,29,72,0.18) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, var(--crimson-glow) 0%, transparent 70%)',
           top: '-15%',
           left: '-15%',
           animation: 'orbFloat 15s ease-in-out infinite',
@@ -90,7 +90,7 @@ export default function Login() {
       <div
         className="absolute w-[400px] h-[400px] rounded-full pointer-events-none"
         style={{
-          background: 'radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, var(--gold-glow) 0%, transparent 70%)',
           bottom: '10%',
           right: '-10%',
           animation: 'orbFloat 18s ease-in-out infinite reverse',
@@ -120,13 +120,9 @@ export default function Login() {
         style={{ animation: 'slideInScale 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) both' }}
       >
         <div
-          className="rounded-3xl p-8 relative overflow-hidden"
+          className="rounded-3xl p-8 relative overflow-hidden glass"
           style={{
-            background: 'rgba(12, 0, 10, 0.8)',
-            backdropFilter: 'blur(40px)',
-            WebkitBackdropFilter: 'blur(40px)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            boxShadow: '0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(225,29,72,0.1), inset 0 1px 0 rgba(255,255,255,0.05)',
+            boxShadow: 'var(--shadow-card)',
           }}
         >
           {/* Card inner glow */}
@@ -143,8 +139,8 @@ export default function Login() {
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center mb-4 relative"
               style={{
-                background: 'linear-gradient(135deg, #7A0B2A, #E11D48)',
-                boxShadow: '0 0 30px rgba(225,29,72,0.5)',
+                background: 'linear-gradient(135deg, var(--crimson-dark), var(--crimson))',
+                boxShadow: 'var(--shadow-glow-crimson)',
                 animation: 'pulseGlow 3s ease-in-out infinite',
               }}
             >
@@ -163,7 +159,7 @@ export default function Login() {
               className="text-5xl font-bold mb-1"
               style={{
                 fontFamily: '"Cormorant Garamond", serif',
-                background: 'linear-gradient(135deg, #FFD700, #D4AF37, #C8951A)',
+                background: 'linear-gradient(135deg, var(--gold-light), var(--gold), #A88655)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -175,14 +171,14 @@ export default function Login() {
             </h1>
 
             <div className="flex items-center gap-2">
-              <Sparkles className="w-3 h-3" style={{ color: '#D4AF37' }} />
+              <Sparkles className="w-3 h-3" style={{ color: 'var(--gold)' }} />
               <p
                 className="text-xs font-semibold uppercase tracking-[0.2em]"
-                style={{ color: 'rgba(212,175,55,0.7)' }}
+                style={{ color: 'var(--gold)' }}
               >
                 Premium Matrimony
               </p>
-              <Sparkles className="w-3 h-3" style={{ color: '#D4AF37' }} />
+              <Sparkles className="w-3 h-3" style={{ color: 'var(--gold)' }} />
             </div>
 
             {/* Divider */}
@@ -220,13 +216,9 @@ export default function Login() {
                 <button
                   onClick={requestOtp}
                   disabled={loading || !phoneNumber}
-                  className="w-full font-bold py-4 rounded-2xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 relative overflow-hidden"
+                  className="w-full font-bold py-4 rounded-2xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 relative overflow-hidden btn-crimson"
                   style={{
-                    background: 'linear-gradient(135deg, #9F1239, #E11D48, #FF4D6D)',
-                    color: 'white',
-                    fontSize: '15px',
-                    border: '1px solid rgba(255,100,120,0.3)',
-                    boxShadow: loading ? 'none' : '0 8px 24px rgba(225,29,72,0.4)',
+                    boxShadow: loading ? 'none' : 'var(--shadow-glow-crimson)',
                   }}
                 >
                   {loading ? (
@@ -245,10 +237,10 @@ export default function Login() {
             ) : (
               <div style={{ animation: 'fadeUp 0.5s ease both' }}>
                 <div className="mb-4 text-center">
-                  <p className="text-xs font-semibold" style={{ color: 'rgba(180,120,150,0.7)' }}>
+                  <p className="text-xs font-semibold text-[var(--text-muted)]">
                     Code sent to
                   </p>
-                  <p className="font-semibold mt-0.5" style={{ color: '#FFF8F0' }}>{phoneNumber}</p>
+                  <p className="font-semibold mt-0.5 text-[var(--text-primary)]">{phoneNumber}</p>
                 </div>
 
                 <label
@@ -270,13 +262,9 @@ export default function Login() {
                 <button
                   onClick={verifyOtp}
                   disabled={loading || !otp}
-                  className="w-full font-bold py-4 rounded-2xl transition-all duration-300 disabled:opacity-40 flex items-center justify-center gap-2"
+                  className="w-full font-bold py-4 rounded-2xl transition-all duration-300 disabled:opacity-40 flex items-center justify-center gap-2 btn-crimson"
                   style={{
-                    background: 'linear-gradient(135deg, #9F1239, #E11D48, #FF4D6D)',
-                    color: 'white',
-                    fontSize: '15px',
-                    border: '1px solid rgba(255,100,120,0.3)',
-                    boxShadow: loading ? 'none' : '0 8px 24px rgba(225,29,72,0.4)',
+                    boxShadow: loading ? 'none' : 'var(--shadow-glow-crimson)',
                   }}
                 >
                   {loading ? (
@@ -291,8 +279,7 @@ export default function Login() {
 
                 <button
                   onClick={() => setStep(1)}
-                  className="w-full mt-3 text-sm font-medium py-2 rounded-xl transition-all"
-                  style={{ color: 'rgba(180,120,150,0.6)' }}
+                  className="w-full mt-3 text-sm font-medium py-2 rounded-xl transition-all text-[var(--text-muted)]"
                 >
                   ← Change number
                 </button>
@@ -301,10 +288,7 @@ export default function Login() {
           </div>
 
           {/* Footer */}
-          <p
-            className="text-center text-xs mt-6"
-            style={{ color: 'rgba(120,80,100,0.5)' }}
-          >
+          <p className="text-center text-xs mt-6 text-[var(--text-muted)]">
             By continuing, you agree to our Terms & Privacy Policy
           </p>
         </div>

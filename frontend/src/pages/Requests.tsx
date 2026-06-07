@@ -72,16 +72,16 @@ export default function Requests() {
   return (
     <div
       className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-64 transition-all"
-      style={{ background: '#050005' }}
+      style={{ background: 'var(--bg-base)' }}
     >
       {/* Header */}
       <div
         className="sticky top-0 z-10"
         style={{
-          background: 'rgba(5,0,5,0.9)',
+          background: 'rgba(255,255,255,0.9)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(255,255,255,0.04)',
+          borderBottom: '1px solid var(--glass-border)',
         }}
       >
         <div className="max-w-2xl mx-auto px-4 pt-4 pb-3">
@@ -102,8 +102,8 @@ export default function Requests() {
           <div
             className="relative flex p-1 rounded-2xl"
             style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.06)',
+              background: 'var(--glass-bg)',
+              border: '1px solid var(--glass-border)',
             }}
           >
             {/* Sliding indicator */}
@@ -113,11 +113,11 @@ export default function Requests() {
                 left: activeTab === 'roses' ? '4px' : 'calc(50% + 4px)',
                 width: 'calc(50% - 8px)',
                 background: activeTab === 'roses'
-                  ? 'linear-gradient(135deg, rgba(225,29,72,0.25), rgba(159,18,57,0.15))'
-                  : 'rgba(255,255,255,0.06)',
+                  ? 'linear-gradient(135deg, rgba(212,138,133,0.25), rgba(181,101,93,0.15))'
+                  : 'var(--bg-surface)',
                 border: activeTab === 'roses'
-                  ? '1px solid rgba(225,29,72,0.3)'
-                  : '1px solid rgba(255,255,255,0.08)',
+                  ? '1px solid rgba(212,138,133,0.3)'
+                  : '1px solid var(--glass-border)',
                 boxShadow: activeTab === 'roses' ? '0 0 20px rgba(225,29,72,0.2)' : 'none',
               }}
             />
@@ -148,7 +148,7 @@ export default function Requests() {
               onClick={() => setActiveTab('standard')}
               className="relative flex-1 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 z-10"
               style={{
-                color: activeTab === 'standard' ? '#FFF8F0' : 'rgba(180,120,150,0.4)',
+                color: activeTab === 'standard' ? 'var(--text-primary)' : 'var(--text-muted)',
               }}
             >
               <UserPlus className="w-3.5 h-3.5" />
@@ -222,14 +222,14 @@ export default function Requests() {
                     className="rounded-2xl p-4 transition-all duration-300"
                     style={{
                       background: hasPremium
-                        ? 'linear-gradient(135deg, rgba(225,29,72,0.08), rgba(212,175,55,0.05))'
-                        : 'rgba(255,255,255,0.03)',
+                        ? 'linear-gradient(135deg, rgba(212,138,133,0.08), rgba(168,134,85,0.05))'
+                        : 'var(--glass-bg)',
                       border: hasPremium
-                        ? '1px solid rgba(212,175,55,0.2)'
-                        : '1px solid rgba(255,255,255,0.06)',
+                        ? '1px solid rgba(168,134,85,0.2)'
+                        : '1px solid var(--glass-border)',
                       boxShadow: hasPremium
-                        ? '0 8px 30px rgba(225,29,72,0.1), inset 0 1px 0 rgba(212,175,55,0.05)'
-                        : '0 4px 16px rgba(0,0,0,0.3)',
+                        ? '0 8px 30px rgba(212,138,133,0.1), inset 0 1px 0 rgba(168,134,85,0.05)'
+                        : 'var(--shadow-card)',
                       animation: `fadeUp 0.5s ${i * 0.08}s ease both`,
                       opacity: 0,
                     }}
@@ -265,7 +265,7 @@ export default function Requests() {
                       <div className="min-w-0">
                         <h3
                           className="font-semibold text-base"
-                          style={{ color: '#FFF8F0' }}
+                          style={{ color: 'var(--text-primary)' }}
                         >
                           {req.users.name}, {req.users.age}
                         </h3>
@@ -283,9 +283,9 @@ export default function Requests() {
                       <div
                         className="mb-3 p-3 rounded-xl italic text-sm"
                         style={{
-                          background: 'rgba(255,255,255,0.03)',
-                          border: '1px solid rgba(255,255,255,0.05)',
-                          color: 'rgba(255,248,240,0.7)',
+                          background: 'var(--bg-surface)',
+                          border: '1px solid var(--glass-border)',
+                          color: 'var(--text-primary)',
                           fontFamily: '"Cormorant Garamond", serif',
                           fontSize: '15px',
                         }}

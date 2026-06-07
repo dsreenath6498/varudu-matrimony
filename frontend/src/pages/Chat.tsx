@@ -113,17 +113,17 @@ export default function Chat() {
   };
 
   const headerStyle: React.CSSProperties = {
-    background: 'rgba(5,0,5,0.9)',
+    background: 'rgba(255, 255, 255, 0.9)',
     backdropFilter: 'blur(20px)',
     WebkitBackdropFilter: 'blur(20px)',
-    borderBottom: '1px solid rgba(255,255,255,0.04)',
+    borderBottom: '1px solid var(--glass-border)',
   };
 
   if (!activeMatch) {
     return (
       <div
         className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-64 transition-all"
-        style={{ background: '#050005' }}
+        style={{ background: 'var(--bg-base)' }}
       >
         {/* Header */}
         <div className="sticky top-0 z-10 px-4 py-4" style={headerStyle}>
@@ -185,11 +185,9 @@ export default function Chat() {
                     className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.01] hover:shadow-lg"
                     style={{
                       background: match.isFullyUnlocked
-                        ? 'rgba(255,255,255,0.04)'
-                        : 'rgba(255,255,255,0.02)',
-                      border: match.isFullyUnlocked
-                        ? '1px solid rgba(255,255,255,0.07)'
-                        : '1px solid rgba(255,255,255,0.04)',
+                        ? 'var(--bg-surface)'
+                        : 'var(--glass-bg)',
+                      border: '1px solid var(--glass-border)',
                       opacity: match.isFullyUnlocked ? 1 : 0.6,
                       animation: `fadeUp 0.5s ${i * 0.08}s ease both`,
                     }}
@@ -220,7 +218,7 @@ export default function Chat() {
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-sm" style={{ color: '#FFF8F0' }}>
+                        <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
                           {match.user.name}
                         </h3>
                         {!match.isFullyUnlocked && (
@@ -279,7 +277,7 @@ export default function Chat() {
   return (
     <div
       className="min-h-screen flex flex-col md:ml-64 transition-all"
-      style={{ background: '#050005' }}
+      style={{ background: 'var(--bg-base)' }}
     >
       {/* Chat Header */}
       <div className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3" style={headerStyle}>
@@ -303,7 +301,7 @@ export default function Chat() {
         <div className="min-w-0">
           <h2
             className="font-bold text-sm"
-            style={{ fontFamily: '"Cormorant Garamond", serif', color: '#FFF8F0', fontSize: '18px' }}
+            style={{ fontFamily: '"Cormorant Garamond", serif', color: 'var(--text-primary)', fontSize: '18px' }}
           >
             {activeMatch.user.name}
           </h2>
@@ -319,9 +317,9 @@ export default function Chat() {
           <div
             className="w-full max-w-sm rounded-3xl p-8 text-center relative overflow-hidden"
             style={{
-              background: 'rgba(12,0,10,0.8)',
-              border: '1px solid rgba(255,255,255,0.07)',
-              boxShadow: '0 30px 60px rgba(0,0,0,0.6)',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--glass-border)',
+              boxShadow: 'var(--shadow-card)',
               animation: 'slideInScale 0.5s ease both',
             }}
           >
@@ -342,7 +340,7 @@ export default function Chat() {
 
             <h3
               className="text-2xl font-bold mb-2"
-              style={{ fontFamily: '"Cormorant Garamond", serif', color: '#FFF8F0' }}
+              style={{ fontFamily: '"Cormorant Garamond", serif', color: 'var(--text-primary)' }}
             >
               Chat Locked
             </h3>
@@ -426,9 +424,9 @@ export default function Chat() {
                           borderBottomRightRadius: '4px',
                           boxShadow: '0 4px 16px rgba(225,29,72,0.3)',
                         } : {
-                          background: 'rgba(255,255,255,0.06)',
-                          color: '#FFF8F0',
-                          border: '1px solid rgba(255,255,255,0.07)',
+                          background: 'var(--bg-surface)',
+                          color: 'var(--text-primary)',
+                          border: '1px solid var(--glass-border)',
                           borderBottomLeftRadius: '4px',
                         }}
                       >
@@ -446,10 +444,10 @@ export default function Chat() {
           <div
             className="fixed bottom-0 left-0 right-0 p-3 md:left-64 z-20 transition-all"
             style={{
-              background: 'rgba(5,0,5,0.9)',
+              background: 'rgba(255, 255, 255, 0.9)',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
-              borderTop: '1px solid rgba(255,255,255,0.04)',
+              borderTop: '1px solid var(--glass-border)',
               paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
             }}
           >

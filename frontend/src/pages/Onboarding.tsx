@@ -4,9 +4,9 @@ import api from '../api';
 import { Camera, ArrowRight, Sparkles } from 'lucide-react';
 
 const inputStyle: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  color: '#FFF8F0',
+  background: 'var(--bg-surface)',
+  border: '1px solid var(--glass-border)',
+  color: 'var(--text-primary)',
   borderRadius: '14px',
   padding: '14px 18px',
   width: '100%',
@@ -107,7 +107,7 @@ export default function Onboarding() {
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ background: 'radial-gradient(ellipse at 60% 80%, #1a0018 0%, #050005 60%, #0a000a 100%)' }}
+      style={{ background: 'radial-gradient(ellipse at 60% 80%, var(--bg-raised) 0%, var(--bg-base) 60%, var(--bg-deep) 100%)' }}
     >
       {/* Orbs */}
       <div
@@ -121,7 +121,7 @@ export default function Onboarding() {
       <div
         className="absolute w-[350px] h-[350px] rounded-full pointer-events-none"
         style={{
-          background: 'radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, var(--gold-glow) 0%, transparent 70%)',
           bottom: '-5%', left: '-5%',
           animation: 'orbFloat 18s ease-in-out infinite reverse',
         }}
@@ -132,13 +132,9 @@ export default function Onboarding() {
         style={{ animation: 'slideInScale 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) both' }}
       >
         <div
-          className="rounded-3xl p-8 relative overflow-hidden"
+          className="rounded-3xl p-8 relative overflow-hidden glass"
           style={{
-            background: 'rgba(12, 0, 10, 0.85)',
-            backdropFilter: 'blur(40px)',
-            WebkitBackdropFilter: 'blur(40px)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            boxShadow: '0 30px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)',
+            boxShadow: 'var(--shadow-card)',
           }}
         >
           {/* Top shimmer line */}
@@ -165,7 +161,7 @@ export default function Onboarding() {
               className="text-3xl font-bold text-center mb-1"
               style={{
                 fontFamily: '"Cormorant Garamond", serif',
-                background: 'linear-gradient(135deg, #FFD700, #D4AF37)',
+                background: 'linear-gradient(135deg, var(--gold-light), var(--gold))',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -255,12 +251,12 @@ export default function Onboarding() {
                     style={{
                       background: formData.gender === g
                         ? g === 'Male'
-                          ? 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.1))'
-                          : 'linear-gradient(135deg, rgba(225,29,72,0.2), rgba(159,18,57,0.1))'
-                        : 'rgba(255,255,255,0.03)',
+                          ? 'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(37,99,235,0.05))'
+                          : 'linear-gradient(135deg, rgba(212,138,133,0.15), rgba(181,101,93,0.08))'
+                        : 'var(--bg-surface)',
                       border: formData.gender === g
-                        ? g === 'Male' ? '1px solid rgba(59,130,246,0.5)' : '1px solid rgba(225,29,72,0.5)'
-                        : '1px solid rgba(255,255,255,0.06)',
+                        ? g === 'Male' ? '1px solid rgba(59,130,246,0.3)' : '1px solid rgba(212,138,133,0.4)'
+                        : '1px solid var(--glass-border)',
                       color: formData.gender === g
                         ? g === 'Male' ? '#93C5FD' : '#FDA4AF'
                         : 'rgba(180,120,150,0.5)',
@@ -290,12 +286,12 @@ export default function Onboarding() {
                     style={{
                       background: formData.interested_in === g
                         ? g === 'Male'
-                          ? 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.1))'
-                          : 'linear-gradient(135deg, rgba(225,29,72,0.2), rgba(159,18,57,0.1))'
-                        : 'rgba(255,255,255,0.03)',
+                          ? 'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(37,99,235,0.05))'
+                          : 'linear-gradient(135deg, rgba(212,138,133,0.15), rgba(181,101,93,0.08))'
+                        : 'var(--bg-surface)',
                       border: formData.interested_in === g
-                        ? g === 'Male' ? '1px solid rgba(59,130,246,0.5)' : '1px solid rgba(225,29,72,0.5)'
-                        : '1px solid rgba(255,255,255,0.06)',
+                        ? g === 'Male' ? '1px solid rgba(59,130,246,0.3)' : '1px solid rgba(212,138,133,0.4)'
+                        : '1px solid var(--glass-border)',
                       color: formData.interested_in === g
                         ? g === 'Male' ? '#93C5FD' : '#FDA4AF'
                         : 'rgba(180,120,150,0.5)',

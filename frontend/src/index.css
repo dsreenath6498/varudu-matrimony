@@ -6,37 +6,38 @@
    ============================================================ */
 
 :root {
-  /* Background */
-  --bg-deep: #050005;
-  --bg-base: #0a0008;
-  --bg-surface: #120010;
-  --bg-raised: #1a0018;
+  /* Background - Light Beige/Cream Theme */
+  --bg-deep: #F4EFE6;
+  --bg-base: #FDFBF7;
+  --bg-surface: #FFFFFF;
+  --bg-raised: #FAF7F2;
 
-  /* Primary */
-  --crimson: #E11D48;
-  --crimson-dark: #9F1239;
-  --crimson-glow: rgba(225, 29, 72, 0.5);
+  /* Primary Accent - Soft Rose/Terracotta */
+  --crimson: #D48A85;
+  --crimson-dark: #B5655D;
+  --crimson-glow: rgba(212, 138, 133, 0.3);
 
-  /* Gold */
-  --gold: #D4AF37;
-  --gold-light: #FFD700;
-  --gold-glow: rgba(212, 175, 55, 0.4);
+  /* Secondary Accent - Vintage Brass/Gold */
+  --gold: #A88655;
+  --gold-light: #C2A67A;
+  --gold-glow: rgba(168, 134, 85, 0.2);
 
-  /* Text */
-  --text-primary: #FFF8F0;
-  --text-secondary: #C9A8B8;
-  --text-muted: #7A5A6A;
+  /* Text - Rich Browns */
+  --text-primary: #3E2723;
+  --text-secondary: #5D4037;
+  --text-muted: #8D6E63;
 
-  /* Glass */
-  --glass-bg: rgba(255, 255, 255, 0.04);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-border-gold: rgba(212, 175, 55, 0.25);
+  /* Glassmorphism - Light Mode */
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(141, 110, 99, 0.15);
+  --glass-border-gold: rgba(168, 134, 85, 0.3);
 
-  /* Shadows */
-  --shadow-glow-crimson: 0 0 20px rgba(225, 29, 72, 0.5), 0 0 60px rgba(225, 29, 72, 0.2);
-  --shadow-glow-gold: 0 0 20px rgba(212, 175, 55, 0.5), 0 0 60px rgba(212, 175, 55, 0.2);
-  --shadow-card: 0 25px 50px rgba(0, 0, 0, 0.7), 0 8px 16px rgba(0, 0, 0, 0.4);
+  /* Shadows - Soft Brown Shadows */
+  --shadow-glow-crimson: 0 10px 25px rgba(212, 138, 133, 0.2);
+  --shadow-glow-gold: 0 10px 25px rgba(168, 134, 85, 0.2);
+  --shadow-card: 0 15px 35px rgba(93, 64, 55, 0.08), 0 5px 15px rgba(93, 64, 55, 0.04);
 }
+
 
 /* ============================================================
    BASE STYLES

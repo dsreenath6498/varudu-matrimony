@@ -29,11 +29,11 @@ export default function Navbar() {
         <div
           className="mx-3 mb-3 rounded-2xl overflow-hidden"
           style={{
-            background: 'rgba(10, 0, 8, 0.85)',
+            background: 'var(--glass-bg)',
             backdropFilter: 'blur(30px)',
             WebkitBackdropFilter: 'blur(30px)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            boxShadow: '0 -4px 30px rgba(0,0,0,0.5), 0 0 0 1px rgba(225,29,72,0.08)',
+            border: '1px solid var(--glass-border)',
+            boxShadow: 'var(--shadow-card)',
           }}
         >
           <div className="flex items-center justify-around px-2 py-2">
@@ -109,11 +109,11 @@ export default function Navbar() {
       <nav
         className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-64 z-50"
         style={{
-          background: 'rgba(5, 0, 5, 0.92)',
+          background: 'rgba(255, 255, 255, 0.92)',
           backdropFilter: 'blur(40px)',
           WebkitBackdropFilter: 'blur(40px)',
-          borderRight: '1px solid rgba(255,255,255,0.05)',
-          boxShadow: '4px 0 30px rgba(0,0,0,0.5)',
+          borderRight: '1px solid var(--glass-border)',
+          boxShadow: '4px 0 30px rgba(93, 64, 55, 0.08)',
         }}
       >
         {/* Decorative orb */}
@@ -136,7 +136,7 @@ export default function Navbar() {
                   animation: 'pulseGlow 3s ease-in-out infinite',
                 }}
               >
-                <Heart className="w-4 h-4 fill-current text-white" />
+                <Heart className="w-4 h-4 fill-current text-[var(--bg-base)]" />
               </div>
               <div>
                 <h1
@@ -220,7 +220,7 @@ export default function Navbar() {
                   <span
                     className="text-sm font-semibold transition-all duration-300"
                     style={{
-                      color: isActive ? '#FFF8F0' : 'rgba(160,100,130,0.6)',
+                      color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
                     }}
                   >
                     {label}

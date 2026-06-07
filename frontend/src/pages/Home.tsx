@@ -84,16 +84,16 @@ export default function Home() {
   return (
     <div
       className="min-h-screen flex flex-col md:ml-64 transition-all"
-      style={{ background: '#050005' }}
+      style={{ background: 'var(--bg-base)' }}
     >
       {/* Mobile Header */}
       <div
         className="md:hidden flex items-center justify-between px-4 py-3 sticky top-0 z-10"
         style={{
-          background: 'rgba(5,0,5,0.85)',
+          background: 'rgba(255, 255, 255, 0.85)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(255,255,255,0.04)',
+          borderBottom: '1px solid var(--glass-border)',
         }}
       >
         <h1
@@ -129,9 +129,9 @@ export default function Home() {
           onClick={handleLogout}
           className="flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
           style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            color: 'rgba(180,120,150,0.7)',
+            background: 'var(--glass-bg)',
+            border: '1px solid var(--glass-border)',
+            color: 'var(--text-muted)',
             backdropFilter: 'blur(10px)',
             fontSize: '13px',
           }}
@@ -247,7 +247,7 @@ export default function Home() {
           <div className="absolute inset-0 w-full h-full">
             {profiles.map((profile) => (
               <TinderCard
-                className="absolute w-full h-full swipe-card cursor-grab active:cursor-grabbing"
+                className="absolute w-full h-full swipe-card cursor-grab active:cursor-grabbing overflow-hidden rounded-3xl"
                 key={profile.id}
                 onSwipe={(dir) => swiped(dir, profile.id)}
                 onCardLeftScreen={() => outOfFrame(profile.name)}
@@ -337,11 +337,11 @@ export default function Home() {
         <div
           className="pointer-events-auto flex justify-center gap-3 md:gap-4 items-center px-5 py-3 rounded-full"
           style={{
-            background: 'rgba(5,0,5,0.7)',
+            background: 'rgba(255, 255, 255, 0.9)',
             backdropFilter: 'blur(30px)',
             WebkitBackdropFilter: 'blur(30px)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+            border: '1px solid var(--glass-border)',
+            boxShadow: 'var(--shadow-card)',
           }}
         >
           {/* Pass */}
@@ -445,9 +445,9 @@ export default function Home() {
           <div
             className="w-full max-w-md rounded-3xl p-6 relative overflow-hidden"
             style={{
-              background: 'rgba(12,0,10,0.95)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              boxShadow: '0 30px 80px rgba(0,0,0,0.8)',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--glass-border)',
+              boxShadow: 'var(--shadow-card)',
               animation: 'slideInScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both',
             }}
           >
@@ -459,7 +459,7 @@ export default function Home() {
 
             <h3
               className="text-xl font-bold mb-1 flex items-center gap-2"
-              style={{ fontFamily: '"Cormorant Garamond", serif', color: '#FFF8F0' }}
+              style={{ fontFamily: '"Cormorant Garamond", serif', color: 'var(--text-primary)' }}
             >
               <span>🌹</span>
               Send a Note
@@ -475,9 +475,9 @@ export default function Home() {
               onChange={(e) => setNoteText(e.target.value)}
               maxLength={140}
               style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                color: '#FFF8F0',
+                background: 'var(--bg-deep)',
+                border: '1px solid var(--glass-border)',
+                color: 'var(--text-primary)',
                 fontFamily: 'Inter, sans-serif',
                 fontSize: '14px',
               }}

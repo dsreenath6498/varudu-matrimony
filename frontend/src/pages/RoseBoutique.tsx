@@ -174,16 +174,16 @@ export default function RoseBoutique() {
   return (
     <div
       className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-64 transition-all"
-      style={{ background: '#050005' }}
+      style={{ background: 'var(--bg-base)' }}
     >
       {/* Header */}
       <div
         className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3"
         style={{
-          background: 'rgba(5,0,5,0.9)',
+          background: 'rgba(255, 255, 255, 0.9)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(255,255,255,0.04)',
+          borderBottom: '1px solid var(--glass-border)',
         }}
       >
         <button
@@ -280,7 +280,7 @@ export default function RoseBoutique() {
               className="text-xl font-bold mb-4 flex items-center gap-2"
               style={{
                 fontFamily: '"Cormorant Garamond", serif',
-                color: '#FFF8F0',
+                color: 'var(--text-primary)',
               }}
             >
               <span>🌹</span>
@@ -297,20 +297,20 @@ export default function RoseBoutique() {
                   style={{
                     ...(tiltStyle[index] || {}),
                     background: pack.style === 'premium'
-                      ? 'linear-gradient(135deg, #0a0008, #1a001a, #120010)'
+                      ? 'linear-gradient(135deg, var(--bg-surface), var(--bg-raised), var(--bg-base))'
                       : pack.style === 'featured'
-                      ? 'linear-gradient(135deg, rgba(122,11,42,0.3), rgba(212,175,55,0.15))'
-                      : 'rgba(255,255,255,0.03)',
+                      ? 'linear-gradient(135deg, rgba(212,138,133,0.15), rgba(168,134,85,0.08))'
+                      : 'var(--bg-surface)',
                     border: pack.style === 'premium'
-                      ? '1px solid rgba(212,175,55,0.35)'
+                      ? '1px solid rgba(168,134,85,0.35)'
                       : pack.style === 'featured'
-                      ? '1px solid rgba(212,175,55,0.25)'
-                      : '1px solid rgba(255,255,255,0.06)',
+                      ? '1px solid rgba(168,134,85,0.25)'
+                      : '1px solid var(--glass-border)',
                     boxShadow: pack.style === 'premium'
-                      ? '0 20px 50px rgba(212,175,55,0.15), inset 0 1px 0 rgba(212,175,55,0.1)'
+                      ? '0 20px 50px rgba(168,134,85,0.15), inset 0 1px 0 rgba(168,134,85,0.1)'
                       : pack.style === 'featured'
-                      ? '0 15px 40px rgba(225,29,72,0.15)'
-                      : 'none',
+                      ? '0 15px 40px rgba(212,138,133,0.15)'
+                      : 'var(--shadow-card)',
                     animation: pack.style === 'featured' ? 'borderShimmer 2.5s ease-in-out infinite' : 'none',
                   }}
                 >
@@ -364,7 +364,7 @@ export default function RoseBoutique() {
                   <h3
                     className="font-bold text-center mb-1"
                     style={{
-                      color: pack.style === 'premium' ? '#D4AF37' : '#FFF8F0',
+                      color: pack.style === 'premium' ? '#D4AF37' : 'var(--text-primary)',
                       fontSize: '14px',
                     }}
                   >
@@ -389,7 +389,7 @@ export default function RoseBoutique() {
           <div style={{ animation: 'fadeUp 0.6s 0.2s ease both' }}>
             <h2
               className="text-xl font-bold mb-4"
-              style={{ fontFamily: '"Cormorant Garamond", serif', color: '#FFF8F0' }}
+              style={{ fontFamily: '"Cormorant Garamond", serif', color: 'var(--text-primary)' }}
             >
               Earn Free Roses
             </h2>
@@ -417,7 +417,7 @@ export default function RoseBoutique() {
                     <Gift className="w-5 h-5" style={{ color: '#4ADE80' }} />
                   </div>
                   <div className="text-left">
-                    <h3 className="font-bold text-sm" style={{ color: '#FFF8F0' }}>Daily Drop</h3>
+                    <h3 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Daily Drop</h3>
                     <p className="text-xs mt-0.5" style={{ color: 'rgba(180,120,150,0.5)' }}>
                       Claim 1 free rose every 48 hours
                     </p>
@@ -459,7 +459,7 @@ export default function RoseBoutique() {
                     <PlaySquare className="w-5 h-5" style={{ color: '#60A5FA' }} />
                   </div>
                   <div className="text-left">
-                    <h3 className="font-bold text-sm" style={{ color: '#FFF8F0' }}>Watch a Short Video</h3>
+                    <h3 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Watch a Short Video</h3>
                     <p className="text-xs mt-0.5" style={{ color: 'rgba(180,120,150,0.5)' }}>
                       Help support the app
                     </p>
@@ -496,7 +496,7 @@ export default function RoseBoutique() {
                     <Users className="w-5 h-5" style={{ color: '#C084FC' }} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm" style={{ color: '#FFF8F0' }}>Refer a Friend</h3>
+                    <h3 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Refer a Friend</h3>
                     <p className="text-xs mt-0.5" style={{ color: 'rgba(180,120,150,0.5)' }}>
                       They get 1, you get 2!
                     </p>
@@ -522,7 +522,7 @@ export default function RoseBoutique() {
           <div style={{ animation: 'fadeUp 0.6s 0.3s ease both' }}>
             <h2
               className="text-xl font-bold mb-4 flex items-center gap-2"
-              style={{ fontFamily: '"Cormorant Garamond", serif', color: '#FFF8F0' }}
+              style={{ fontFamily: '"Cormorant Garamond", serif', color: 'var(--text-primary)' }}
             >
               <TrendingUp className="w-5 h-5" style={{ color: '#D4AF37' }} />
               Rose Ledger
@@ -530,8 +530,8 @@ export default function RoseBoutique() {
             <div
               className="rounded-3xl overflow-hidden relative"
               style={{
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.05)',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--glass-border)',
               }}
             >
               <div
@@ -551,7 +551,7 @@ export default function RoseBoutique() {
                       style={{ animation: `fadeUp 0.4s ${i * 0.05}s ease both` }}
                     >
                       <div>
-                        <p className="font-semibold text-sm" style={{ color: '#FFF8F0' }}>
+                        <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
                           {tx.description}
                         </p>
                         <p className="text-xs mt-0.5" style={{ color: 'rgba(180,120,150,0.4)' }}>
