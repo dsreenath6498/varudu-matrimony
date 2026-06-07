@@ -474,9 +474,9 @@ export default function Chat() {
                 placeholder="Type a message..."
                 className="flex-1 rounded-2xl px-4 py-3 text-sm outline-none transition-all duration-300"
                 style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: `1px solid ${newMessage ? 'rgba(212,175,55,0.3)' : 'rgba(255,255,255,0.07)'}`,
-                  color: '#FFF8F0',
+                  background: 'var(--bg-surface)',
+                  border: `1px solid ${newMessage ? 'var(--gold)' : 'var(--glass-border)'}`,
+                  color: 'var(--text-primary)',
                   fontFamily: 'Inter, sans-serif',
                 }}
                 value={newMessage}
@@ -487,13 +487,13 @@ export default function Chat() {
                 className="rounded-2xl px-4 flex items-center justify-center transition-all duration-300 flex-shrink-0"
                 style={{
                   background: newMessage.trim()
-                    ? 'linear-gradient(135deg, #7A0B2A, #E11D48)'
-                    : 'rgba(255,255,255,0.04)',
+                    ? 'linear-gradient(135deg, var(--gold), var(--gold-light))'
+                    : 'var(--bg-surface)',
                   border: newMessage.trim()
-                    ? '1px solid rgba(255,100,120,0.3)'
-                    : '1px solid rgba(255,255,255,0.06)',
-                  color: newMessage.trim() ? 'white' : 'rgba(180,120,150,0.3)',
-                  boxShadow: newMessage.trim() ? '0 4px 16px rgba(225,29,72,0.3)' : 'none',
+                    ? '1px solid var(--gold)'
+                    : '1px solid var(--glass-border)',
+                  color: newMessage.trim() ? 'white' : 'var(--text-muted)',
+                  boxShadow: newMessage.trim() ? '0 4px 16px rgba(212,175,55,0.3)' : 'none',
                   transform: newMessage.trim() ? 'scale(1)' : 'scale(0.95)',
                   width: '48px',
                   height: '48px',

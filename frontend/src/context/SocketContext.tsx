@@ -15,8 +15,14 @@ const SocketContext = createContext<SocketContextType | undefined>(undefined);
 export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
+  const [activeMatchId, _setActiveMatchId] = useState<string | null>(null);
+  const activeMatchIdRef = useRef<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
+
+  const setActiveMatchId = (id: string | null) => {
+    activeMatchIdRef.current = id;
+    _setActiveMatchId(id);
+  };
 
   useEffect(() => {
     const userStr = localStorage.getItem('user');
@@ -34,7 +40,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     newSocket.on('new_notification', (data: any) => {
       // If we are currently looking at the chat room where this message came from, don't increment badge
       // In this case, activeMatchId will equal data.matchId
-      if (activeMatchId !== data.matchId) {
+      if (activeMatchIdRef.current !== data.matchId) {
         setUnreadCount(prev => prev + 1);
       }
     });
@@ -42,7 +48,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       newSocket.disconnect();
     };
-  }, [activeMatchId]);
+  }, []);
 
   const clearUnread = () => setUnreadCount(0);
 

@@ -36,7 +36,7 @@ function App() {
             <Route path="/" element={<ProtectedRoute><><FloatingRose /><Home /></></ProtectedRoute>} />
             <Route path="/interests" element={<ProtectedRoute><><FloatingRose /><MyInterests /></></ProtectedRoute>} />
             <Route path="/requests" element={<ProtectedRoute><><FloatingRose /><Requests /></></ProtectedRoute>} />
-            <Route path="/chat" element={<ProtectedRoute><><FloatingRose /><Chat /></></ProtectedRoute>} />
+            <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
             <Route path="/store" element={<ProtectedRoute><RoseBoutique /></ProtectedRoute>} />
           </Routes>
         </div>
