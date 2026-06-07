@@ -78,6 +78,28 @@ io.on('connection', (socket) => {
     }
   });
 
+  // --- WebRTC Signaling Events ---
+  socket.on('call_user', (data) => {
+    const { userToCall, signalData, from, name, photo } = data;
+    // userToCall is the receiverId. We emit to their personal room.
+    io.to(userToCall).emit('incoming_call', { signal: signalData, from, name, photo });
+  });
+
+  socket.on('answer_call', (data) => {
+    const { to, signal } = data;
+    io.to(to).emit('call_accepted', { signal });
+  });
+
+  socket.on('ice_candidate', (data) => {
+    const { to, candidate } = data;
+    io.to(to).emit('ice_candidate', { candidate });
+  });
+
+  socket.on('end_call', (data) => {
+    const { to } = data;
+    io.to(to).emit('call_ended');
+  });
+
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
   });

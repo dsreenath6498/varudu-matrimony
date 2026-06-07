@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar';
-import { Send, ArrowLeft, Lock, Sparkles } from 'lucide-react';
+import { Send, ArrowLeft, Lock, Sparkles, Phone } from 'lucide-react';
 import api from '../api';
 import { useSocket } from '../context/SocketContext';
+import { useCall } from '../context/CallContext';
 
 interface Match {
   matchId: string;
@@ -31,6 +32,7 @@ export default function Chat() {
   const [newMessage, setNewMessage] = useState('');
   const [loadingMatches, setLoadingMatches] = useState(true);
   const { socket, clearUnread, setActiveMatchId } = useSocket();
+  const { callUser } = useCall();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentUserStr = localStorage.getItem('user');
@@ -298,7 +300,7 @@ export default function Chat() {
           style={{ borderColor: 'rgba(212,175,55,0.4)' }}
           alt=""
         />
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h2
             className="font-bold text-sm"
             style={{ fontFamily: '"Cormorant Garamond", serif', color: 'var(--text-primary)', fontSize: '18px' }}
@@ -309,6 +311,21 @@ export default function Chat() {
             <p className="text-[10px]" style={{ color: '#4ADE80' }}>● Online</p>
           )}
         </div>
+        
+        {activeMatch.isFullyUnlocked && (
+          <button
+            onClick={() => callUser(activeMatch.user.id, activeMatch.user.name, activeMatch.user.photos[0] || 'https://via.placeholder.com/150')}
+            className="rounded-full p-2.5 flex items-center justify-center transition-all hover:scale-110 flex-shrink-0"
+            style={{
+              background: 'linear-gradient(135deg, rgba(34,197,94,0.1), rgba(22,163,74,0.1))',
+              border: '1px solid rgba(34,197,94,0.3)',
+              color: '#22C55E',
+              boxShadow: '0 4px 12px rgba(34,197,94,0.1)',
+            }}
+          >
+            <Phone className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {!activeMatch.isFullyUnlocked ? (

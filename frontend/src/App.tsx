@@ -10,6 +10,8 @@ import RoseBoutique from './pages/RoseBoutique';
 import FloatingRose from './components/FloatingRose';
 import FloralOverlay from './components/FloralOverlay';
 import { SocketProvider } from './context/SocketContext';
+import { CallProvider } from './context/CallContext';
+import CallOverlay from './components/CallOverlay';
 
 // A simple protected route wrapper
 const ProtectedRoute = ({ children }: { children: ReactElement }) => {
@@ -24,8 +26,10 @@ function App() {
   return (
     <Router>
       <SocketProvider>
-        <div className="font-sans antialiased min-h-screen relative bg-[var(--bg-base)] text-[var(--text-primary)]">
-          <FloralOverlay />
+        <CallProvider>
+          <div className="font-sans antialiased min-h-screen relative bg-[var(--bg-base)] text-[var(--text-primary)]">
+            <FloralOverlay />
+            <CallOverlay />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
@@ -36,6 +40,7 @@ function App() {
             <Route path="/store" element={<ProtectedRoute><RoseBoutique /></ProtectedRoute>} />
           </Routes>
         </div>
+        </CallProvider>
       </SocketProvider>
     </Router>
   );
