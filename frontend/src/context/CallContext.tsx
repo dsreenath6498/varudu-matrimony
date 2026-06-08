@@ -63,6 +63,12 @@ export const CallProvider = ({ children }: { children: ReactNode }) => {
         try {
           await peerConnection.current.setRemoteDescription(new RTCSessionDescription(signal));
           setCallState('in-call');
+
+          // Process any ICE candidates that arrived before the remote description was set
+          while (pendingIceCandidates.current.length > 0) {
+            const candidate = pendingIceCandidates.current.shift();
+            if (candidate) await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+          }
         } catch (err) {
           console.error('Error handling call_accepted:', err);
         }
