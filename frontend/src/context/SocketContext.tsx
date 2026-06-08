@@ -33,8 +33,10 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     socketRef.current = newSocket;
     setSocket(newSocket);
 
-    // Register user for global notifications
-    newSocket.emit('register_user', user.id);
+    // Register user for global notifications on connect and reconnect
+    newSocket.on('connect', () => {
+      newSocket.emit('register_user', user.id);
+    });
 
     // Listen for global notifications
     newSocket.on('new_notification', (data: any) => {
