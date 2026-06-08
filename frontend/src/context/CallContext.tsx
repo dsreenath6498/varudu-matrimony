@@ -12,12 +12,15 @@ interface CallContextType {
   callState: 'idle' | 'calling' | 'ringing' | 'in-call';
   caller: CallerData | null;
   remoteStream: MediaStream | null;
+  localStream: MediaStream | null;
   callDuration: number;
   isMuted: boolean;
+  isVideoEnabled: boolean;
   callUser: (id: string, name: string, photo: string) => Promise<void>;
   answerCall: () => Promise<void>;
   endCall: () => void;
   toggleMute: () => void;
+  toggleVideo: () => void;
 }
 
 const CallContext = createContext<CallContextType | undefined>(undefined);
@@ -27,7 +30,9 @@ export const CallProvider = ({ children }: { children: ReactNode }) => {
   const [callState, setCallState] = useState<'idle' | 'calling' | 'ringing' | 'in-call'>('idle');
   const [caller, setCaller] = useState<CallerData | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [localStreamObj, setLocalStreamObj] = useState<MediaStream | null>(null);
   const [isMuted, setIsMuted] = useState(false);
+  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [callDuration, setCallDuration] = useState(0);
   
   const peerConnection = useRef<RTCPeerConnection | null>(null);
@@ -129,14 +134,17 @@ export const CallProvider = ({ children }: { children: ReactNode }) => {
     return pc;
   };
 
-  const startLocalAudio = async () => {
+  const startLocalMedia = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
       localStream.current = stream;
+      setLocalStreamObj(stream);
+      setIsVideoEnabled(true);
+      setIsMuted(false);
       return true;
     } catch (err) {
-      console.error('Failed to get local audio', err);
-      alert('Microphone access is required to make calls.');
+      console.error('Failed to get local media', err);
+      alert('Microphone and Camera access is required to make video calls.');
       return false;
     }
   };
@@ -146,7 +154,7 @@ export const CallProvider = ({ children }: { children: ReactNode }) => {
     const currentUser = currentUserStr ? JSON.parse(currentUserStr) : null;
     
     if (!socket || !currentUser) return;
-    const streamOk = await startLocalAudio();
+    const streamOk = await startLocalMedia();
     if (!streamOk) return;
 
     currentPartnerId.current = userToCall;
@@ -175,7 +183,7 @@ export const CallProvider = ({ children }: { children: ReactNode }) => {
 
   const answerCall = async () => {
     if (!socket || !peerConnection.current || !currentPartnerId.current) return;
-    const streamOk = await startLocalAudio();
+    const streamOk = await startLocalMedia();
     if (!streamOk) {
       cleanupCall();
       return;
@@ -216,6 +224,7 @@ export const CallProvider = ({ children }: { children: ReactNode }) => {
     if (localStream.current) {
       localStream.current.getTracks().forEach(track => track.stop());
       localStream.current = null;
+      setLocalStreamObj(null);
     }
     setRemoteStream(null);
     setCallState('idle');
@@ -223,6 +232,7 @@ export const CallProvider = ({ children }: { children: ReactNode }) => {
     currentPartnerId.current = null;
     pendingIceCandidates.current = [];
     setIsMuted(false);
+    setIsVideoEnabled(true);
     setCallDuration(0);
   };
 
@@ -232,6 +242,16 @@ export const CallProvider = ({ children }: { children: ReactNode }) => {
       if (audioTrack) {
         audioTrack.enabled = !audioTrack.enabled;
         setIsMuted(!audioTrack.enabled);
+      }
+    }
+  };
+
+  const toggleVideo = () => {
+    if (localStream.current) {
+      const videoTrack = localStream.current.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.enabled = !videoTrack.enabled;
+        setIsVideoEnabled(videoTrack.enabled);
       }
     }
   };
@@ -250,8 +270,8 @@ export const CallProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <CallContext.Provider value={{
-      callState, caller, remoteStream, callDuration, isMuted,
-      callUser, answerCall, endCall, toggleMute
+      callState, caller, remoteStream, localStream: localStreamObj, callDuration, isMuted, isVideoEnabled,
+      callUser, answerCall, endCall, toggleMute, toggleVideo
     }}>
       {children}
     </CallContext.Provider>
