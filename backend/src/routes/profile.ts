@@ -36,6 +36,11 @@ router.post('/create', upload.array('photos', 5), async (req, res) => {
     const db = getDb();
     const existingUser = await db.get('SELECT photos, referral_code, is_onboarded FROM users WHERE id = $1', [userId]);
 
+    if (!existingUser) {
+      console.log('Inserting mock user on the fly: ', userId);
+      await db.run('INSERT INTO users (id, phone_number) VALUES ($1, $2)', [userId, 'mock-' + userId]);
+    }
+
     if (files && files.length > 0) {
       // Convert to full URL accessible via browser
       const baseUrl = req.protocol + '://' + req.get('host');
@@ -120,10 +125,49 @@ router.get('/feed', async (req, res) => {
     `;
     
     const profiles = await db.all(query, [interestedIn]);
-    profiles.forEach(p => p.photos = JSON.parse(p.photos || '[]'));
+    profiles.forEach(p => {
+      p.photos = JSON.parse(p.photos || '[]');
+      p.family_details = JSON.parse(p.family_details || '{}');
+    });
 
     res.json({ profiles });
   } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 3. Get My Profile
+router.get('/me', async (req, res) => {
+  const { userId } = req.query;
+  if (!userId) return res.status(400).json({ error: 'Missing userId' });
+  
+  const db = getDb();
+  try {
+    const user = await db.get('SELECT * FROM users WHERE id = $1', [userId]);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    user.photos = JSON.parse(user.photos || '[]');
+    user.family_details = JSON.parse(user.family_details || '{}');
+    res.json({ user });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 4. Update Family Details
+router.put('/update-family', async (req, res) => {
+  const { userId, familyDetails } = req.body;
+  if (!userId || !familyDetails) {
+    return res.status(400).json({ error: 'Missing userId or familyDetails' });
+  }
+
+  const db = getDb();
+  try {
+    const familyDetailsStr = JSON.stringify(familyDetails);
+    await db.run('UPDATE users SET family_details = $1 WHERE id = $2', [familyDetailsStr, userId]);
+    res.json({ message: 'Family details updated successfully' });
+  } catch (err: any) {
+    console.error('Error updating family details:', err);
     res.status(500).json({ error: err.message });
   }
 });

@@ -7,11 +7,14 @@ import MyInterests from './pages/MyInterests';
 import Requests from './pages/Requests';
 import Chat from './pages/Chat';
 import RoseBoutique from './pages/RoseBoutique';
+import Profile from './pages/Profile';
 import FloatingRose from './components/FloatingRose';
 import FloralOverlay from './components/FloralOverlay';
 import { SocketProvider } from './context/SocketContext';
 import { CallProvider } from './context/CallContext';
 import CallOverlay from './components/CallOverlay';
+import ChatbotWidget from './components/ChatbotWidget';
+
 
 // A simple protected route wrapper
 const ProtectedRoute = ({ children }: { children: ReactElement }) => {
@@ -30,16 +33,18 @@ function App() {
           <div className="font-sans antialiased min-h-screen relative bg-[var(--bg-base)] text-[var(--text-primary)]">
             <FloralOverlay />
             <CallOverlay />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-            <Route path="/" element={<ProtectedRoute><><FloatingRose /><Home /></></ProtectedRoute>} />
-            <Route path="/interests" element={<ProtectedRoute><><FloatingRose /><MyInterests /></></ProtectedRoute>} />
-            <Route path="/requests" element={<ProtectedRoute><><FloatingRose /><Requests /></></ProtectedRoute>} />
-            <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
-            <Route path="/store" element={<ProtectedRoute><RoseBoutique /></ProtectedRoute>} />
-          </Routes>
-        </div>
+            <ChatbotWidget />
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+              <Route path="/" element={<ProtectedRoute><><FloatingRose /><Home /></></ProtectedRoute>} />
+              <Route path="/interests" element={<ProtectedRoute><><FloatingRose /><MyInterests /></></ProtectedRoute>} />
+              <Route path="/requests" element={<ProtectedRoute><><FloatingRose /><Requests /></></ProtectedRoute>} />
+              <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+              <Route path="/store" element={<ProtectedRoute><RoseBoutique /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            </Routes>
+          </div>
         </CallProvider>
       </SocketProvider>
     </Router>

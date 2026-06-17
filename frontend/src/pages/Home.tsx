@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import TinderCard from 'react-tinder-card';
 import api from '../api';
 import Navbar from '../components/Navbar';
@@ -18,6 +18,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [swipeDirection, setSwipeDirection] = useState<string | null>(null);
   const navigate = useNavigate();
+  const cardRefs = useRef<Record<string, any>>({});
+  const pendingInteraction = useRef({ type: 'standard', message: null as string | null });
 
   useEffect(() => {
     const fetchFeed = async () => {
@@ -38,7 +40,10 @@ export default function Home() {
     fetchFeed();
   }, []);
 
-  const swiped = async (direction: string, receiverId: string, interactionType = 'standard', attachedMessage: string | null = null) => {
+  const swiped = async (direction: string, receiverId: string) => {
+    const { type: interactionType, message: attachedMessage } = pendingInteraction.current;
+    pendingInteraction.current = { type: 'standard', message: null }; // Reset
+
     const userStr = localStorage.getItem('user');
     if (!userStr) return;
     const user = JSON.parse(userStr);
@@ -61,8 +66,18 @@ export default function Home() {
     }
   };
 
-  const outOfFrame = (name: string) => {
-    console.log(name + ' left the screen!');
+  const outOfFrame = (profileId: string) => {
+    setProfiles((prev) => prev.filter((p) => p.id !== profileId));
+  };
+
+  const swipeButton = async (dir: string, profileId: string, type = 'standard', message: string | null = null) => {
+    pendingInteraction.current = { type, message };
+    if (cardRefs.current[profileId]) {
+      await cardRefs.current[profileId].swipe(dir);
+    } else {
+      swiped(dir, profileId);
+      outOfFrame(profileId);
+    }
   };
 
   const handleLogout = () => {
@@ -123,8 +138,8 @@ export default function Home() {
         </button>
       </div>
 
-      {/* Desktop Logout */}
-      <div className="hidden md:flex justify-end p-4 absolute top-0 right-0 z-20">
+      {/* Desktop Logout - Moved to avoid Rose Boutique overlap */}
+      <div className="hidden md:flex justify-end p-4 absolute top-0 right-24 z-20">
         <button
           onClick={handleLogout}
           className="flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
@@ -244,19 +259,22 @@ export default function Home() {
             </p>
           </div>
         ) : (
-          <div className="absolute inset-0 w-full h-full">
+          <div className="relative w-[90vw] max-w-[420px] h-[68vh] max-h-[650px] mx-auto mt-4 md:mt-8 perspective-1000">
             {profiles.map((profile) => (
               <TinderCard
-                className="absolute w-full h-full swipe-card cursor-grab active:cursor-grabbing overflow-hidden rounded-3xl"
+                ref={(el) => (cardRefs.current[profile.id] = el)}
+                className="absolute inset-0 swipe-card cursor-grab active:cursor-grabbing"
                 key={profile.id}
                 onSwipe={(dir) => swiped(dir, profile.id)}
-                onCardLeftScreen={() => outOfFrame(profile.name)}
+                onCardLeftScreen={() => outOfFrame(profile.id)}
                 preventSwipe={['up', 'down']}
               >
                 <div
-                  className="w-full h-full relative bg-cover bg-center"
+                  className="w-full h-full relative bg-cover bg-center rounded-[32px] overflow-hidden"
                   style={{
                     backgroundImage: `url(${profile.photos && profile.photos.length > 0 ? profile.photos[0] : 'https://via.placeholder.com/600x800?text=No+Photo'})`,
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0,0,0,0.2)',
+                    border: '1px solid rgba(255,255,255,0.12)'
                   }}
                 >
                   {/* Gradient overlays */}
@@ -346,7 +364,7 @@ export default function Home() {
         >
           {/* Pass */}
           <button
-            onClick={() => { if (profiles.length > 0) swiped('left', profiles[profiles.length - 1].id); }}
+            onClick={() => { if (profiles.length > 0) swipeButton('left', profiles[profiles.length - 1].id, 'standard'); }}
             className="rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
             style={{
               width: '56px',
@@ -361,7 +379,7 @@ export default function Home() {
 
           {/* Like */}
           <button
-            onClick={() => { if (profiles.length > 0) swiped('right', profiles[profiles.length - 1].id, 'standard'); }}
+            onClick={() => { if (profiles.length > 0) swipeButton('right', profiles[profiles.length - 1].id, 'standard'); }}
             className="rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
             style={{
               width: '64px',
@@ -378,7 +396,7 @@ export default function Home() {
 
           {/* Rose */}
           <button
-            onClick={() => { if (profiles.length > 0) swiped('right', profiles[profiles.length - 1].id, 'rose'); }}
+            onClick={() => { if (profiles.length > 0) swipeButton('right', profiles[profiles.length - 1].id, 'rose'); }}
             className="rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 relative"
             style={{
               width: '56px',
@@ -509,7 +527,7 @@ export default function Home() {
               <button
                 onClick={() => {
                   setShowNoteModal(false);
-                  swiped('right', activeProfileId, 'rose_message', noteText);
+                  swipeButton('right', activeProfileId, 'rose_message', noteText);
                   setNoteText('');
                 }}
                 className="flex-1 py-3 rounded-xl font-bold text-sm transition-all duration-300 hover:scale-[1.02]"

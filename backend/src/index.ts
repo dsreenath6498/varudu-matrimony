@@ -9,11 +9,14 @@ dotenv.config();
 import authRoutes from './routes/auth';
 import profileRoutes from './routes/profile';
 import interactionRoutes from './routes/interactions';
+import verificationRoutes from './routes/verification';
 
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import chatRoutes from './routes/chat';
 import rosesRoutes from './routes/roses';
+import chatbotRoutes from './routes/chatbot';
+
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -34,6 +37,9 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/interactions', interactionRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/roses', rosesRoutes);
+app.use('/api/verify', verificationRoutes);
+app.use('/api/chatbot', chatbotRoutes);
+
 
 app.get('/', (req, res) => {
   res.send('Varudu API is running!');
@@ -57,7 +63,7 @@ io.on('connection', (socket) => {
   socket.on('send_message', async (data) => {
     // data should have { matchId, senderId, receiverId, message }
     const { matchId, senderId, receiverId, message } = data;
-    
+
     // Broadcast to the chat room
     io.to(matchId).emit('receive_message', data);
 

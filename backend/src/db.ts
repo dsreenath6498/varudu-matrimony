@@ -26,14 +26,17 @@ export async function initDb() {
         interested_in TEXT CHECK (interested_in IN ('Male', 'Female')),
         photos TEXT DEFAULT '[]',
         is_onboarded INTEGER DEFAULT 0,
+        aadhaar_verified BOOLEAN DEFAULT false,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         roses_balance INTEGER DEFAULT 0,
         referral_code TEXT UNIQUE,
         referred_by TEXT,
-        last_free_rose_at TIMESTAMP
+        last_free_rose_at TIMESTAMP,
+        family_details TEXT DEFAULT '{}'
       );
 
       CREATE TABLE IF NOT EXISTS interests (
+
         id TEXT PRIMARY KEY,
         sender_id TEXT,
         receiver_id TEXT,
@@ -67,6 +70,14 @@ export async function initDb() {
     `);
 
     console.log('PostgreSQL Database initialized!');
+
+    // Migration for adding family_details column
+    try {
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS family_details TEXT DEFAULT '{}';`);
+      console.log('Successfully added family_details column to users table (or it already existed).');
+    } catch (migErr) {
+      console.error('Migration error for family_details:', migErr);
+    }
   } catch (error) {
     console.error('Error initializing PostgreSQL database:', error);
   }

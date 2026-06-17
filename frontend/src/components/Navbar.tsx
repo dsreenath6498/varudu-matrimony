@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Heart, Bell, MessageCircle, Home, Sparkles } from 'lucide-react';
+import { Heart, Bell, MessageCircle, Home, Sparkles, User } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { to: '/interests', icon: Heart, label: 'Interests' },
   { to: '/requests', icon: Bell, label: 'Requests' },
   { to: '/chat', icon: MessageCircle, label: 'Chats' },
+  { to: '/profile', icon: User, label: 'Profile' },
 ];
 
 export default function Navbar() {
