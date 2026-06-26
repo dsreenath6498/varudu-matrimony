@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import type { ReactElement } from 'react';
 import Login from './pages/Login';
+import Signup from './pages/Signup';
 import Onboarding from './pages/Onboarding';
 import Home from './pages/Home';
 import MyInterests from './pages/MyInterests';
@@ -36,6 +37,7 @@ function App() {
             <ChatbotWidget />
             <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
               <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
               <Route path="/" element={<ProtectedRoute><><FloatingRose /><Home /></></ProtectedRoute>} />
               <Route path="/interests" element={<ProtectedRoute><><FloatingRose /><MyInterests /></></ProtectedRoute>} />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { Heart, Sparkles } from 'lucide-react';
@@ -21,12 +21,12 @@ function Petal({ style }: { style: React.CSSProperties }) {
 }
 
 export default function Login() {
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [otp, setOtp] = useState('');
-  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
+  const [devEmail, setDevEmail] = useState('');
   const navigate = useNavigate();
+
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   const petals = Array.from({ length: 18 }, (_, i) => ({
     left: `${(i * 5.5) % 100}%`,
@@ -35,38 +35,78 @@ export default function Login() {
     top: '-20px',
   }));
 
-  const requestOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!phoneNumber) return;
+  // Initialize real Google Sign-In GSI client if client ID exists
+  useEffect(() => {
+    if (googleClientId && (window as any).google) {
+      const google = (window as any).google;
+      google.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: handleGoogleCallback,
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('google-login-btn'),
+        { theme: 'outline', size: 'large', width: '100%' }
+      );
+    }
+  }, [googleClientId]);
+
+  // Google callback
+  const handleGoogleCallback = async (response: any) => {
     setLoading(true);
+    const idToken = response.credential;
+
     try {
-      await api.post('/auth/request-otp', { phoneNumber });
-      setTransitioning(true);
-      setTimeout(() => {
-        setStep(2);
-        setTransitioning(false);
-      }, 300);
-    } catch (error) {
-      alert('Error requesting OTP');
+      const loginRes = await api.post('/auth/google-login', { idToken });
+      const { success, user, isNew, code, email, name } = loginRes.data;
+
+      if (success) {
+        localStorage.setItem('user', JSON.stringify(user));
+        if (isNew) {
+          navigate('/onboarding');
+        } else {
+          navigate('/');
+        }
+      } else if (code === 'USER_NOT_FOUND') {
+        // Redirection to signup page carrying Google account state
+        alert('No account matches this Google email. Redirecting to Signup to link a phone number.');
+        navigate('/signup', { state: { googleUser: { email, name, idToken } } });
+      }
+    } catch (error: any) {
+      console.error('Google login error:', error);
+      alert(error.response?.data?.error || 'Authentication failed. Please check credentials.');
     } finally {
       setLoading(false);
     }
   };
 
-  const verifyOtp = async (e: React.FormEvent) => {
+  // Mock Developer login
+  const handleDevLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!devEmail) return;
     setLoading(true);
+
+    const email = devEmail.trim().toLowerCase();
+    const idToken = `mock-token-${email}`;
+    const name = email.split('@')[0];
+
     try {
-      const response = await api.post('/auth/verify-otp', { phoneNumber, otp });
-      const { user, isNew } = response.data;
-      localStorage.setItem('user', JSON.stringify(user));
-      if (isNew) {
-        navigate('/onboarding');
-      } else {
-        navigate('/');
+      const loginRes = await api.post('/auth/google-login', { idToken });
+      const { success, user, isNew, code } = loginRes.data;
+
+      if (success) {
+        localStorage.setItem('user', JSON.stringify(user));
+        if (isNew) {
+          navigate('/onboarding');
+        } else {
+          navigate('/');
+        }
+      } else if (code === 'USER_NOT_FOUND') {
+        alert('User not found. Redirecting to signup with test credentials.');
+        navigate('/signup', { state: { googleUser: { email, name, idToken } } });
       }
-    } catch (error) {
-      alert('Invalid OTP. Use 1234 for testing.');
+    } catch (error: any) {
+      console.error('Developer login error:', error);
+      alert(error.response?.data?.error || 'Authentication error in mock login');
     } finally {
       setLoading(false);
     }
@@ -196,95 +236,56 @@ export default function Login() {
               transition: 'all 0.3s ease',
             }}
           >
-            {step === 1 ? (
-              <div style={{ animation: 'fadeUp 0.5s 0.3s ease both' }}>
-                <label
-                  className="block mb-2 text-xs font-semibold uppercase tracking-widest"
-                  style={{ color: 'rgba(212,175,55,0.7)' }}
-                >
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  placeholder="+91 98765 43210"
-                  className="input-luxury mb-4"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && requestOtp(e as any)}
-                />
+            <div className="flex flex-col gap-4 animate-fadeUp">
+              <p className="text-sm text-[var(--text-muted)] text-center leading-relaxed mb-1">
+                Please log in using your registered Google account.
+              </p>
 
-                <button
-                  onClick={requestOtp}
-                  disabled={loading || !phoneNumber}
-                  className="w-full font-bold py-4 rounded-2xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 relative overflow-hidden btn-crimson"
-                  style={{
-                    boxShadow: loading ? 'none' : 'var(--shadow-glow-crimson)',
-                  }}
-                >
-                  {loading ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" style={{ animation: 'spinSlow 0.8s linear infinite' }} />
-                      Sending OTP...
-                    </span>
-                  ) : (
-                    <>
-                      <span>Get OTP</span>
-                      <Heart className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
-              </div>
-            ) : (
-              <div style={{ animation: 'fadeUp 0.5s ease both' }}>
-                <div className="mb-4 text-center">
-                  <p className="text-xs font-semibold text-[var(--text-muted)]">
-                    Code sent to
-                  </p>
-                  <p className="font-semibold mt-0.5 text-[var(--text-primary)]">{phoneNumber}</p>
+              {googleClientId ? (
+                <div className="flex flex-col items-center justify-center min-h-[46px] w-full bg-white/5 rounded-2xl p-1 border border-white/10">
+                  <div id="google-login-btn" className="w-full"></div>
+                </div>
+              ) : (
+                <div className="p-4 bg-yellow-950/20 border border-yellow-800/30 rounded-2xl text-xs text-yellow-500/90 leading-normal mb-2 text-center">
+                  ⚠️ Google Client ID is not configured. Falling back to Developer Mock Login below.
+                </div>
+              )}
+
+              {/* Developer Sandbox */}
+              <form onSubmit={handleDevLogin} className="flex flex-col gap-3 mt-2 border-t border-white/5 pt-4">
+                <div className="text-center text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)] mb-1">
+                  Developer Sandbox
+                </div>
+                <div>
+                  <label className="block mb-1 text-[11px] font-semibold text-white/50">Registered Email</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="e.g. rahul.sharma@gmail.com"
+                    className="input-luxury text-sm"
+                    value={devEmail}
+                    onChange={(e) => setDevEmail(e.target.value)}
+                  />
                 </div>
 
-                <label
-                  className="block mb-2 text-xs font-semibold uppercase tracking-widest"
-                  style={{ color: 'rgba(212,175,55,0.7)' }}
-                >
-                  Enter OTP
-                </label>
-                <input
-                  type="text"
-                  placeholder="• • • •"
-                  className="input-luxury mb-4 text-center tracking-[0.5em] text-xl"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  maxLength={6}
-                  onKeyDown={(e) => e.key === 'Enter' && verifyOtp(e as any)}
-                />
-
                 <button
-                  onClick={verifyOtp}
-                  disabled={loading || !otp}
-                  className="w-full font-bold py-4 rounded-2xl transition-all duration-300 disabled:opacity-40 flex items-center justify-center gap-2 btn-crimson"
-                  style={{
-                    boxShadow: loading ? 'none' : 'var(--shadow-glow-crimson)',
-                  }}
+                  type="submit"
+                  disabled={loading || !devEmail}
+                  className="w-full font-bold py-3.5 rounded-2xl transition-all duration-300 disabled:opacity-40 flex items-center justify-center gap-2 btn-crimson text-sm"
                 >
-                  {loading ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" style={{ animation: 'spinSlow 0.8s linear infinite' }} />
-                      Verifying...
-                    </span>
-                  ) : (
-                    'Verify & Enter ✨'
-                  )}
+                  {loading ? 'Logging in...' : 'Sign In with Mock Google'}
                 </button>
+              </form>
 
+              <div className="text-center mt-3 border-t border-white/5 pt-4">
                 <button
-                  onClick={() => setStep(1)}
-                  className="w-full mt-3 text-sm font-medium py-2 rounded-xl transition-all text-[var(--text-muted)]"
+                  onClick={() => navigate('/signup')}
+                  className="text-xs font-semibold text-[var(--gold)] hover:underline flex items-center gap-1.5 justify-center mx-auto"
                 >
-                  ← Change number
+                  New to Varudu? Create an account
                 </button>
               </div>
-            )}
+            </div>
           </div>
 
           {/* Footer */}

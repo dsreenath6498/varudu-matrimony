@@ -235,19 +235,19 @@ export default function Profile() {
         </div>
 
           {/* Family Details Card */}
-          <div className="p-5 rounded-2xl border bg-white/5 backdrop-blur-md mt-6" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+          <div className="p-5 rounded-2xl border-2 bg-[#FFFDF9] mt-6 shadow-[0_0_15px_rgba(212,175,55,0.2)]" style={{ borderColor: '#D4AF37' }}>
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2.5 rounded-full bg-indigo-500/10">
-                  <Users className="w-5 h-5 text-indigo-400" />
+                <div className="p-2.5 rounded-full bg-[#D4AF37]/20">
+                  <Users className="w-5 h-5 text-[#8b5a2b]" />
                 </div>
-                <h3 className="text-lg font-semibold text-white">Family Details</h3>
+                <h3 className="text-lg font-bold text-[#4a2e1b]">Family Details</h3>
               </div>
               <button 
                 onClick={() => setShowFamilyModal(true)}
-                className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+                className="p-2 rounded-full bg-[#D4AF37]/10 hover:bg-[#D4AF37]/30 transition-colors"
               >
-                <Pencil className="w-4 h-4 text-gray-300" />
+                <Pencil className="w-4 h-4 text-[#4a2e1b]" />
               </button>
             </div>
             
@@ -255,49 +255,49 @@ export default function Profile() {
               <div className="space-y-3 mt-2">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-gray-500">Father</p>
-                    <p className="text-sm text-gray-200">
+                    <p className="text-xs text-[#8b5a2b] font-semibold">Father</p>
+                    <p className="text-sm text-[#4a2e1b] font-bold">
                       {user.family_details.father_name || 'N/A'}
                       {user.family_details.father_expired ? ' (Late)' : ''}
                     </p>
-                    <p className="text-xs text-gray-400">{user.family_details.father_job}</p>
+                    <p className="text-xs text-[#5c4033] font-medium">{user.family_details.father_job}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Mother</p>
-                    <p className="text-sm text-gray-200">
+                    <p className="text-xs text-[#8b5a2b] font-semibold">Mother</p>
+                    <p className="text-sm text-[#4a2e1b] font-bold">
                       {user.family_details.mother_name || 'N/A'}
                       {user.family_details.mother_expired ? ' (Late)' : ''}
                     </p>
-                    <p className="text-xs text-gray-400">{user.family_details.mother_job}</p>
+                    <p className="text-xs text-[#5c4033] font-medium">{user.family_details.mother_job}</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-white/5">
+                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-[#D4AF37]/30">
                   <div>
-                    <p className="text-xs text-gray-500">Family Type</p>
-                    <p className="text-sm text-gray-200">{user.family_details.family_type || 'N/A'}</p>
+                    <p className="text-xs text-[#8b5a2b] font-semibold">Family Type</p>
+                    <p className="text-sm text-[#4a2e1b] font-bold">{user.family_details.family_type || 'N/A'}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Status</p>
-                    <p className="text-sm text-gray-200">{user.family_details.family_status || 'N/A'}</p>
+                    <p className="text-xs text-[#8b5a2b] font-semibold">Status</p>
+                    <p className="text-sm text-[#4a2e1b] font-bold">{user.family_details.family_status || 'N/A'}</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-white/5">
+                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-[#D4AF37]/30">
                   <div>
-                    <p className="text-xs text-gray-500">Brothers</p>
-                    <p className="text-sm text-gray-200">{user.family_details.brothers || 0}</p>
+                    <p className="text-xs text-[#8b5a2b] font-semibold">Brothers</p>
+                    <p className="text-sm text-[#4a2e1b] font-bold">{user.family_details.brothers || 0}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Sisters</p>
-                    <p className="text-sm text-gray-200">{user.family_details.sisters || 0}</p>
+                    <p className="text-xs text-[#8b5a2b] font-semibold">Sisters</p>
+                    <p className="text-sm text-[#4a2e1b] font-bold">{user.family_details.sisters || 0}</p>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="text-center py-4">
-                <p className="text-sm text-gray-400 mb-3">Add your family details to get better matches.</p>
+                <p className="text-sm text-[#5c4033] mb-3 font-medium">Add your family details to get better matches.</p>
                 <button 
                   onClick={() => setShowFamilyModal(true)}
-                  className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-lg transition-all"
+                  className="px-4 py-2 bg-gradient-to-r from-[#D4AF37] to-[#C5A059] text-[#4a2e1b] hover:scale-105 text-xs font-bold rounded-lg transition-all shadow-md"
                 >
                   Add Details
                 </button>

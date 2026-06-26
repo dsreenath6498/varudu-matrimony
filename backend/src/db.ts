@@ -32,7 +32,8 @@ export async function initDb() {
         referral_code TEXT UNIQUE,
         referred_by TEXT,
         last_free_rose_at TIMESTAMP,
-        family_details TEXT DEFAULT '{}'
+        family_details TEXT DEFAULT '{}',
+        email TEXT UNIQUE
       );
 
       CREATE TABLE IF NOT EXISTS interests (
@@ -77,6 +78,14 @@ export async function initDb() {
       console.log('Successfully added family_details column to users table (or it already existed).');
     } catch (migErr) {
       console.error('Migration error for family_details:', migErr);
+    }
+
+    // Migration for adding email column
+    try {
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT UNIQUE;`);
+      console.log('Successfully added email column to users table (or it already existed).');
+    } catch (migErr) {
+      console.error('Migration error for email:', migErr);
     }
   } catch (error) {
     console.error('Error initializing PostgreSQL database:', error);
