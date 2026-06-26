@@ -174,6 +174,42 @@ router.put('/update-family', async (req, res) => {
   }
 });
 
+// 5. Upload/Update single profile photo (primary avatar)
+router.post('/update-photo', upload.single('photo'), async (req, res) => {
+  const { userId } = req.body;
+  if (!userId) return res.status(400).json({ error: 'User ID required' });
+  if (!req.file) return res.status(400).json({ error: 'No image file uploaded' });
+
+  const db = getDb();
+  try {
+    const baseUrl = req.protocol + '://' + req.get('host');
+    const photoUrl = `${baseUrl}/uploads/${req.file.filename}`;
+
+    // Read existing photos or initialize empty array
+    const user = await db.get('SELECT photos FROM users WHERE id = $1', [userId]);
+    let photos: string[] = [];
+    if (user && user.photos) {
+      try {
+        photos = JSON.parse(user.photos);
+      } catch (e) {}
+    }
+
+    // Set as primary photo (at index 0)
+    photos[0] = photoUrl;
+
+    await db.run('UPDATE users SET photos = $1 WHERE id = $2', [JSON.stringify(photos), userId]);
+
+    const updatedUser = await db.get('SELECT * FROM users WHERE id = $1', [userId]);
+    updatedUser.photos = JSON.parse(updatedUser.photos || '[]');
+    updatedUser.family_details = JSON.parse(updatedUser.family_details || '{}');
+
+    res.json({ message: 'Photo uploaded successfully', user: updatedUser });
+  } catch (error: any) {
+    console.error('Error updating photo:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Helper to convert profile picture (URL or local path) to base64 string
 async function getImageBase64(imageUrl: string): Promise<string> {
   // If it's a local upload, read directly from file system

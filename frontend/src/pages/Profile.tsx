@@ -57,6 +57,10 @@ export default function Profile() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  // Photo upload states
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+
   const [familyData, setFamilyData] = useState<FamilyDetails>({
     father_name: '',
     father_job: '',
@@ -94,6 +98,29 @@ export default function Profile() {
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  const handleUploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
+
+    setUploadingPhoto(true);
+    const formData = new FormData();
+    formData.append('userId', user.id);
+    formData.append('photo', file);
+
+    try {
+      await api.post('/profile/update-photo', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      await fetchProfile();
+      alert('Profile photo updated successfully!');
+    } catch (err: any) {
+      console.error('Error uploading photo:', err);
+      alert(err.response?.data?.error || 'Failed to upload photo. Please try again.');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
 
   const startCamera = async () => {
     try {
@@ -270,8 +297,16 @@ export default function Profile() {
           {/* DP Section */}
           <div className="flex flex-col items-center mt-4">
             <div className="relative">
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleUploadPhoto} 
+                className="hidden" 
+                accept="image/*" 
+              />
               <div 
-                className={`w-32 h-32 rounded-full overflow-hidden object-cover transition-all duration-500 ${user?.aadhaar_verified ? 'ring-4 ring-offset-4 ring-offset-[#0a0008]' : ''}`}
+                onClick={() => fileInputRef.current?.click()}
+                className={`w-32 h-32 rounded-full overflow-hidden object-cover transition-all duration-500 cursor-pointer relative group ${user?.aadhaar_verified ? 'ring-4 ring-offset-4 ring-offset-[#0a0008]' : ''}`}
                 style={{
                    // Silver ring if verified
                    borderColor: user?.aadhaar_verified ? '#C0C0C0' : 'transparent',
@@ -280,11 +315,25 @@ export default function Profile() {
                    padding: user?.aadhaar_verified ? '3px' : '0'
                 }}
               >
+                {uploadingPhoto ? (
+                  <div className="w-full h-full flex items-center justify-center bg-black/60 absolute inset-0">
+                    <div className="w-6 h-6 border-2 border-white/20 border-t-[#D4AF37] rounded-full animate-spin" />
+                  </div>
+                ) : null}
                 <img 
                   src={user?.photos?.[0] || 'https://via.placeholder.com/150'} 
                   alt="Profile" 
-                  className="w-full h-full object-cover rounded-full" 
+                  className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-all duration-300" 
                 />
+              </div>
+
+              {/* Edit Photo Icon Overlay */}
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute top-0 right-0 bg-black/70 hover:bg-[#D4AF37] text-white hover:text-black rounded-full p-2 cursor-pointer border border-white/10 transition-all hover:scale-110 shadow-lg"
+                title="Upload Profile Photo"
+              >
+                <Pencil className="w-3.5 h-3.5" />
               </div>
 
               {/* Verified Badge */}
