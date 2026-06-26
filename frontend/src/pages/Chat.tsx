@@ -43,6 +43,7 @@ export default function Chat() {
   const [unlockLoading, setUnlockLoading] = useState(false);
   const [astroError, setAstroError] = useState('');
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [showStory, setShowStory] = useState(false);
 
   const currentUserStr = localStorage.getItem('user');
   const currentUser = currentUserStr ? JSON.parse(currentUserStr) : null;
@@ -191,6 +192,7 @@ export default function Chat() {
     } else {
       window.speechSynthesis?.cancel();
       setIsPlayingAudio(false);
+      setShowStory(false);
     }
   }, [showAstroModal, activeMatch]);
 
@@ -827,6 +829,32 @@ export default function Chat() {
                         </div>
                       </div>
 
+                      {/* Detailed Koota Breakdown */}
+                      {astroData.kootas && astroData.kootas.length > 0 && (
+                        <div className="p-5 rounded-2xl border border-white/10 bg-black/40 space-y-3 text-left">
+                          <h5 className="text-[#D4AF37] font-serif font-bold text-xs border-b border-white/5 pb-2 flex items-center justify-between">
+                            <span>Astrological Koota Breakdown</span>
+                            <span className="text-[10px] text-gray-500 font-sans font-normal">అష్టకూట వివరణ</span>
+                          </h5>
+                          
+                          <div className="space-y-3">
+                            {astroData.kootas.map((k: any, idx: number) => (
+                              <div key={idx} className="flex flex-col space-y-0.5 text-xs">
+                                <div className="flex items-center justify-between text-gray-300">
+                                  <span className="font-semibold">{k.telugu}</span>
+                                  <span className="font-bold text-[#D4AF37]">
+                                    {k.received} / {k.total}
+                                  </span>
+                                </div>
+                                <p className="text-[10px] text-gray-500 leading-normal font-normal">
+                                  {k.desc}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Locked vs. Unlocked Astro Story */}
                       {!astroData.isUnlocked ? (
                         /* Locked Paywall */
@@ -865,59 +893,78 @@ export default function Chat() {
                       ) : (
                         /* Unlocked Chapters Report */
                         <div className="space-y-4 text-left">
-                          
-                          {/* TTS Audio Controls */}
-                          <div className="flex justify-end">
-                            <button
-                              onClick={toggleAudioReadout}
-                              className={`px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2 transition-all border ${
-                                isPlayingAudio 
-                                  ? 'bg-[#E11D48]/10 border-[#E11D48]/30 text-[#E11D48] shadow-[0_0_10px_rgba(225,29,72,0.2)]'
-                                  : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
-                              }`}
-                            >
-                              {isPlayingAudio ? (
-                                <>
-                                  <span className="flex gap-0.5 items-center justify-center w-3 h-3">
-                                    <span className="w-0.5 h-2 bg-rose-400 animate-pulse animate-duration-500" />
-                                    <span className="w-0.5 h-3 bg-rose-400 animate-pulse animate-duration-500 delay-75" />
-                                    <span className="w-0.5 h-1.5 bg-rose-400 animate-pulse animate-duration-500 delay-150" />
-                                  </span>
-                                  Stop Voice Story
-                                </>
-                              ) : (
-                                <>
-                                  <span>🔊</span> Listen to Story
-                                </>
-                              )}
-                            </button>
-                          </div>
-
-                          {/* 4 Chapters */}
-                          <div className="space-y-4">
-                            {[
-                              { title: 'Chapter 1: Chemistry, Vibe & Communication', text: astroData.story?.chapter1, bg: 'rgba(212,175,55,0.02)', border: 'rgba(212,175,55,0.1)' },
-                              { title: 'Chapter 2: Wealth, Family Support & Destiny', text: astroData.story?.chapter2, bg: 'rgba(34,197,94,0.02)', border: 'rgba(34,197,94,0.1)' },
-                              { title: 'Chapter 3: Children & Life Compatibility', text: astroData.story?.chapter3, bg: 'rgba(59,130,246,0.02)', border: 'rgba(59,130,246,0.1)' },
-                              { title: 'Chapter 4: Challenges & Warning Signs', text: astroData.story?.chapter4, bg: 'rgba(239,68,68,0.02)', border: 'rgba(239,68,68,0.1)' },
-                            ].map((ch, i) => (
-                              <div 
-                                key={i}
-                                className="p-5 rounded-2xl border text-sm leading-relaxed text-gray-300 space-y-2 transition-all hover:scale-[1.01]"
-                                style={{
-                                  background: ch.bg,
-                                  borderColor: ch.border
-                                }}
-                              >
-                                <h5 className="font-serif text-[#D4AF37] font-bold text-sm">
-                                  {ch.title}
-                                </h5>
-                                <p className="text-gray-300 text-xs font-normal leading-relaxed">
-                                  {ch.text}
-                                </p>
+                          {!showStory ? (
+                            <div className="p-6 text-center bg-[#D4AF37]/5 border border-[#D4AF37]/20 rounded-2xl space-y-4">
+                              <div className="w-12 h-12 bg-[#D4AF37]/10 rounded-full flex items-center justify-center mx-auto border border-[#D4AF37]/20 animate-pulse">
+                                <Sparkles className="w-6 h-6 text-[#D4AF37]" />
                               </div>
-                            ))}
-                          </div>
+                              <h5 className="text-white font-serif font-bold text-sm">Astrological Match Story Unlocked!</h5>
+                              <p className="text-xs text-gray-300 leading-relaxed max-w-xs mx-auto">
+                                The detailed planetary match story is unlocked. Click below to read or listen to the full narrative.
+                              </p>
+                              <button
+                                onClick={() => setShowStory(true)}
+                                className="w-full py-3 bg-gradient-to-r from-[#D4AF37] to-[#C5A059] text-black text-xs font-bold rounded-xl hover:scale-[1.02] transition-all shadow-md flex items-center justify-center gap-1.5"
+                              >
+                                📖 Reveal Astrological Story
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              {/* TTS Audio Controls */}
+                              <div className="flex justify-end">
+                                <button
+                                  onClick={toggleAudioReadout}
+                                  className={`px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2 transition-all border ${
+                                    isPlayingAudio 
+                                      ? 'bg-[#E11D48]/10 border-[#E11D48]/30 text-[#E11D48] shadow-[0_0_10px_rgba(225,29,72,0.2)]'
+                                      : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
+                                  }`}
+                                >
+                                  {isPlayingAudio ? (
+                                    <>
+                                      <span className="flex gap-0.5 items-center justify-center w-3 h-3">
+                                        <span className="w-0.5 h-2 bg-rose-400 animate-pulse animate-duration-500" />
+                                        <span className="w-0.5 h-3 bg-rose-400 animate-pulse animate-duration-500 delay-75" />
+                                        <span className="w-0.5 h-1.5 bg-rose-400 animate-pulse animate-duration-500 delay-150" />
+                                      </span>
+                                      Stop Voice Story
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span>🔊</span> Listen to Story
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+
+                              {/* 4 Chapters */}
+                              <div className="space-y-4">
+                                {[
+                                  { title: 'Chapter 1: Chemistry, Vibe & Communication', text: astroData.story?.chapter1, bg: 'rgba(212,175,55,0.02)', border: 'rgba(212,175,55,0.1)' },
+                                  { title: 'Chapter 2: Wealth, Family Support & Destiny', text: astroData.story?.chapter2, bg: 'rgba(34,197,94,0.02)', border: 'rgba(34,197,94,0.1)' },
+                                  { title: 'Chapter 3: Children & Life Compatibility', text: astroData.story?.chapter3, bg: 'rgba(59,130,246,0.02)', border: 'rgba(59,130,246,0.1)' },
+                                  { title: 'Chapter 4: Challenges & Warning Signs', text: astroData.story?.chapter4, bg: 'rgba(239,68,68,0.02)', border: 'rgba(239,68,68,0.1)' },
+                                ].map((ch, i) => (
+                                  <div 
+                                    key={i}
+                                    className="p-5 rounded-2xl border text-sm leading-relaxed text-gray-300 space-y-2 transition-all hover:scale-[1.01]"
+                                    style={{
+                                      background: ch.bg,
+                                      borderColor: ch.border
+                                    }}
+                                  >
+                                    <h5 className="font-serif text-[#D4AF37] font-bold text-sm">
+                                      {ch.title}
+                                    </h5>
+                                    <p className="text-gray-300 text-xs font-normal leading-relaxed">
+                                      {ch.text}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </>
+                          )}
                         </div>
                       )}
 

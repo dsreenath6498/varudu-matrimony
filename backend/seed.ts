@@ -58,7 +58,7 @@ const seedDB = async () => {
     const dob = `19${99 - (age - 24)}-01-01`;
     const place = places[Math.floor(Math.random() * places.length)];
     const photo = [malePhotos[i % malePhotos.length]];
-    
+
     await pool.query(query, [id, phone, name, age, dob, place, 'Male', 'Female', JSON.stringify(photo), 1, 10]);
   }
 
@@ -71,7 +71,7 @@ const seedDB = async () => {
     const dob = `19${99 - (age - 22)}-01-01`;
     const place = places[Math.floor(Math.random() * places.length)];
     const photo = [femalePhotos[i % femalePhotos.length]];
-    
+
     await pool.query(query, [id, phone, name, age, dob, place, 'Female', 'Male', JSON.stringify(photo), 1, 10]);
   }
 

@@ -281,7 +281,18 @@ router.get('/match-details', async (req, res) => {
     const receivedPoints = scoreDetails.total?.received_points || 0;
     const status = scoreDetails.total?.status || false;
 
-    // 5. If not unlocked, return only basic compatibility points
+    const kootas = [
+      { name: "Varna", telugu: "వర్ణ కూటమి (Varna)", received: scoreDetails.varna?.received_points ?? 0, total: scoreDetails.varna?.total_points ?? 1, desc: scoreDetails.varna?.description || "Mental compatibility and work dynamics." },
+      { name: "Vasya", telugu: "వశ్య కూటమి (Vasya)", received: scoreDetails.vasya?.received_points ?? 0, total: scoreDetails.vasya?.total_points ?? 2, desc: scoreDetails.vasya?.description || "Mutual attraction and dominance factor." },
+      { name: "Tara", telugu: "తార కూటమి (Tara)", received: scoreDetails.tara?.received_points ?? 0, total: scoreDetails.tara?.total_points ?? 3, desc: scoreDetails.tara?.description || "Health, wellness, and lifetime synergy." },
+      { name: "Yoni", telugu: "యోని కూటమి (Yoni)", received: scoreDetails.yoni?.received_points ?? 0, total: scoreDetails.yoni?.total_points ?? 4, desc: scoreDetails.yoni?.description || "Physical and intimate compatibility." },
+      { name: "Graha Maitri", telugu: "గృహమైత్రి (Graha Maitri)", received: scoreDetails.maitri?.received_points ?? 0, total: scoreDetails.maitri?.total_points ?? 5, desc: scoreDetails.maitri?.description || "Mental wavelength, friendship, and affection." },
+      { name: "Gana", telugu: "గణ కూటమి (Gana)", received: scoreDetails.gana?.received_points ?? 0, total: scoreDetails.gana?.total_points ?? 6, desc: scoreDetails.gana?.description || "Temperament matching and behavior alignment." },
+      { name: "Bhakoota", telugu: "భకూట కూటమి (Bhakoota)", received: scoreDetails.bhakoot?.received_points ?? 0, total: scoreDetails.bhakoot?.total_points ?? 7, desc: scoreDetails.bhakoot?.description || "Prosperity, family welfare, and abundance." },
+      { name: "Nadi", telugu: "నాడీ కూటమి (Nadi)", received: scoreDetails.nadi?.received_points ?? 0, total: scoreDetails.nadi?.total_points ?? 8, desc: scoreDetails.nadi?.description || "Biological, physiological, and genetic compatibility." }
+    ];
+
+    // 5. If not unlocked, return only basic compatibility points & kootas details
     if (!isUnlocked) {
       return res.json({
         success: true,
@@ -289,7 +300,8 @@ router.get('/match-details', async (req, res) => {
         isUnlocked: false,
         score: receivedPoints,
         meName: userMe.name,
-        partnerName: userPartner.name
+        partnerName: userPartner.name,
+        kootas
       });
     }
 
@@ -351,7 +363,8 @@ router.get('/match-details', async (req, res) => {
       score: receivedPoints,
       meName: userMe.name,
       partnerName: userPartner.name,
-      story: storyData
+      story: storyData,
+      kootas
     });
 
   } catch (error: any) {
