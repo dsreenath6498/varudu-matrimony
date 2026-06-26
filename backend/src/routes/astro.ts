@@ -318,17 +318,31 @@ router.get('/match-details', async (req, res) => {
     }
     Make sure each chapter is highly detailed, warm, and writes about the couple by name. Do not include markdown blocks around the JSON output.`;
 
-    console.log('Requesting Gemini to write the Astro compatibility story...');
-    const result = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json'
-      }
-    });
+    let storyData: any;
+    try {
+      console.log('Requesting Gemini to write the Astro compatibility story...');
+      const result = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json'
+        }
+      });
 
-    const replyText = result.text || '';
-    const storyData = JSON.parse(replyText.trim());
+      const replyText = result.text || '';
+      storyData = JSON.parse(replyText.trim());
+    } catch (gemErr: any) {
+      console.warn('Gemini API call failed, using local fallback story:', gemErr.message);
+      const boyName = userMe.gender?.toLowerCase() === 'male' ? userMe.name : userPartner.name;
+      const girlName = userMe.gender?.toLowerCase() === 'female' ? userMe.name : userPartner.name;
+      
+      storyData = {
+        chapter1: `The connection between ${boyName} and ${girlName} shows a warm and promising start. Their mental wavelengths match nicely with an Ashtakoota compatibility score of ${receivedPoints}/36 points. In conversations, they exhibit a natural rhythm where mutual respect serves as their core language. Communication flows effortlessly as they appreciate each other's perspectives.`,
+        chapter2: `Financially and professionally, this union receives strong planetary support. Together, ${boyName} and ${girlName} will encourage one another to achieve greater career milestones. Family support will act as an anchor, bringing prosperity and stability into their lives. They are destined to build a secure and comfortable home together.`,
+        chapter3: `In the long run, their life compatibility is built on shared goals and values. The planetary positions indicate a stable, nurturing household where children will thrive under their combined wisdom. Their overall temperament alignment creates a peaceful home environment that can weather any life transitions.`,
+        chapter4: `While their score of ${receivedPoints}/36 points is highly encouraging, they should be mindful of slight differences in temperament. To balance any potential friction, it is recommended that they spend quiet time in nature together and practice deep listening. A simple practical remedy is to light a ghee lamp on Thursdays to invite positive energy.`
+      };
+    }
 
     return res.json({
       success: true,
