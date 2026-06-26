@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import api from '../api';
-import { ShieldCheck, ArrowLeft, ShieldAlert, Users, Pencil, X } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, ShieldAlert, Users, Pencil, X, Sparkles } from 'lucide-react';
 
 export interface FamilyDetails {
   father_name: string;
@@ -27,6 +27,9 @@ interface UserData {
   photos: string[];
   aadhaar_verified: boolean;
   face_verified: boolean;
+  dob?: string;
+  tob?: string;
+  pob?: string;
   family_details?: FamilyDetails;
 }
 
@@ -37,6 +40,11 @@ export default function Profile() {
   const [showAadhaarModal, setShowAadhaarModal] = useState(false);
   const [showFamilyModal, setShowFamilyModal] = useState(false);
   const [familyLoading, setFamilyLoading] = useState(false);
+  
+  // Birth details states
+  const [showBirthModal, setShowBirthModal] = useState(false);
+  const [birthData, setBirthData] = useState({ dob: '', tob: '', pob: '' });
+  const [birthLoading, setBirthLoading] = useState(false);
   
   // Aadhaar states
   const [aadhaarNumber, setAadhaarNumber] = useState('');
@@ -277,6 +285,27 @@ export default function Profile() {
     }
   };
 
+  const handleUpdateBirth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user?.id) return;
+    setBirthLoading(true);
+    setError('');
+    try {
+      await api.post('/astro/update-birth-details', {
+        userId: user.id,
+        dob: birthData.dob,
+        tob: birthData.tob,
+        pob: birthData.pob
+      });
+      setShowBirthModal(false);
+      await fetchProfile(); // Reload profile data
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to update birth details');
+    } finally {
+      setBirthLoading(false);
+    }
+  };
+
   if (loading) return null;
 
   return (
@@ -429,6 +458,63 @@ export default function Profile() {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Horoscope & Birth Details Card */}
+          <div className="p-5 rounded-2xl border bg-white/5 backdrop-blur-md" style={{ borderColor: 'rgba(212,175,55,0.2)' }}>
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2.5 rounded-full bg-[#D4AF37]/10 text-[#D4AF37]">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-bold text-white">Horoscope & Birth Details</h3>
+              </div>
+              <button 
+                onClick={() => {
+                  setBirthData({
+                    dob: user?.dob || '',
+                    tob: user?.tob || '',
+                    pob: user?.pob || ''
+                  });
+                  setShowBirthModal(true);
+                }}
+                className="p-2 rounded-full bg-white/5 hover:bg-[#D4AF37]/20 transition-colors"
+              >
+                <Pencil className="w-4 h-4 text-[#D4AF37]" />
+              </button>
+            </div>
+            
+            {user?.dob || user?.tob || user?.pob ? (
+              <div className="space-y-3 mt-2 text-sm text-gray-300">
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <p className="text-xs text-gray-500 font-semibold">Date of Birth</p>
+                    <p className="font-bold text-white mt-0.5">{user.dob || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-semibold">Time of Birth</p>
+                    <p className="font-bold text-white mt-0.5">{user.tob || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-semibold">Place of Birth</p>
+                    <p className="font-bold text-white mt-0.5 truncate" title={user.pob}>{user.pob || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-sm text-gray-400 mb-3 font-medium">Add your birth details to unlock AI Kundali matchmaking.</p>
+                <button 
+                  onClick={() => {
+                    setBirthData({ dob: '', tob: '', pob: '' });
+                    setShowBirthModal(true);
+                  }}
+                  className="px-4 py-2 bg-gradient-to-r from-[#D4AF37] to-[#C5A059] text-black hover:scale-105 text-xs font-bold rounded-lg transition-all shadow-md"
+                >
+                  Add Birth Details
+                </button>
+              </div>
+            )}
           </div>
 
         </div>
@@ -831,6 +917,67 @@ export default function Profile() {
             <p className="text-[10px] text-gray-500 mt-4 leading-normal">
               Align your face clearly in the circle. Make sure you are in a bright room.
             </p>
+          </div>
+        </div>
+      )}
+      {/* Birth Details Modal */}
+      {showBirthModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#120a15] border border-white/10 p-6 rounded-2xl w-full max-w-sm relative">
+            <button 
+              onClick={() => { setShowBirthModal(false); setError(''); }} 
+              className="absolute top-4 right-4 text-gray-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-[#D4AF37]" />
+              Birth Details
+            </h2>
+
+            {error && <div className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{error}</div>}
+
+            <form onSubmit={handleUpdateBirth} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Date of Birth</label>
+                <input 
+                  type="date" 
+                  value={birthData.dob}
+                  onChange={e => setBirthData({...birthData, dob: e.target.value})}
+                  className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-rose-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Time of Birth</label>
+                <input 
+                  type="text" 
+                  value={birthData.tob}
+                  onChange={e => setBirthData({...birthData, tob: e.target.value})}
+                  placeholder="e.g. 14:30 or 02:30 PM"
+                  className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-rose-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Place of Birth</label>
+                <input 
+                  type="text" 
+                  value={birthData.pob}
+                  onChange={e => setBirthData({...birthData, pob: e.target.value})}
+                  placeholder="e.g. Vijayawada, AP"
+                  className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-rose-500"
+                  required
+                />
+              </div>
+              <button 
+                type="submit" 
+                disabled={birthLoading}
+                className="w-full bg-rose-600 hover:bg-rose-500 text-white font-semibold py-3 rounded-lg transition-all disabled:opacity-50"
+              >
+                {birthLoading ? 'Saving...' : 'Save Birth Details'}
+              </button>
+            </form>
           </div>
         </div>
       )}

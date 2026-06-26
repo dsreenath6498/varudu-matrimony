@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar';
-import { Send, ArrowLeft, Lock, Sparkles, Phone } from 'lucide-react';
+import { Send, ArrowLeft, Lock, Sparkles, Phone, X } from 'lucide-react';
 import api from '../api';
 import { useSocket } from '../context/SocketContext';
 import { useCall } from '../context/CallContext';
@@ -35,6 +35,14 @@ export default function Chat() {
   const { socket, clearUnread, setActiveMatchId } = useSocket();
   const { callUser } = useCall();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Astro matchmaking states
+  const [showAstroModal, setShowAstroModal] = useState(false);
+  const [astroLoading, setAstroLoading] = useState(false);
+  const [astroData, setAstroData] = useState<any>(null);
+  const [unlockLoading, setUnlockLoading] = useState(false);
+  const [astroError, setAstroError] = useState('');
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
   const currentUserStr = localStorage.getItem('user');
   const currentUser = currentUserStr ? JSON.parse(currentUserStr) : null;
@@ -117,6 +125,74 @@ export default function Chat() {
     }]);
     setNewMessage('');
   };
+
+  const fetchAstroDetails = async () => {
+    if (!activeMatch) return;
+    setAstroLoading(true);
+    setAstroError('');
+    try {
+      const response = await api.get('/astro/match-details', {
+        params: { matchId: activeMatch.matchId, userId: currentUser.id }
+      });
+      setAstroData(response.data);
+    } catch (err: any) {
+      console.error('Error fetching astro details:', err);
+      setAstroError(err.response?.data?.error || 'Failed to load compatibility details');
+    } finally {
+      setAstroLoading(false);
+    }
+  };
+
+  const handleUnlockAstro = async () => {
+    if (!activeMatch) return;
+    setUnlockLoading(true);
+    setAstroError('');
+    try {
+      await api.post('/astro/unlock-match', {
+        matchId: activeMatch.matchId,
+        userId: currentUser.id
+      });
+      // Fire global balance update event
+      window.dispatchEvent(new Event('rose_balance_updated'));
+      await fetchAstroDetails();
+    } catch (err: any) {
+      console.error('Error unlocking astro details:', err);
+      setAstroError(err.response?.data?.error || 'Failed to unlock details');
+    } finally {
+      setUnlockLoading(false);
+    }
+  };
+
+  const toggleAudioReadout = () => {
+    if (isPlayingAudio) {
+      window.speechSynthesis?.cancel();
+      setIsPlayingAudio(false);
+    } else {
+      if (!astroData?.story) return;
+      const { chapter1, chapter2, chapter3, chapter4 } = astroData.story;
+      const fullText = `Here is your Vedic Matchmaking story. Chapter 1, Chemistry and Vibe: ${chapter1}. Chapter 2, Wealth and Career: ${chapter2}. Chapter 3, Life Harmony: ${chapter3}. Chapter 4, Challenges and Remedies: ${chapter4}`;
+      
+      const utterance = new SpeechSynthesisUtterance(fullText);
+      utterance.onend = () => {
+        setIsPlayingAudio(false);
+      };
+      utterance.onerror = () => {
+        setIsPlayingAudio(false);
+      };
+      
+      setIsPlayingAudio(true);
+      window.speechSynthesis?.speak(utterance);
+    }
+  };
+
+  useEffect(() => {
+    if (showAstroModal && activeMatch) {
+      fetchAstroDetails();
+    } else {
+      window.speechSynthesis?.cancel();
+      setIsPlayingAudio(false);
+    }
+  }, [showAstroModal, activeMatch]);
 
   const headerStyle: React.CSSProperties = {
     background: 'rgba(255, 255, 255, 0.9)',
@@ -331,18 +407,33 @@ export default function Chat() {
         </div>
         
         {activeMatch.isFullyUnlocked && (
-          <button
-            onClick={() => callUser(activeMatch.user.id, activeMatch.user.name, activeMatch.user.photos[0] || 'https://via.placeholder.com/150')}
-            className="rounded-full p-2.5 flex items-center justify-center transition-all hover:scale-110 flex-shrink-0"
-            style={{
-              background: 'linear-gradient(135deg, rgba(34,197,94,0.1), rgba(22,163,74,0.1))',
-              border: '1px solid rgba(34,197,94,0.3)',
-              color: '#22C55E',
-              boxShadow: '0 4px 12px rgba(34,197,94,0.1)',
-            }}
-          >
-            <Phone className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => setShowAstroModal(true)}
+              className="rounded-full p-2.5 flex items-center justify-center transition-all hover:scale-110"
+              style={{
+                background: 'linear-gradient(135deg, rgba(212,175,55,0.15), rgba(197,160,89,0.15))',
+                border: '1px solid rgba(212,175,55,0.4)',
+                color: '#D4AF37',
+                boxShadow: '0 0 10px rgba(212,175,55,0.2)',
+              }}
+              title="Astro Compatibility"
+            >
+              <Sparkles className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => callUser(activeMatch.user.id, activeMatch.user.name, activeMatch.user.photos[0] || 'https://via.placeholder.com/150')}
+              className="rounded-full p-2.5 flex items-center justify-center transition-all hover:scale-110"
+              style={{
+                background: 'linear-gradient(135deg, rgba(34,197,94,0.1), rgba(22,163,74,0.1))',
+                border: '1px solid rgba(34,197,94,0.3)',
+                color: '#22C55E',
+                boxShadow: '0 4px 12px rgba(34,197,94,0.1)',
+              }}
+            >
+              <Phone className="w-5 h-5" />
+            </button>
+          </div>
         )}
       </div>
 
@@ -524,6 +615,328 @@ export default function Chat() {
           </div>
         </>
       )}
+
+      {/* Astro Modal */}
+      {showAstroModal && activeMatch && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div 
+            className="w-full max-w-lg rounded-3xl overflow-hidden relative border border-[#D4AF37]/30 shadow-[0_0_30px_rgba(212,175,55,0.2)] flex flex-col"
+            style={{
+              background: 'radial-gradient(circle at center, #180920 0%, #070008 100%)',
+              maxHeight: '90vh',
+            }}
+          >
+            {/* Header */}
+            <div className="p-5 border-b border-white/5 flex items-center justify-between relative z-10">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-[#D4AF37] animate-pulse" />
+                <h3 className="text-lg font-bold text-white font-serif tracking-wide">
+                  AI Kundali Matchmaker
+                </h3>
+              </div>
+              <button 
+                onClick={() => setShowAstroModal(false)}
+                className="text-gray-400 hover:text-white transition-colors p-1 bg-white/5 hover:bg-white/10 rounded-full"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Content Body */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {astroLoading ? (
+                <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                  <div className="w-12 h-12 border-4 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin" />
+                  <p className="text-sm text-gray-400 font-medium">Consulting celestial stars...</p>
+                </div>
+              ) : astroError ? (
+                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
+                  {astroError}
+                  <button 
+                    onClick={fetchAstroDetails}
+                    className="mt-3 block mx-auto px-4 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-200 text-xs font-semibold rounded-lg transition-colors"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : astroData ? (
+                <>
+                  {!astroData.isComplete ? (
+                    /* Missing birth details screen */
+                    <div className="space-y-6">
+                      <div className="text-center space-y-2">
+                        <div className="w-16 h-16 bg-[#D4AF37]/10 rounded-full flex items-center justify-center mx-auto border border-[#D4AF37]/20">
+                          <Sparkles className="w-8 h-8 text-[#D4AF37]" />
+                        </div>
+                        <h4 className="text-white font-bold text-lg font-serif">Incomplete Birth Details</h4>
+                        <p className="text-xs text-gray-400 max-w-sm mx-auto">
+                          Vedic astrology requires the Date, Time, and Place of birth for both individuals to construct accurate birth charts and calculate Ashtakoota compatibility.
+                        </p>
+                      </div>
+
+                      <div className="space-y-4">
+                        {/* Current User Status */}
+                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-semibold text-white">Your Birth Details</p>
+                            <p className="text-xs text-gray-400 mt-0.5">
+                              {astroData.meComplete ? '✅ Completed' : '❌ Required'}
+                            </p>
+                          </div>
+                          {!astroData.meComplete && (
+                            <span className="text-xs text-[#D4AF37] font-semibold bg-[#D4AF37]/10 px-3 py-1 rounded-full border border-[#D4AF37]/20">
+                              Action Required
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Partner Status */}
+                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-semibold text-white">{astroData.partnerName}'s Birth Details</p>
+                            <p className="text-xs text-gray-400 mt-0.5">
+                              {astroData.partnerComplete ? '✅ Completed' : '⏳ Waiting for them...'}
+                            </p>
+                          </div>
+                          {!astroData.partnerComplete && (
+                            <span className="text-xs text-rose-400 font-semibold bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">
+                              Awaiting Update
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Fast birth details form if current user is incomplete */}
+                      {!astroData.meComplete && (
+                        <div className="p-5 rounded-2xl bg-[#D4AF37]/5 border border-[#D4AF37]/20 space-y-4 text-left">
+                          <p className="text-sm font-bold text-[#D4AF37] font-serif">Quickly add your birth details:</p>
+                          
+                          <form 
+                            onSubmit={async (e) => {
+                              e.preventDefault();
+                              const form = e.currentTarget;
+                              const dob = (form.elements.namedItem('localDob') as HTMLInputElement).value;
+                              const tob = (form.elements.namedItem('localTob') as HTMLInputElement).value;
+                              const pob = (form.elements.namedItem('localPob') as HTMLInputElement).value;
+                              
+                              setAstroLoading(true);
+                              try {
+                                await api.post('/astro/update-birth-details', {
+                                  userId: currentUser.id,
+                                  dob,
+                                  tob,
+                                  pob
+                                });
+                                await fetchAstroDetails();
+                              } catch (err: any) {
+                                setAstroError(err.response?.data?.error || 'Failed to update details');
+                                setAstroLoading(false);
+                              }
+                            }}
+                            className="space-y-3"
+                          >
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-[10px] text-gray-400 font-medium mb-1">Date of Birth</label>
+                                <input 
+                                  type="date" 
+                                  name="localDob"
+                                  className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-[#D4AF37]"
+                                  required
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] text-gray-400 font-medium mb-1">Time of Birth</label>
+                                <input 
+                                  type="text" 
+                                  name="localTob"
+                                  placeholder="e.g. 14:30 or 2:30 PM"
+                                  className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-[#D4AF37]"
+                                  required
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-[10px] text-gray-400 font-medium mb-1">Place of Birth</label>
+                              <input 
+                                type="text" 
+                                name="localPob"
+                                placeholder="e.g. Vijayawada, AP"
+                                className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-[#D4AF37]"
+                                required
+                              />
+                            </div>
+                            <button 
+                              type="submit"
+                              className="w-full bg-gradient-to-r from-[#D4AF37] to-[#C5A059] text-black font-semibold py-2 rounded-xl text-xs hover:scale-[1.02] transition-all shadow-md mt-2"
+                            >
+                              Save & Match
+                            </button>
+                          </form>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* Completed & Calculations available */
+                    <div className="space-y-6">
+                      
+                      {/* Ashtakoota compatibility circular graph / progress */}
+                      <div className="flex flex-col items-center text-center space-y-3">
+                        <div className="relative w-36 h-36 flex items-center justify-center">
+                          <div className="absolute inset-0 rounded-full bg-[#D4AF37]/5 animate-ping opacity-30" />
+                          <svg className="w-full h-full transform -rotate-90">
+                            <circle 
+                              cx="72" 
+                              cy="72" 
+                              r="60" 
+                              className="stroke-white/5" 
+                              strokeWidth="8"
+                              fill="transparent"
+                            />
+                            <circle 
+                              cx="72" 
+                              cy="72" 
+                              r="60" 
+                              className="stroke-[#D4AF37]" 
+                              strokeWidth="8"
+                              fill="transparent"
+                              strokeDasharray={2 * Math.PI * 60}
+                              strokeDashoffset={2 * Math.PI * 60 * (1 - (astroData.score || 0) / 36)}
+                              strokeLinecap="round"
+                              style={{
+                                filter: 'drop-shadow(0 0 8px rgba(212,175,55,0.4))',
+                                transition: 'stroke-dashoffset 1.5s ease-in-out'
+                              }}
+                            />
+                          </svg>
+                          <div className="absolute flex flex-col items-center">
+                            <span className="text-3xl font-bold text-white font-serif">{astroData.score}</span>
+                            <span className="text-[10px] text-gray-400 font-semibold tracking-wider uppercase">Out of 36</span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="text-white font-bold text-lg font-serif">
+                            Ashtakoota Match Score
+                          </h4>
+                          <p className="text-xs mt-1" style={{ color: (astroData.score || 0) >= 18 ? '#4ADE80' : '#FB7185' }}>
+                            {(astroData.score || 0) >= 18 
+                              ? '✨ Highly Auspicious & Recommended Match!' 
+                              : '⚠️ Average Compatibility. Remedies Advised.'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Locked vs. Unlocked Astro Story */}
+                      {!astroData.isUnlocked ? (
+                        /* Locked Paywall */
+                        <div 
+                          className="p-6 rounded-3xl border border-[#D4AF37]/20 text-center relative overflow-hidden bg-black/40"
+                          style={{ backdropFilter: 'blur(10px)' }}
+                        >
+                          <div className="absolute -right-10 -top-10 w-24 h-24 bg-[#D4AF37]/10 rounded-full blur-xl" />
+                          <div className="absolute -left-10 -bottom-10 w-24 h-24 bg-purple-500/10 rounded-full blur-xl" />
+                          
+                          <div className="w-14 h-14 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-rose-500/20">
+                            <Lock className="w-6 h-6 text-rose-400 animate-bounce" />
+                          </div>
+
+                          <h5 className="text-white font-bold font-serif text-base mb-1">
+                            Unlock Detailed Compatibility Story
+                          </h5>
+                          <p className="text-xs text-gray-400 leading-relaxed mb-6 max-w-sm mx-auto">
+                            Decode your astrological combination. Get a comprehensive, AI-written 4-chapter narrative analysis covering vibe, wealth/career, long-term harmony, and remedies using Google Gemini.
+                          </p>
+
+                          <button
+                            onClick={handleUnlockAstro}
+                            disabled={unlockLoading}
+                            className="w-full py-3.5 bg-gradient-to-r from-[#D4AF37] to-[#C5A059] text-black font-bold rounded-2xl text-sm transition-all duration-300 hover:scale-[1.02] shadow-[0_0_15px_rgba(212,175,55,0.3)] disabled:opacity-50 flex items-center justify-center gap-2"
+                          >
+                            {unlockLoading ? (
+                              <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                            ) : (
+                              <>
+                                🌹 Unlock Story (3 Roses)
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      ) : (
+                        /* Unlocked Chapters Report */
+                        <div className="space-y-4 text-left">
+                          
+                          {/* TTS Audio Controls */}
+                          <div className="flex justify-end">
+                            <button
+                              onClick={toggleAudioReadout}
+                              className={`px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2 transition-all border ${
+                                isPlayingAudio 
+                                  ? 'bg-[#E11D48]/10 border-[#E11D48]/30 text-[#E11D48] shadow-[0_0_10px_rgba(225,29,72,0.2)]'
+                                  : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
+                              }`}
+                            >
+                              {isPlayingAudio ? (
+                                <>
+                                  <span className="flex gap-0.5 items-center justify-center w-3 h-3">
+                                    <span className="w-0.5 h-2 bg-rose-400 animate-pulse animate-duration-500" />
+                                    <span className="w-0.5 h-3 bg-rose-400 animate-pulse animate-duration-500 delay-75" />
+                                    <span className="w-0.5 h-1.5 bg-rose-400 animate-pulse animate-duration-500 delay-150" />
+                                  </span>
+                                  Stop Voice Story
+                                </>
+                              ) : (
+                                <>
+                                  <span>🔊</span> Listen to Story
+                                </>
+                              )}
+                            </button>
+                          </div>
+
+                          {/* 4 Chapters */}
+                          <div className="space-y-4">
+                            {[
+                              { title: 'Chapter 1: Chemistry, Vibe & Communication', text: astroData.story?.chapter1, bg: 'rgba(212,175,55,0.02)', border: 'rgba(212,175,55,0.1)' },
+                              { title: 'Chapter 2: Wealth, Family Support & Destiny', text: astroData.story?.chapter2, bg: 'rgba(34,197,94,0.02)', border: 'rgba(34,197,94,0.1)' },
+                              { title: 'Chapter 3: Children & Life Compatibility', text: astroData.story?.chapter3, bg: 'rgba(59,130,246,0.02)', border: 'rgba(59,130,246,0.1)' },
+                              { title: 'Chapter 4: Challenges & Warning Signs', text: astroData.story?.chapter4, bg: 'rgba(239,68,68,0.02)', border: 'rgba(239,68,68,0.1)' },
+                            ].map((ch, i) => (
+                              <div 
+                                key={i}
+                                className="p-5 rounded-2xl border text-sm leading-relaxed text-gray-300 space-y-2 transition-all hover:scale-[1.01]"
+                                style={{
+                                  background: ch.bg,
+                                  borderColor: ch.border
+                                }}
+                              >
+                                <h5 className="font-serif text-[#D4AF37] font-bold text-sm">
+                                  {ch.title}
+                                </h5>
+                                <p className="text-gray-300 text-xs font-normal leading-relaxed">
+                                  {ch.text}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                    </div>
+                  )}
+                </>
+              ) : null}
+            </div>
+
+            {/* Sticky disclaimer footer */}
+            <div className="p-3 bg-black/40 border-t border-white/5 text-center">
+              <p className="text-[10px] text-gray-500 leading-normal">
+                Astrological calculations are based on Vedic Rishis match principles. Stories generated by Gemini AI. Use with positive discretion.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

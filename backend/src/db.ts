@@ -34,7 +34,9 @@ export async function initDb() {
         referred_by TEXT,
         last_free_rose_at TIMESTAMP,
         family_details TEXT DEFAULT '{}',
-        email TEXT UNIQUE
+        email TEXT UNIQUE,
+        tob TEXT,
+        pob TEXT
       );
 
       CREATE TABLE IF NOT EXISTS interests (
@@ -50,6 +52,7 @@ export async function initDb() {
         receiver_unlocked INTEGER DEFAULT 0,
         is_refunded INTEGER DEFAULT 0,
         accepted_at TIMESTAMP,
+        astro_unlocked INTEGER DEFAULT 0,
         UNIQUE(sender_id, receiver_id)
       );
 
@@ -95,6 +98,30 @@ export async function initDb() {
       console.log('Successfully added face_verified column to users table (or it already existed).');
     } catch (migErr) {
       console.error('Migration error for face_verified:', migErr);
+    }
+
+    // Migration for adding tob column
+    try {
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS tob TEXT;`);
+      console.log('Successfully added tob column to users table (or it already existed).');
+    } catch (migErr) {
+      console.error('Migration error for tob:', migErr);
+    }
+
+    // Migration for adding pob column
+    try {
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS pob TEXT;`);
+      console.log('Successfully added pob column to users table (or it already existed).');
+    } catch (migErr) {
+      console.error('Migration error for pob:', migErr);
+    }
+
+    // Migration for adding astro_unlocked column to interests
+    try {
+      await pool.query(`ALTER TABLE interests ADD COLUMN IF NOT EXISTS astro_unlocked INTEGER DEFAULT 0;`);
+      console.log('Successfully added astro_unlocked column to interests table (or it already existed).');
+    } catch (migErr) {
+      console.error('Migration error for astro_unlocked:', migErr);
     }
   } catch (error) {
     console.error('Error initializing PostgreSQL database:', error);

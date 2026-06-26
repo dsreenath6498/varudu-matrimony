@@ -10,6 +10,7 @@ import authRoutes from './routes/auth';
 import profileRoutes from './routes/profile';
 import interactionRoutes from './routes/interactions';
 import verificationRoutes from './routes/verification';
+import astroRoutes from './routes/astro';
 
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -39,6 +40,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/roses', rosesRoutes);
 app.use('/api/verify', verificationRoutes);
 app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/astro', astroRoutes);
 
 
 app.get('/', (req, res) => {
