@@ -14,6 +14,7 @@ interface Match {
     id: string;
     name: string;
     photos: string[];
+    face_verified?: boolean;
   };
 }
 
@@ -223,8 +224,15 @@ export default function Chat() {
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                        <h3 className="font-semibold text-sm flex items-center gap-1" style={{ color: 'var(--text-primary)' }}>
                           {match.user.name}
+                          {match.user.face_verified && (
+                            <span className="inline-flex items-center justify-center bg-blue-500 text-white rounded-full p-0.5" style={{ width: '14px', height: '14px' }} title="Face Verified">
+                              <svg className="w-2.5 h-2.5 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            </span>
+                          )}
                         </h3>
                         {!match.isFullyUnlocked && (
                           <span
@@ -305,10 +313,17 @@ export default function Chat() {
         />
         <div className="min-w-0 flex-1">
           <h2
-            className="font-bold text-sm"
+            className="font-bold text-sm flex items-center gap-1.5"
             style={{ fontFamily: '"Cormorant Garamond", serif', color: 'var(--text-primary)', fontSize: '18px' }}
           >
             {activeMatch.user.name}
+            {activeMatch.user.face_verified && (
+              <span className="inline-flex items-center justify-center bg-blue-500 text-white rounded-full p-0.5" style={{ width: '16px', height: '16px' }} title="Face Verified">
+                <svg className="w-3.5 h-3.5 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </span>
+            )}
           </h2>
           {activeMatch.isFullyUnlocked && (
             <p className="text-[10px]" style={{ color: '#4ADE80' }}>● Online</p>

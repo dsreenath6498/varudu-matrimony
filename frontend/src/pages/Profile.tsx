@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import api from '../api';
@@ -26,6 +26,7 @@ interface UserData {
   interested_in: string;
   photos: string[];
   aadhaar_verified: boolean;
+  face_verified: boolean;
   family_details?: FamilyDetails;
 }
 
@@ -44,6 +45,17 @@ export default function Profile() {
   const [refId, setRefId] = useState('');
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Face Verification states
+  const [showFaceModal, setShowFaceModal] = useState(false);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [faceLoading, setFaceLoading] = useState(false);
+  const [faceError, setFaceError] = useState('');
+  const [faceSuccess, setFaceSuccess] = useState(false);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const [familyData, setFamilyData] = useState<FamilyDetails>({
     father_name: '',
@@ -82,6 +94,92 @@ export default function Profile() {
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  const startCamera = async () => {
+    try {
+      setCapturedImage(null);
+      setFaceError('');
+      setFaceSuccess(false);
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 480, height: 480, facingMode: 'user' },
+        audio: false
+      });
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+    } catch (err) {
+      console.error('Webcam access error:', err);
+      setFaceError('Could not access your camera. Please ensure permissions are granted.');
+    }
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        canvas.width = video.videoWidth || 480;
+        canvas.height = video.videoHeight || 480;
+        
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        setCapturedImage(dataUrl);
+        stopCamera();
+      }
+    }
+  };
+
+  const handleFaceVerify = async () => {
+    if (!capturedImage || !user?.id) return;
+    setFaceLoading(true);
+    setFaceError('');
+
+    try {
+      const response = await api.post('/profile/verify-face', {
+        userId: user.id,
+        selfieDataUrl: capturedImage
+      });
+
+      if (response.data.success) {
+        setFaceSuccess(true);
+        await fetchProfile();
+        setTimeout(() => {
+          setShowFaceModal(false);
+          setCapturedImage(null);
+          setFaceSuccess(false);
+        }, 2500);
+      } else {
+        setFaceError(response.data.message || 'Verification failed. Please try again.');
+      }
+    } catch (err: any) {
+      console.error('Face verify error:', err);
+      setFaceError(err.response?.data?.error || 'Verification failed due to a server error. Please try again.');
+    } finally {
+      setFaceLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showFaceModal) {
+      startCamera();
+    } else {
+      stopCamera();
+    }
+    return () => stopCamera();
+  }, [showFaceModal]);
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,39 +293,91 @@ export default function Profile() {
                   <ShieldCheck className="w-5 h-5 text-white" />
                 </div>
               )}
+
+              {/* Face Verified Badge (Bottom Left) */}
+              {user?.face_verified && (
+                <div className="absolute -bottom-2 left-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full p-1.5 shadow-[0_0_10px_rgba(59,130,246,0.5)] flex items-center justify-center border border-blue-200" title="Face Verified">
+                  <svg className="w-4 h-4 text-white fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+              )}
             </div>
 
-            <h2 className="mt-5 text-2xl font-bold text-white tracking-wide">{user?.name}, {user?.age}</h2>
+            <h2 className="mt-5 text-2xl font-bold text-white tracking-wide flex items-center justify-center gap-1.5">
+              {user?.name}, {user?.age}
+              {user?.face_verified && (
+                <span className="inline-flex items-center justify-center bg-blue-500 text-white rounded-full p-0.5" title="Face Verified">
+                  <svg className="w-3.5 h-3.5 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </span>
+              )}
+            </h2>
             <p className="text-gray-400 text-sm mt-1">{user?.place}</p>
           </div>
 
-          {/* Verification Status Card */}
-          <div className="p-5 rounded-2xl border bg-white/5 backdrop-blur-md" style={{ borderColor: user?.aadhaar_verified ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.1)' }}>
-            <div className="flex items-start gap-4">
-              <div className={`p-3 rounded-full ${user?.aadhaar_verified ? 'bg-green-500/10' : 'bg-rose-500/10'}`}>
-                {user?.aadhaar_verified ? (
-                  <ShieldCheck className="w-6 h-6 text-green-400" />
-                ) : (
-                  <ShieldAlert className="w-6 h-6 text-rose-400" />
-                )}
+          {/* Verification Status Cards */}
+          <div className="space-y-4">
+            {/* Aadhaar Verification Card */}
+            <div className="p-5 rounded-2xl border bg-white/5 backdrop-blur-md" style={{ borderColor: user?.aadhaar_verified ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.1)' }}>
+              <div className="flex items-start gap-4">
+                <div className={`p-3 rounded-full ${user?.aadhaar_verified ? 'bg-green-500/10' : 'bg-rose-500/10'}`}>
+                  {user?.aadhaar_verified ? (
+                    <ShieldCheck className="w-6 h-6 text-green-400" />
+                  ) : (
+                    <ShieldAlert className="w-6 h-6 text-rose-400" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-white">
+                    {user?.aadhaar_verified ? 'Identity Verified' : 'Identity Not Verified'}
+                  </h3>
+                  <p className="text-sm text-gray-400 mt-1">
+                    {user?.aadhaar_verified 
+                      ? 'Your Aadhaar is verified. You have the verified badge and silver ring!' 
+                      : 'Verify your Aadhaar to get a silver ring around your profile and a verified badge.'}
+                  </p>
+                  {!user?.aadhaar_verified && (
+                    <button 
+                      onClick={() => setShowAadhaarModal(true)}
+                      className="mt-4 px-5 py-2 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white text-sm font-semibold rounded-lg shadow-[0_0_15px_rgba(225,29,72,0.3)] transition-all"
+                    >
+                      Verify Aadhaar
+                    </button>
+                  )}
+                </div>
               </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-white">
-                  {user?.aadhaar_verified ? 'Identity Verified' : 'Identity Not Verified'}
-                </h3>
-                <p className="text-sm text-gray-400 mt-1">
-                  {user?.aadhaar_verified 
-                    ? 'Your Aadhaar is verified. You have the verified badge and silver ring!' 
-                    : 'Verify your Aadhaar to get a silver ring around your profile and a verified badge.'}
-                </p>
-                {!user?.aadhaar_verified && (
-                  <button 
-                    onClick={() => setShowAadhaarModal(true)}
-                    className="mt-4 px-5 py-2 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white text-sm font-semibold rounded-lg shadow-[0_0_15px_rgba(225,29,72,0.3)] transition-all"
-                  >
-                    Verify Aadhaar
-                  </button>
-                )}
+            </div>
+
+            {/* AI Face Verification Card */}
+            <div className="p-5 rounded-2xl border bg-white/5 backdrop-blur-md" style={{ borderColor: user?.face_verified ? 'rgba(59,130,246,0.3)' : 'rgba(255,255,255,0.1)' }}>
+              <div className="flex items-start gap-4">
+                <div className={`p-3 rounded-full ${user?.face_verified ? 'bg-blue-500/10' : 'bg-rose-500/10'}`}>
+                  {user?.face_verified ? (
+                    <ShieldCheck className="w-6 h-6 text-blue-400" />
+                  ) : (
+                    <ShieldAlert className="w-6 h-6 text-rose-400" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-white">
+                    {user?.face_verified ? 'AI Face Verified' : 'AI Face Not Verified'}
+                  </h3>
+                  <p className="text-sm text-gray-400 mt-1">
+                    {user?.face_verified 
+                      ? 'Your face verification is complete. You have the blue verified badge!' 
+                      : 'Complete a live selfie verification to get a blue checkmark badge on your profile.'}
+                  </p>
+                  {!user?.face_verified && (
+                    <button 
+                      onClick={() => setShowFaceModal(true)}
+                      className="mt-4 px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white text-sm font-semibold rounded-lg shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all"
+                    >
+                      Verify with AI Selfie
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -520,6 +670,118 @@ export default function Profile() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Face Verification Modal */}
+      {showFaceModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <style>{`
+            @keyframes scanLaser {
+              0% { top: 0%; }
+              50% { top: 100%; }
+              100% { top: 0%; }
+            }
+          `}</style>
+          <div className="bg-[#120a15] border border-white/10 p-6 rounded-2xl w-full max-w-sm relative text-center">
+            <button 
+              onClick={() => { setShowFaceModal(false); stopCamera(); }} 
+              className="absolute top-4 right-4 text-gray-400 hover:text-white"
+              disabled={faceLoading}
+            >
+              ✕
+            </button>
+            <h2 className="text-xl font-bold text-white mb-2">AI Face Verification</h2>
+            <p className="text-xs text-gray-400 mb-6">Compare a live selfie with your profile picture</p>
+
+            {faceError && (
+              <div className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                {faceError}
+              </div>
+            )}
+
+            {faceSuccess && (
+              <div className="p-4 mb-4 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm font-semibold flex flex-col items-center gap-2">
+                <svg className="w-8 h-8 text-green-400 animate-bounce" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                Identity Matched Successfully!
+              </div>
+            )}
+
+            <div className="relative w-64 h-64 mx-auto rounded-full overflow-hidden border-4 border-white/10 bg-black/50 mb-6">
+              {/* Webcam Video */}
+              {!capturedImage && (
+                <video 
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full h-full object-cover scale-x-[-1]"
+                />
+              )}
+
+              {/* Captured Photo */}
+              {capturedImage && (
+                <img 
+                  src={capturedImage}
+                  alt="Selfie"
+                  className="w-full h-full object-cover"
+                />
+              )}
+
+              {/* Scanner HUD Overlay */}
+              {!faceSuccess && (
+                <div className="absolute inset-0 pointer-events-none border-4 border-[#3B82F6]/30 rounded-full flex items-center justify-center">
+                  <div className="w-[85%] h-[85%] border-2 border-dashed border-[#3B82F6]/40 rounded-full animate-[spin_10s_linear_infinite]" />
+                </div>
+              )}
+
+              {/* Scanning Laser Line */}
+              {faceLoading && (
+                <div 
+                  className="absolute left-0 right-0 h-1 bg-[#3B82F6] shadow-[0_0_15px_#3B82F6] opacity-80"
+                  style={{
+                    animation: 'scanLaser 2s ease-in-out infinite'
+                  }}
+                />
+              )}
+            </div>
+
+            <canvas ref={canvasRef} className="hidden" />
+
+            <div className="space-y-3">
+              {!capturedImage ? (
+                <button 
+                  onClick={capturePhoto}
+                  className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg transition-all"
+                >
+                  Capture Selfie
+                </button>
+              ) : (
+                <div className="flex gap-3">
+                  <button 
+                    onClick={startCamera}
+                    disabled={faceLoading}
+                    className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold py-3 rounded-lg transition-all disabled:opacity-50"
+                  >
+                    Retake
+                  </button>
+                  <button 
+                    onClick={handleFaceVerify}
+                    disabled={faceLoading || faceSuccess}
+                    className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {faceLoading ? 'Verifying...' : 'Verify Now'}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <p className="text-[10px] text-gray-500 mt-4 leading-normal">
+              Align your face clearly in the circle. Make sure you are in a bright room.
+            </p>
           </div>
         </div>
       )}

@@ -27,6 +27,7 @@ export async function initDb() {
         photos TEXT DEFAULT '[]',
         is_onboarded INTEGER DEFAULT 0,
         aadhaar_verified BOOLEAN DEFAULT false,
+        face_verified BOOLEAN DEFAULT false,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         roses_balance INTEGER DEFAULT 0,
         referral_code TEXT UNIQUE,
@@ -86,6 +87,14 @@ export async function initDb() {
       console.log('Successfully added email column to users table (or it already existed).');
     } catch (migErr) {
       console.error('Migration error for email:', migErr);
+    }
+
+    // Migration for adding face_verified column
+    try {
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS face_verified BOOLEAN DEFAULT false;`);
+      console.log('Successfully added face_verified column to users table (or it already existed).');
+    } catch (migErr) {
+      console.error('Migration error for face_verified:', migErr);
     }
   } catch (error) {
     console.error('Error initializing PostgreSQL database:', error);

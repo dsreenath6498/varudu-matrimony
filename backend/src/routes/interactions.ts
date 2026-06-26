@@ -57,7 +57,7 @@ router.get('/my-interests', async (req, res) => {
   const db = getDb();
   try {
     const data = await db.all(`
-      SELECT i.id, i.status, u.id as u_id, u.name, u.age, u.place, u.photos
+      SELECT i.id, i.status, u.id as u_id, u.name, u.age, u.place, u.photos, u.face_verified
       FROM interests i
       JOIN users u ON i.receiver_id = u.id
       WHERE i.sender_id = $1 AND i.status != 'rejected'
@@ -71,7 +71,8 @@ router.get('/my-interests', async (req, res) => {
         name: row.name,
         age: row.age,
         place: row.place,
-        photos: JSON.parse(row.photos || '[]')
+        photos: JSON.parse(row.photos || '[]'),
+        face_verified: row.face_verified === 1 || row.face_verified === true
       }
     }));
 
@@ -89,7 +90,7 @@ router.get('/requests', async (req, res) => {
   const db = getDb();
   try {
     const data = await db.all(`
-      SELECT i.id, i.status, i.interaction_type, i.attached_message, u.id as u_id, u.name, u.age, u.place, u.photos
+      SELECT i.id, i.status, i.interaction_type, i.attached_message, u.id as u_id, u.name, u.age, u.place, u.photos, u.face_verified
       FROM interests i
       JOIN users u ON i.sender_id = u.id
       WHERE i.receiver_id = $1 AND i.status = 'pending'
@@ -111,7 +112,8 @@ router.get('/requests', async (req, res) => {
         name: row.name,
         age: row.age,
         place: row.place,
-        photos: JSON.parse(row.photos || '[]')
+        photos: JSON.parse(row.photos || '[]'),
+        face_verified: row.face_verified === 1 || row.face_verified === true
       }
     }));
 

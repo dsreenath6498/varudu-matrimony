@@ -15,6 +15,7 @@ interface Request {
     age: number;
     photos: string[];
     place: string;
+    face_verified?: boolean;
   };
 }
 
@@ -264,10 +265,17 @@ export default function Requests() {
                       />
                       <div className="min-w-0">
                         <h3
-                          className="font-semibold text-base"
+                          className="font-semibold text-base flex items-center gap-1.5"
                           style={{ color: 'var(--text-primary)' }}
                         >
                           {req.users.name}, {req.users.age}
+                          {req.users.face_verified && (
+                            <span className="inline-flex items-center justify-center bg-blue-500 text-white rounded-full p-0.5" style={{ width: '16px', height: '16px' }} title="Face Verified">
+                              <svg className="w-3 h-3 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            </span>
+                          )}
                         </h3>
                         <div className="flex items-center gap-1 mt-0.5">
                           <MapPin className="w-3 h-3 flex-shrink-0" style={{ color: 'rgba(180,120,150,0.5)' }} />

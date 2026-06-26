@@ -11,6 +11,7 @@ interface Profile {
   age: number;
   place: string;
   photos: string[];
+  face_verified?: boolean;
 }
 
 export default function Home() {
@@ -301,7 +302,7 @@ export default function Home() {
                     <div className="flex items-end justify-between mb-2">
                       <div>
                         <h2
-                          className="font-bold mb-1"
+                          className="font-bold mb-1 flex items-center gap-2"
                           style={{
                             fontFamily: '"Cormorant Garamond", serif',
                             fontSize: 'clamp(32px, 6vw, 48px)',
@@ -311,6 +312,13 @@ export default function Home() {
                           }}
                         >
                           {profile.name}, <span style={{ color: '#FFD700', fontWeight: 400 }}>{profile.age}</span>
+                          {profile.face_verified && (
+                            <span className="inline-flex items-center justify-center bg-blue-500 text-white rounded-full p-0.5" style={{ width: '22px', height: '22px' }} title="Face Verified">
+                              <svg className="w-3.5 h-3.5 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            </span>
+                          )}
                         </h2>
                         <div className="flex items-center gap-1.5">
                           <MapPin className="w-3.5 h-3.5" style={{ color: 'rgba(255,215,0,0.8)' }} />

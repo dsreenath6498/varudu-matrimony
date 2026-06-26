@@ -3,6 +3,8 @@ import { getDb } from '../db';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { GoogleGenAI } from '@google/genai';
+import axios from 'axios';
 
 const router = Router();
 
@@ -169,6 +171,137 @@ router.put('/update-family', async (req, res) => {
   } catch (err: any) {
     console.error('Error updating family details:', err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// Helper to convert profile picture (URL or local path) to base64 string
+async function getImageBase64(imageUrl: string): Promise<string> {
+  // If it's a local upload, read directly from file system
+  if (imageUrl.includes('/uploads/')) {
+    try {
+      const filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+      const filePath = path.join(__dirname, '../../uploads', filename);
+      if (fs.existsSync(filePath)) {
+        return fs.readFileSync(filePath).toString('base64');
+      }
+    } catch (e) {
+      console.warn('Failed to read local file, falling back to fetch:', e);
+    }
+  }
+
+  // Fallback: fetch via HTTP
+  const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+  return Buffer.from(response.data, 'binary').toString('base64');
+}
+
+// POST /verify-face - compare live webcam selfie with profile picture using Gemini
+router.post('/verify-face', async (req, res) => {
+  const { userId, selfieDataUrl } = req.body;
+
+  if (!userId || !selfieDataUrl) {
+    return res.status(400).json({ error: 'Missing userId or selfieDataUrl' });
+  }
+
+  const db = getDb();
+
+  try {
+    // 1. Get user profile and parse their photos
+    const user = await db.get('SELECT photos FROM users WHERE id = $1', [userId]);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const photos = JSON.parse(user.photos || '[]');
+    if (!photos || photos.length === 0) {
+      return res.status(400).json({ error: 'Please upload a profile photo before doing face verification.' });
+    }
+
+    const primaryPhotoUrl = photos[0];
+    console.log('Verifying user face. Primary photo URL:', primaryPhotoUrl);
+
+    // 2. Convert profile photo and selfie to base64
+    let base64Profile: string;
+    try {
+      base64Profile = await getImageBase64(primaryPhotoUrl);
+    } catch (e: any) {
+      console.error('Error reading profile photo:', e);
+      return res.status(500).json({ error: 'Failed to retrieve your profile picture. Please make sure it is uploaded.' });
+    }
+
+    const base64Selfie = selfieDataUrl.replace(/^data:image\/\w+;base64,/, '');
+
+    // 3. Initialize Gemini
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      console.error('GEMINI_API_KEY is not configured in backend env.');
+      return res.status(500).json({ error: 'AI Verification service is currently unavailable. Please contact support.' });
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+
+    // 4. Send to Gemini
+    const prompt = 'Analyze these two images. Image 1 is a registered profile picture, and Image 2 is a webcam live selfie. ' +
+      'Determine if they show the same person. Answer strictly in JSON matching the schema: {"matched": boolean, "confidence": number, "reasoning": string}. ' +
+      'Ignore differences in lighting, camera quality, small age changes, or expressions. Return matched true if they are the same person with high likelihood (above 70% confidence).';
+
+    console.log('Sending images to Gemini for comparison...');
+    const result = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            {
+              inlineData: {
+                mimeType: 'image/jpeg',
+                data: base64Profile
+              }
+            },
+            {
+              inlineData: {
+                mimeType: 'image/jpeg',
+                data: base64Selfie
+              }
+            },
+            {
+              text: prompt
+            }
+          ]
+        }
+      ],
+      config: {
+        responseMimeType: 'application/json'
+      }
+    });
+
+    const replyText = result.text || '';
+    console.log('Gemini raw response:', replyText);
+
+    const matchData = JSON.parse(replyText.trim());
+
+    // 5. If matched, update the database
+    if (matchData.matched && matchData.confidence >= 0.7) {
+      await db.run('UPDATE users SET face_verified = true WHERE id = $1', [userId]);
+      return res.json({
+        success: true,
+        matched: true,
+        confidence: matchData.confidence,
+        reasoning: matchData.reasoning,
+        message: 'Face verification successful! You have been awarded the verification badge.'
+      });
+    } else {
+      return res.json({
+        success: false,
+        matched: false,
+        confidence: matchData.confidence,
+        reasoning: matchData.reasoning,
+        message: 'Face verification failed. Please ensure your face is well lit, clearly visible, and matches your profile photo.'
+      });
+    }
+
+  } catch (error: any) {
+    console.error('Error during face verification:', error);
+    return res.status(500).json({ error: error.message || 'An error occurred during verification' });
   }
 });
 

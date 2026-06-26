@@ -32,7 +32,7 @@ router.get('/matches', async (req, res) => {
   try {
     // Find all interests where status is 'accepted' involving the user
     const data = await db.all(`
-      SELECT i.id as match_id, i.sender_id, i.receiver_id, i.sender_unlocked, i.receiver_unlocked, u.id as u_id, u.name, u.photos
+      SELECT i.id as match_id, i.sender_id, i.receiver_id, i.sender_unlocked, i.receiver_unlocked, u.id as u_id, u.name, u.photos, u.face_verified
       FROM interests i
       JOIN users u ON (u.id = i.sender_id OR u.id = i.receiver_id)
       WHERE (i.sender_id = $1 OR i.receiver_id = $2) 
@@ -54,7 +54,8 @@ router.get('/matches', async (req, res) => {
         user: {
           id: row.u_id,
           name: row.name,
-          photos: JSON.parse(row.photos || '[]')
+          photos: JSON.parse(row.photos || '[]'),
+          face_verified: row.face_verified === 1 || row.face_verified === true
         }
       };
     });
