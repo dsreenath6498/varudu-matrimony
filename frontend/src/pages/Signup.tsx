@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../api';
-import { Heart, Sparkles, Phone, Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Heart, Sparkles, Mail, ArrowLeft } from 'lucide-react';
 
 // Floating petal component
 function Petal({ style }: { style: React.CSSProperties }) {

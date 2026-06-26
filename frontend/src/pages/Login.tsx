@@ -22,7 +22,7 @@ function Petal({ style }: { style: React.CSSProperties }) {
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
-  const [transitioning, setTransitioning] = useState(false);
+  const transitioning = false;
   const [devEmail, setDevEmail] = useState('');
   const navigate = useNavigate();
 

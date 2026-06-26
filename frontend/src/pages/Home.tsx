@@ -262,7 +262,7 @@ export default function Home() {
           <div className="relative w-[90vw] max-w-[420px] h-[68vh] max-h-[650px] mx-auto mt-4 md:mt-8 perspective-1000">
             {profiles.map((profile) => (
               <TinderCard
-                ref={(el) => (cardRefs.current[profile.id] = el)}
+                ref={(el) => { cardRefs.current[profile.id] = el; }}
                 className="absolute inset-0 swipe-card cursor-grab active:cursor-grabbing"
                 key={profile.id}
                 onSwipe={(dir) => swiped(dir, profile.id)}

@@ -57,6 +57,9 @@ export default function Chat() {
     if (!socket) return;
     const messageHandler = (data: any) => {
       if (activeMatch && data.matchId === activeMatch.matchId) {
+        // If the message was sent by us, ignore the socket broadcast to prevent duplication (as we already added it optimistically)
+        if (data.senderId === currentUser?.id) return;
+        
         setMessages((prev) => [...prev, {
           id: data.id || Date.now().toString(),
           sender_id: data.senderId,
