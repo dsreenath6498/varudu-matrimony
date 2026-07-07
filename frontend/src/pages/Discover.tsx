@@ -578,7 +578,7 @@ export default function Discover() {
                       <div
                         className="absolute inset-0 bg-cover bg-center transition-all duration-300"
                         style={{
-                          backgroundImage: `url(${profile.photos && profile.photos.length > 0 ? profile.photos[currentPhotoIdx] : 'https://via.placeholder.com/600x800?text=No+Photo'})`,
+                          backgroundImage: `url("${profile.photos && profile.photos.length > 0 ? profile.photos[currentPhotoIdx] : 'https://via.placeholder.com/600x800?text=No+Photo'}")`,
                         }}
                       />
 
