@@ -377,7 +377,7 @@ export default function Discover() {
                   <div
                     className="w-full h-full flex transition-transform duration-300 relative"
                     style={{
-                      transform: isShowMore ? 'translateX(-70%)' : 'translateX(0)',
+                      transform: isShowMore ? 'translateX(-50%)' : 'translateX(0)',
                     }}
                   >
                     {/* Main Capsule Item Card */}
@@ -456,7 +456,7 @@ export default function Discover() {
 
                     {/* Details Drawer */}
                     <div
-                      className="w-[70%] h-full flex-shrink-0 bg-white px-5 flex items-center justify-between absolute right-0 text-left transition-transform duration-300 z-20"
+                      className="w-[50%] h-full flex-shrink-0 bg-white px-5 flex items-center justify-between absolute right-0 text-left transition-transform duration-300 z-20"
                       style={{
                         transform: isShowMore ? 'translateX(0)' : 'translateX(100%)',
                       }}
@@ -569,7 +569,7 @@ export default function Discover() {
                   <div
                     className="w-full h-full flex transition-transform duration-300 relative"
                     style={{
-                      transform: isShowMore ? 'translateX(-70%)' : 'translateX(0)',
+                      transform: isShowMore ? 'translateX(-50%)' : 'translateX(0)',
                     }}
                   >
                     {/* Reel Main View */}
@@ -692,7 +692,7 @@ export default function Discover() {
 
                     {/* Reels Details Panel Drawer */}
                     <div
-                      className="w-[70%] h-full flex-shrink-0 bg-white border-l border-neutral-200/80 p-5 flex flex-col justify-between absolute right-0 text-left transition-transform duration-300 z-30"
+                      className="w-[50%] h-full flex-shrink-0 bg-white border-l border-neutral-200/80 p-5 flex flex-col justify-between absolute right-0 text-left transition-transform duration-300 z-30"
                       style={{
                         transform: isShowMore ? 'translateX(0)' : 'translateX(100%)',
                       }}

@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Heart, Compass, MessageCircle, Home, User } from 'lucide-react';
+import { Heart, Compass, Sparkles, MessageCircle, Home, User } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 
 const navItems = [
   { to: '/', icon: Home, label: 'Home' },
   { to: '/discover', icon: Compass, label: 'Discover' },
   { to: '/interests', icon: Heart, label: 'Interests' },
+  { to: '/store', icon: Sparkles, label: 'Boutique' },
   { to: '/chat', icon: MessageCircle, label: 'Chats' },
   { to: '/profile', icon: User, label: 'Profile' },
 ];
@@ -25,7 +26,7 @@ export default function Navbar({ hideMobileBottom = false }: { hideMobileBottom?
       {/* ── MOBILE BOTTOM BAR ── */}
       {!hideMobileBottom && (
         <nav
-          className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/85 backdrop-blur-md border-t border-neutral-200/40 py-4 flex justify-around shadow-sm"
+          className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-neutral-100 py-3.5 flex justify-around shadow-none"
           style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
         >
           {navItems.map(({ to, icon: Icon }) => {

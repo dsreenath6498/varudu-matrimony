@@ -231,14 +231,13 @@ const ChatbotWidget = () => {
                     onPointerDown={handlePointerDown}
                     onPointerMove={handlePointerMove}
                     onPointerUp={handlePointerUp}
-                    className="w-12 h-12 rounded-full shadow-[0_4px_15px_rgba(212,175,55,0.3)] flex items-center justify-center text-xl hover:scale-115 active:scale-95 transition-transform duration-150 ease-out mt-auto border-2 border-white/20 relative group select-none cursor-grab active:cursor-grabbing"
+                    className="w-12 h-12 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.1)] flex items-center justify-center text-xl hover:scale-110 active:scale-95 transition-transform duration-150 ease-out mt-auto bg-white border border-black text-black relative group select-none cursor-grab active:cursor-grabbing"
                     style={{ 
-                        background: 'linear-gradient(135deg, #D4AF37, #A88655)',
                         touchAction: 'none' // Prevents default touchscreen scrolling while dragging
                     }}
                 >
-                    {/* Pulsing ring effect */}
-                    {!isOpen && <div className="absolute inset-0 rounded-full border-2 border-[#D4AF37] animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite] opacity-40 pointer-events-none" />}
+                    {/* Pulsing ring effect - styled in gray/black */}
+                    {!isOpen && <div className="absolute inset-0 rounded-full border border-black animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite] opacity-25 pointer-events-none" />}
                     
                     <span className="relative z-10 transform group-hover:rotate-12 transition-transform duration-300 pointer-events-none">
                         {isOpen ? '✕' : '✨'}
