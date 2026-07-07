@@ -505,3 +505,10 @@ body {
 .snap-always {
   scroll-snap-stop: always;
 }
+
+/* Prevent iOS auto-zoom on input focus by ensuring a minimum font-size of 16px on mobile viewports */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}

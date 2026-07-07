@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Heart, Sparkles, MessageCircle, Home, User } from 'lucide-react';
+import { Heart, Compass, MessageCircle, Home, User } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 
 const navItems = [
-  { to: '/', icon: Home, label: 'Discover' },
+  { to: '/', icon: Home, label: 'Home' },
+  { to: '/discover', icon: Compass, label: 'Discover' },
   { to: '/interests', icon: Heart, label: 'Interests' },
-  { to: '/store', icon: Sparkles, label: 'Boutique' },
   { to: '/chat', icon: MessageCircle, label: 'Chats' },
   { to: '/profile', icon: User, label: 'Profile' },
 ];
