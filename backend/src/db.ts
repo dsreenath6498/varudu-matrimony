@@ -123,6 +123,26 @@ export async function initDb() {
     } catch (migErr) {
       console.error('Migration error for astro_unlocked:', migErr);
     }
+
+    // Create phone_unlocks table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS phone_unlocks (
+        id TEXT PRIMARY KEY,
+        unlocker_id TEXT NOT NULL,
+        unlocked_user_id TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(unlocker_id, unlocked_user_id)
+      );
+    `);
+
+    // Migration for adding phone_visible column to users
+    try {
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_visible BOOLEAN DEFAULT false;`);
+      console.log('Successfully added phone_visible column to users table (or it already existed).');
+    } catch (migErr) {
+      console.error('Migration error for phone_visible:', migErr);
+    }
+
   } catch (error) {
     console.error('Error initializing PostgreSQL database:', error);
   }

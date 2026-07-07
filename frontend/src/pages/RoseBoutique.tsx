@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import Navbar from '../components/Navbar';
@@ -50,7 +50,6 @@ export default function RoseBoutique() {
   const [canClaimFree, setCanClaimFree] = useState(false);
   const [loading, setLoading] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [tiltStyle, setTiltStyle] = useState<Record<number, React.CSSProperties>>({});
   const [copiedCode, setCopiedCode] = useState(false);
 
   const fetchData = async () => {
@@ -148,23 +147,6 @@ export default function RoseBoutique() {
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, index: number) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 14;
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -14;
-    setTiltStyle(prev => ({
-      ...prev,
-      [index]: { transform: `perspective(600px) rotateX(${y}deg) rotateY(${x}deg) scale(1.02)` },
-    }));
-  };
-
-  const handleMouseLeave = (index: number) => {
-    setTiltStyle(prev => ({
-      ...prev,
-      [index]: { transform: 'perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)', transition: 'transform 0.5s ease' },
-    }));
-  };
-
   const copyReferral = () => {
     navigator.clipboard.writeText(referralCode);
     setCopiedCode(true);
@@ -173,40 +155,22 @@ export default function RoseBoutique() {
 
   return (
     <div
-      className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-64 transition-all"
-      style={{ background: 'var(--bg-base)' }}
+      className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-44 bg-white"
     >
       {/* Header */}
       <div
-        className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3"
-        style={{
-          background: 'rgba(255, 255, 255, 0.9)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: '1px solid var(--glass-border)',
-        }}
+        className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3 bg-white border-b border-neutral-200"
       >
         <button
           onClick={() => navigate(-1)}
-          className="rounded-full p-2 flex items-center justify-center transition-all hover:scale-110"
+          className="rounded-full p-2 flex items-center justify-center transition-all bg-neutral-100 hover:bg-neutral-200 text-neutral-800"
           style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            color: 'rgba(212,175,55,0.7)',
+            border: '1px solid rgba(0,0,0,0.05)',
           }}
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-4 h-4" />
         </button>
-        <h1
-          className="text-2xl font-bold"
-          style={{
-            fontFamily: '"Cormorant Garamond", serif',
-            background: 'linear-gradient(135deg, #FFD700, #D4AF37)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}
-        >
+        <h1 className="text-lg font-bold tracking-tight text-neutral-900 font-sans">
           The Rose Boutique
         </h1>
       </div>
@@ -216,73 +180,25 @@ export default function RoseBoutique() {
 
           {/* Balance Card */}
           <div
-            className="relative rounded-3xl p-8 text-center overflow-hidden"
-            style={{
-              background: 'linear-gradient(135deg, rgba(122,11,42,0.3), rgba(225,29,72,0.15), rgba(212,175,55,0.1))',
-              border: '1px solid rgba(212,175,55,0.2)',
-              boxShadow: '0 20px 60px rgba(225,29,72,0.15), inset 0 1px 0 rgba(255,255,255,0.05)',
-              animation: 'fadeUp 0.6s ease both',
-            }}
+            className="rounded-3xl p-8 text-center bg-white border border-neutral-200/80 shadow-[0_8px_30px_rgba(0,0,0,0.04)] font-sans"
           >
-            {/* Top shimmer */}
-            <div
-              className="absolute top-0 left-0 right-0 h-px"
-              style={{ background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.6), transparent)' }}
-            />
-            {/* Decorative orbs */}
-            <div
-              className="absolute w-40 h-40 rounded-full pointer-events-none"
-              style={{
-                background: 'radial-gradient(circle, rgba(225,29,72,0.2) 0%, transparent 70%)',
-                top: '-20px', left: '-20px',
-              }}
-            />
-            <div
-              className="absolute w-32 h-32 rounded-full pointer-events-none"
-              style={{
-                background: 'radial-gradient(circle, rgba(212,175,55,0.15) 0%, transparent 70%)',
-                bottom: '-10px', right: '-10px',
-              }}
-            />
-
-            <p
-              className="text-xs font-bold uppercase tracking-[0.25em] mb-3 relative"
-              style={{ color: 'rgba(212,175,55,0.6)' }}
-            >
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-500 mb-2">
               Your Balance
             </p>
-            <div className="flex items-center justify-center gap-3 relative">
-              <span style={{ fontSize: '36px', animation: 'float 4s ease-in-out infinite' }}>🌹</span>
-              <span
-                className="font-bold relative"
-                style={{
-                  fontFamily: '"Cormorant Garamond", serif',
-                  fontSize: '72px',
-                  lineHeight: 1,
-                  background: 'linear-gradient(135deg, #FFD700, #D4AF37, #FFF8F0)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  textShadow: 'none',
-                }}
-              >
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-3xl select-none">🌹</span>
+              <span className="text-5xl font-extrabold text-neutral-900 tracking-tight font-sans">
                 {balance}
               </span>
             </div>
-            <p className="text-xs mt-3 relative" style={{ color: 'rgba(180,120,150,0.5)' }}>
+            <p className="text-xs mt-3 text-neutral-400">
               Roses never expire · Use them wisely
             </p>
           </div>
 
           {/* Buy Roses */}
-          <div style={{ animation: 'fadeUp 0.6s 0.1s ease both' }}>
-            <h2
-              className="text-xl font-bold mb-4 flex items-center gap-2"
-              style={{
-                fontFamily: '"Cormorant Garamond", serif',
-                color: 'var(--text-primary)',
-              }}
-            >
+          <div className="font-sans">
+            <h2 className="text-base font-bold mb-4 flex items-center gap-2 text-neutral-900">
               <span>🌹</span>
               Buy Roses
             </h2>
@@ -290,107 +206,49 @@ export default function RoseBoutique() {
               {rosePacks.map((pack, index) => (
                 <div
                   key={index}
-                  onMouseMove={(e) => handleMouseMove(e, index)}
-                  onMouseLeave={() => handleMouseLeave(index)}
                   onClick={() => !loading && handleBuy(pack.roses)}
-                  className="relative rounded-2xl p-6 cursor-pointer overflow-hidden transition-all duration-300"
-                  style={{
-                    ...(tiltStyle[index] || {}),
-                    background: pack.style === 'premium'
-                      ? 'linear-gradient(135deg, var(--bg-surface), var(--bg-raised), var(--bg-base))'
-                      : pack.style === 'featured'
-                      ? 'linear-gradient(135deg, rgba(212,138,133,0.15), rgba(168,134,85,0.08))'
-                      : 'var(--bg-surface)',
-                    border: pack.style === 'premium'
-                      ? '1px solid rgba(168,134,85,0.35)'
-                      : pack.style === 'featured'
-                      ? '1px solid rgba(168,134,85,0.25)'
-                      : '1px solid var(--glass-border)',
-                    boxShadow: pack.style === 'premium'
-                      ? '0 20px 50px rgba(168,134,85,0.15), inset 0 1px 0 rgba(168,134,85,0.1)'
-                      : pack.style === 'featured'
-                      ? '0 15px 40px rgba(212,138,133,0.15)'
-                      : 'var(--shadow-card)',
-                    animation: pack.style === 'featured' ? 'borderShimmer 2.5s ease-in-out infinite' : 'none',
-                  }}
+                  className="relative rounded-2xl p-6 bg-white border border-neutral-200/80 shadow-sm cursor-pointer hover:border-neutral-400 transition-all duration-200 flex flex-col justify-between min-h-[160px]"
                 >
-                  {/* Top shimmer for all cards */}
-                  <div
-                    className="absolute top-0 left-0 right-0 h-px"
-                    style={{
-                      background: pack.style === 'premium'
-                        ? 'linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent)'
-                        : pack.style === 'featured'
-                        ? 'linear-gradient(90deg, transparent, rgba(225,29,72,0.4), transparent)'
-                        : 'transparent',
-                    }}
-                  />
-
                   {pack.badge && (
-                    <div
-                      className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide"
-                      style={{
-                        background: pack.style === 'premium'
-                          ? 'linear-gradient(135deg, #D4AF37, #FFD700)'
-                          : 'linear-gradient(135deg, #7A0B2A, #E11D48)',
-                        color: pack.style === 'premium' ? '#0a0008' : 'white',
-                        boxShadow: pack.style === 'premium'
-                          ? '0 4px 12px rgba(212,175,55,0.4)'
-                          : '0 4px 12px rgba(225,29,72,0.4)',
-                      }}
-                    >
+                    <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-black text-white">
                       {pack.badge}
                     </div>
                   )}
 
                   <div className="flex items-center justify-center mb-3">
                     {pack.roses === 1 ? (
-                      <span style={{ fontSize: '32px', animation: 'float 5s ease-in-out infinite' }}>🌹</span>
+                      <span className="text-3xl select-none">🌹</span>
                     ) : pack.roses === 5 ? (
                       <div className="flex -space-x-2">
                         {['🌹', '🌹', '🌹'].map((r, i) => (
-                          <span key={i} style={{ fontSize: '24px', animation: `float ${4 + i * 0.5}s ease-in-out ${i * 0.3}s infinite` }}>{r}</span>
+                          <span key={i} className="text-2xl select-none">{r}</span>
                         ))}
                       </div>
                     ) : (
                       <div className="flex -space-x-2">
                         {['🌹', '🌹', '🌹', '🌹', '🌹'].map((r, i) => (
-                          <span key={i} style={{ fontSize: '20px', animation: `float ${4 + i * 0.3}s ease-in-out ${i * 0.2}s infinite` }}>{r}</span>
+                          <span key={i} className="text-xl select-none">{r}</span>
                         ))}
                       </div>
                     )}
                   </div>
 
-                  <h3
-                    className="font-bold text-center mb-1"
-                    style={{
-                      color: pack.style === 'premium' ? '#D4AF37' : 'var(--text-primary)',
-                      fontSize: '14px',
-                    }}
-                  >
-                    {pack.label}
-                  </h3>
-                  <p
-                    className="text-center font-bold"
-                    style={{
-                      fontFamily: '"Cormorant Garamond", serif',
-                      fontSize: '28px',
-                      color: pack.style === 'premium' ? '#FFD700' : '#FDA4AF',
-                    }}
-                  >
-                    {pack.price}
-                  </p>
+                  <div>
+                    <h3 className="font-semibold text-center text-xs text-neutral-800 mb-1">
+                      {pack.label}
+                    </h3>
+                    <p className="text-center font-extrabold text-xl text-neutral-900">
+                      {pack.price}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Earn Free Roses */}
-          <div style={{ animation: 'fadeUp 0.6s 0.2s ease both' }}>
-            <h2
-              className="text-xl font-bold mb-4"
-              style={{ fontFamily: '"Cormorant Garamond", serif', color: 'var(--text-primary)' }}
-            >
+          <div className="font-sans">
+            <h2 className="text-base font-bold mb-4 text-neutral-900">
               Earn Free Roses
             </h2>
             <div className="space-y-3">
@@ -399,38 +257,26 @@ export default function RoseBoutique() {
               <button
                 onClick={() => handleAction('claim-free')}
                 disabled={!canClaimFree || loading}
-                className="w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 hover:scale-[1.01] disabled:opacity-40"
+                className="w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-200 border text-neutral-800 disabled:opacity-40"
                 style={{
-                  background: canClaimFree ? 'rgba(34,197,94,0.06)' : 'rgba(255,255,255,0.02)',
-                  border: canClaimFree ? '1px solid rgba(34,197,94,0.2)' : '1px solid rgba(255,255,255,0.05)',
-                  boxShadow: canClaimFree ? '0 0 20px rgba(34,197,94,0.08)' : 'none',
+                  background: canClaimFree ? '#E9F7EF' : '#FFFFFF',
+                  borderColor: canClaimFree ? '#A2D9CE' : '#E8E8ED',
                 }}
               >
                 <div className="flex items-center gap-4">
                   <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                    style={{
-                      background: 'rgba(34,197,94,0.1)',
-                      border: '1px solid rgba(34,197,94,0.2)',
-                    }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-neutral-100 border border-neutral-200"
                   >
-                    <Gift className="w-5 h-5" style={{ color: '#4ADE80' }} />
+                    <Gift className="w-5 h-5 text-neutral-800" />
                   </div>
                   <div className="text-left">
-                    <h3 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Daily Drop</h3>
-                    <p className="text-xs mt-0.5" style={{ color: 'rgba(180,120,150,0.5)' }}>
+                    <h3 className="font-bold text-xs text-neutral-900">Daily Drop</h3>
+                    <p className="text-[10px] text-neutral-500 mt-0.5">
                       Claim 1 free rose every 48 hours
                     </p>
                   </div>
                 </div>
-                <span
-                  className="font-bold text-sm px-3 py-1.5 rounded-xl"
-                  style={{
-                    background: 'rgba(34,197,94,0.12)',
-                    border: '1px solid rgba(34,197,94,0.2)',
-                    color: '#4ADE80',
-                  }}
-                >
+                <span className="font-bold text-xs px-2.5 py-1 rounded-lg bg-black text-white">
                   +1 🌹
                 </span>
               </button>
@@ -442,74 +288,50 @@ export default function RoseBoutique() {
                   setTimeout(() => handleAction('watch-ad'), 2000);
                 }}
                 disabled={loading}
-                className="w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 hover:scale-[1.01] disabled:opacity-40"
-                style={{
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.05)',
-                }}
+                className="w-full flex items-center justify-between p-4 rounded-2xl bg-white border border-neutral-200/80 hover:bg-neutral-50 transition-all duration-200 text-neutral-800 disabled:opacity-40"
               >
                 <div className="flex items-center gap-4">
                   <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                    style={{
-                      background: 'rgba(59,130,246,0.1)',
-                      border: '1px solid rgba(59,130,246,0.2)',
-                    }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-neutral-100 border border-neutral-200"
                   >
-                    <PlaySquare className="w-5 h-5" style={{ color: '#60A5FA' }} />
+                    <PlaySquare className="w-5 h-5 text-neutral-800" />
                   </div>
                   <div className="text-left">
-                    <h3 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Watch a Short Video</h3>
-                    <p className="text-xs mt-0.5" style={{ color: 'rgba(180,120,150,0.5)' }}>
+                    <h3 className="font-bold text-xs text-neutral-900">Watch a Short Video</h3>
+                    <p className="text-[10px] text-neutral-500 mt-0.5">
                       Help support the app
                     </p>
                   </div>
                 </div>
-                <span
-                  className="font-bold text-sm px-3 py-1.5 rounded-xl"
-                  style={{
-                    background: 'rgba(59,130,246,0.1)',
-                    border: '1px solid rgba(59,130,246,0.2)',
-                    color: '#60A5FA',
-                  }}
-                >
+                <span className="font-bold text-xs px-2.5 py-1 rounded-lg bg-black text-white">
                   +1 🌹
                 </span>
               </button>
 
               {/* Refer a Friend */}
               <div
-                className="flex items-center justify-between p-4 rounded-2xl"
-                style={{
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.05)',
-                }}
+                className="flex items-center justify-between p-4 rounded-2xl bg-white border border-neutral-200/80"
               >
                 <div className="flex items-center gap-4">
                   <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                    style={{
-                      background: 'rgba(168,85,247,0.1)',
-                      border: '1px solid rgba(168,85,247,0.2)',
-                    }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-neutral-100 border border-neutral-200"
                   >
-                    <Users className="w-5 h-5" style={{ color: '#C084FC' }} />
+                    <Users className="w-5 h-5 text-neutral-800" />
                   </div>
-                  <div>
-                    <h3 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Refer a Friend</h3>
-                    <p className="text-xs mt-0.5" style={{ color: 'rgba(180,120,150,0.5)' }}>
+                  <div className="text-left">
+                    <h3 className="font-bold text-xs text-neutral-900">Refer a Friend</h3>
+                    <p className="text-[10px] text-neutral-500 mt-0.5">
                       They get 1, you get 2!
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={copyReferral}
-                  className="font-mono font-bold text-xs px-3 py-2 rounded-xl transition-all duration-300 flex items-center gap-1.5"
+                  className="font-sans font-semibold text-xs px-3 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1 bg-black text-white hover:bg-neutral-900"
                   style={{
-                    background: copiedCode ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.05)',
-                    border: copiedCode ? '1px solid rgba(34,197,94,0.3)' : '1px solid rgba(255,255,255,0.08)',
-                    color: copiedCode ? '#4ADE80' : 'rgba(212,175,55,0.7)',
-                    letterSpacing: '0.05em',
+                    background: copiedCode ? '#E9F7EF' : '#1D1D1F',
+                    border: copiedCode ? '1px solid #A2D9CE' : 'none',
+                    color: copiedCode ? '#27AE60' : '#FFFFFF',
                   }}
                 >
                   {copiedCode ? '✓ Copied!' : (referralCode || '...')}
@@ -519,51 +341,39 @@ export default function RoseBoutique() {
           </div>
 
           {/* Rose Ledger */}
-          <div style={{ animation: 'fadeUp 0.6s 0.3s ease both' }}>
-            <h2
-              className="text-xl font-bold mb-4 flex items-center gap-2"
-              style={{ fontFamily: '"Cormorant Garamond", serif', color: 'var(--text-primary)' }}
-            >
-              <TrendingUp className="w-5 h-5" style={{ color: '#D4AF37' }} />
+          <div className="font-sans pb-10">
+            <h2 className="text-base font-bold mb-4 flex items-center gap-2 text-neutral-900">
+              <TrendingUp className="w-4 h-4 text-neutral-800" />
               Rose Ledger
             </h2>
             <div
-              className="rounded-3xl overflow-hidden relative"
-              style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--glass-border)',
-              }}
+              className="rounded-3xl overflow-hidden bg-white border border-neutral-200/80 shadow-sm"
             >
-              <div
-                className="absolute top-0 left-0 right-0 h-px"
-                style={{ background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.3), transparent)' }}
-              />
               {transactions.length === 0 ? (
-                <div className="text-center py-10" style={{ color: 'rgba(180,120,150,0.3)' }}>
-                  <p className="text-sm">No transactions yet</p>
+                <div className="text-center py-10 text-neutral-400 font-sans">
+                  <p className="text-xs">No transactions yet</p>
                 </div>
               ) : (
-                <div className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
-                  {transactions.map((tx, i) => (
+                <div className="divide-y divide-neutral-100">
+                  {transactions.map((tx) => (
                     <div
                       key={tx.id}
-                      className="flex items-center justify-between px-5 py-4 transition-all duration-300 hover:bg-white/[0.02]"
-                      style={{ animation: `fadeUp 0.4s ${i * 0.05}s ease both` }}
+                      className="flex items-center justify-between px-5 py-3.5 hover:bg-neutral-50/50 transition-all font-sans"
                     >
-                      <div>
-                        <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                      <div className="text-left">
+                        <p className="font-semibold text-xs text-neutral-900">
                           {tx.description}
                         </p>
-                        <p className="text-xs mt-0.5" style={{ color: 'rgba(180,120,150,0.4)' }}>
+                        <p className="text-[10px] mt-0.5 text-neutral-400">
                           {new Date(tx.created_at).toLocaleString()}
                         </p>
                       </div>
                       <div
-                        className="font-bold text-sm px-3 py-1 rounded-xl"
+                        className="font-bold text-xs px-2.5 py-0.5 rounded-full border"
                         style={{
-                          background: tx.amount > 0 ? 'rgba(34,197,94,0.1)' : 'rgba(225,29,72,0.1)',
-                          border: `1px solid ${tx.amount > 0 ? 'rgba(34,197,94,0.2)' : 'rgba(225,29,72,0.2)'}`,
-                          color: tx.amount > 0 ? '#4ADE80' : '#FDA4AF',
+                          background: tx.amount > 0 ? '#E9F7EF' : '#FDEBD0',
+                          borderColor: tx.amount > 0 ? '#A2D9CE' : '#F5CBA7',
+                          color: tx.amount > 0 ? '#27AE60' : '#E67E22',
                         }}
                       >
                         {tx.amount > 0 ? '+' : ''}{tx.amount} 🌹

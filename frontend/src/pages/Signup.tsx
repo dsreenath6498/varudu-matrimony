@@ -1,25 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../api';
-import { Heart, Sparkles, Mail, ArrowLeft } from 'lucide-react';
+import { Heart, Mail, ArrowLeft } from 'lucide-react';
 
 // Floating petal component
-function Petal({ style }: { style: React.CSSProperties }) {
-  return (
-    <div
-      className="petal"
-      style={{
-        ...style,
-        width: `${8 + Math.random() * 8}px`,
-        height: `${8 + Math.random() * 8}px`,
-        borderRadius: '50% 0 50% 0',
-        background: `radial-gradient(circle at 30% 30%, rgba(212,138,133,0.9), rgba(181,101,93,0.5))`,
-        transform: `rotate(${Math.random() * 360}deg)`,
-      }}
-    />
-  );
-}
-
 export default function Signup() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,6 +14,7 @@ export default function Signup() {
   
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
+  const [phoneVisible, setPhoneVisible] = useState(false);
   
   const [loading, setLoading] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
@@ -37,14 +22,6 @@ export default function Signup() {
   const [devName, setDevName] = useState('');
 
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-
-  // Petals array for layout animation
-  const petals = Array.from({ length: 18 }, (_, i) => ({
-    left: `${(i * 5.5) % 100}%`,
-    animationDuration: `${10 + Math.random() * 10}s`,
-    animationDelay: `${Math.random() * 12}s`,
-    top: '-20px',
-  }));
 
   // Handle redirect from login page with google details
   useEffect(() => {
@@ -146,6 +123,16 @@ export default function Signup() {
     }
   };
 
+  const goToPrivacyStep = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otp) return;
+    setTransitioning(true);
+    setTimeout(() => {
+      setStep(4);
+      setTransitioning(false);
+    }, 300);
+  };
+
   // Verify OTP and complete google registration
   const handleVerifyAndRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,7 +142,8 @@ export default function Signup() {
       const response = await api.post('/auth/google-signup', {
         idToken: googleUser.idToken,
         phoneNumber,
-        otp
+        otp,
+        phoneVisible
       });
       
       const { user } = response.data;
@@ -168,91 +156,31 @@ export default function Signup() {
     }
   };
 
+
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ background: 'radial-gradient(ellipse at 30% 20%, var(--bg-raised) 0%, var(--bg-base) 60%, var(--bg-deep) 100%)' }}
+      className="min-h-screen flex items-center justify-center p-4 bg-[#F5F5F7]"
     >
-      {/* Ambient orbs */}
-      <div
-        className="absolute w-[600px] h-[600px] rounded-full pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle, var(--crimson-glow) 0%, transparent 70%)',
-          top: '-15%',
-          left: '-15%',
-          animation: 'orbFloat 15s ease-in-out infinite',
-        }}
-      />
-      <div
-        className="absolute w-[400px] h-[400px] rounded-full pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle, var(--gold-glow) 0%, transparent 70%)',
-          bottom: '10%',
-          right: '-10%',
-          animation: 'orbFloat 18s ease-in-out infinite reverse',
-          animationDelay: '-6s',
-        }}
-      />
-
-      {/* Floating petals */}
-      <div className="petal-canvas">
-        {petals.map((p, i) => (
-          <Petal
-            key={i}
-            style={{
-              left: p.left,
-              top: p.top,
-              animationDuration: p.animationDuration,
-              animationDelay: p.animationDelay,
-              animationName: 'petalFall',
-            }}
-          />
-        ))}
-      </div>
-
       {/* Signup Card */}
       <div
-        className="relative w-full max-w-sm z-10"
-        style={{ animation: 'slideInScale 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) both' }}
+        className="w-full max-w-sm"
+        style={{ animation: 'fadeUp 0.5s ease both' }}
       >
         <div
-          className="rounded-3xl p-8 relative overflow-hidden glass"
-          style={{
-            boxShadow: 'var(--shadow-card)',
-          }}
+          className="rounded-3xl p-8 bg-white border border-neutral-200/80 shadow-[0_8px_30px_rgba(0,0,0,0.04)] relative overflow-hidden"
         >
-          {/* Card top gold line */}
-          <div
-            className="absolute top-0 left-0 right-0 h-px"
-            style={{ background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.4), transparent)' }}
-          />
-
           {/* Logo / Header */}
           <div className="flex flex-col items-center mb-6">
             <div
-              className="w-14 h-14 rounded-full flex items-center justify-center mb-3 relative"
-              style={{
-                background: 'linear-gradient(135deg, var(--crimson-dark), var(--crimson))',
-                boxShadow: 'var(--shadow-glow-crimson)',
-                animation: 'pulseGlow 3s ease-in-out infinite',
-              }}
+              className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-black"
             >
-              <Heart className="w-6 h-6 text-white fill-current" />
+              <Heart className="w-5 h-5 text-white fill-current" />
             </div>
 
-            <h1
-              className="text-4xl font-bold mb-0.5"
-              style={{
-                fontFamily: '"Cormorant Garamond", serif',
-                background: 'linear-gradient(135deg, var(--gold-light), var(--gold), #A88655)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              Create Account
+            <h1 className="text-3xl font-extrabold text-neutral-900 tracking-tight font-sans">
+              create account
             </h1>
-            <p className="text-xs font-semibold tracking-wider text-[var(--gold)] uppercase">
+            <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-[0.15em] mt-1.5 font-sans">
               Join Varudu Matrimony
             </p>
           </div>
@@ -262,48 +190,48 @@ export default function Signup() {
             style={{
               opacity: transitioning ? 0 : 1,
               transform: transitioning ? 'translateX(-10px)' : 'translateX(0)',
-              transition: 'all 0.3s ease',
+              transition: 'all 0.2s ease',
             }}
           >
             {/* STEP 1: Google Authentication */}
             {step === 1 && (
-              <div className="flex flex-col gap-4" style={{ animation: 'fadeUp 0.5s ease both' }}>
-                <p className="text-sm text-[var(--text-muted)] text-center leading-relaxed mb-2">
+              <div className="flex flex-col gap-4 font-sans">
+                <p className="text-xs text-neutral-500 text-center leading-relaxed mb-2 font-sans">
                   To get started, authenticate with your Google account.
                 </p>
 
                 {googleClientId ? (
-                  <div className="flex flex-col items-center justify-center min-h-[46px] w-full bg-white/5 rounded-2xl p-1 border border-white/10">
+                  <div className="flex flex-col items-center justify-center min-h-[46px] w-full bg-neutral-50 rounded-2xl p-1 border border-neutral-200">
                     <div id="google-signup-btn" className="w-full"></div>
                   </div>
                 ) : (
-                  <div className="p-4 bg-yellow-950/20 border border-yellow-800/30 rounded-2xl text-xs text-yellow-500/90 leading-normal mb-2">
+                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-2xl text-xs text-yellow-800 leading-normal mb-2 text-center font-sans">
                     ⚠️ Google Client ID is not configured. Falling back to Developer Mock Auth mode below.
                   </div>
                 )}
 
                 {/* Mock sign-in fields for development */}
-                <form onSubmit={handleDevGoogleLogin} className="flex flex-col gap-3 mt-2 border-t border-white/5 pt-4">
-                  <div className="text-center text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)] mb-1">
+                <form onSubmit={handleDevGoogleLogin} className="flex flex-col gap-3 mt-2 border-t border-neutral-100 pt-4 font-sans">
+                  <div className="text-center text-[10px] uppercase font-bold tracking-widest text-neutral-400 mb-1">
                     Developer Sandbox
                   </div>
                   <div>
-                    <label className="block mb-1 text-[11px] font-semibold text-white/50">Test Email</label>
+                    <label className="block mb-1 text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">Test Email</label>
                     <input
                       type="email"
                       required
                       placeholder="e.g. rahul.sharma@gmail.com"
-                      className="input-luxury text-sm"
+                      className="w-full rounded-xl p-3 outline-none border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-black text-neutral-900 text-sm transition-all font-sans"
                       value={devEmail}
                       onChange={(e) => setDevEmail(e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="block mb-1 text-[11px] font-semibold text-white/50">Full Name</label>
+                    <label className="block mb-1 text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">Full Name</label>
                     <input
                       type="text"
                       placeholder="e.g. Rahul Sharma"
-                      className="input-luxury text-sm"
+                      className="w-full rounded-xl p-3 outline-none border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-black text-neutral-900 text-sm transition-all font-sans"
                       value={devName}
                       onChange={(e) => setDevName(e.target.value)}
                     />
@@ -312,7 +240,7 @@ export default function Signup() {
                   <button
                     type="submit"
                     disabled={loading || !devEmail}
-                    className="w-full font-bold py-3.5 rounded-2xl transition-all duration-300 disabled:opacity-40 flex items-center justify-center gap-2 btn-crimson text-sm mt-1"
+                    className="w-full font-medium py-3 rounded-full bg-black hover:bg-neutral-900 text-white transition-all duration-200 disabled:opacity-40 flex items-center justify-center gap-2 text-sm mt-1"
                   >
                     {loading ? 'Authenticating...' : 'Sign Up with Mock Google'}
                   </button>
@@ -321,7 +249,7 @@ export default function Signup() {
                 <div className="text-center mt-3">
                   <button
                     onClick={() => navigate('/login')}
-                    className="text-xs font-semibold text-[var(--gold)] hover:underline flex items-center gap-1.5 justify-center mx-auto"
+                    className="text-xs font-semibold text-[#0071E3] hover:underline flex items-center gap-1.5 justify-center mx-auto"
                   >
                     Already have an account? Log in
                   </button>
@@ -331,26 +259,26 @@ export default function Signup() {
 
             {/* STEP 2: Phone number input */}
             {step === 2 && googleUser && (
-              <form onSubmit={handleRequestOtp} className="flex flex-col gap-4" style={{ animation: 'fadeUp 0.5s ease both' }}>
-                <div className="bg-white/5 rounded-2xl p-4 border border-white/10 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-crimson/10 border border-crimson/30 flex items-center justify-center text-white text-lg font-bold">
+              <form onSubmit={handleRequestOtp} className="flex flex-col gap-4 font-sans">
+                <div className="bg-neutral-50 rounded-2xl p-4 border border-neutral-100 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white text-xs font-bold font-sans">
                     {googleUser.name[0]?.toUpperCase() || 'U'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm truncate text-white">{googleUser.name}</p>
-                    <p className="text-xs text-[var(--text-muted)] truncate flex items-center gap-1 mt-0.5">
-                      <Mail className="w-3 h-3 text-[var(--gold)]" />
+                    <p className="font-semibold text-xs truncate text-neutral-900 font-sans">{googleUser.name}</p>
+                    <p className="text-[10px] text-neutral-500 truncate flex items-center gap-1 mt-0.5 font-sans">
+                      <Mail className="w-3 h-3 text-neutral-400" />
                       {googleUser.email}
                     </p>
                   </div>
                 </div>
 
                 <div className="mt-2">
-                  <label className="block mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--gold)]">
+                  <label className="block mb-2 text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">
                     Verify Phone Number
                   </label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-[var(--text-muted)] font-semibold">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-neutral-400 font-semibold font-sans">
                       +91
                     </span>
                     <input
@@ -358,12 +286,12 @@ export default function Signup() {
                       required
                       pattern="[0-9]{10}"
                       placeholder="98765 43210"
-                      className="input-luxury pl-12 text-base tracking-wider"
+                      className="w-full rounded-xl p-3 pl-12 outline-none border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-black text-neutral-900 tracking-wider text-sm transition-all font-sans"
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value)}
                     />
                   </div>
-                  <p className="text-[10px] text-[var(--text-muted)] mt-1.5 leading-relaxed pl-1">
+                  <p className="text-[10px] text-neutral-400 mt-1.5 leading-relaxed font-sans">
                     An OTP will be sent to verify your phone number.
                   </p>
                 </div>
@@ -371,18 +299,15 @@ export default function Signup() {
                 <button
                   type="submit"
                   disabled={loading || phoneNumber.length !== 10}
-                  className="w-full font-bold py-4 rounded-2xl transition-all duration-300 disabled:opacity-40 flex items-center justify-center gap-2 btn-crimson mt-2"
+                  className="w-full font-medium py-3 rounded-full bg-black hover:bg-neutral-900 text-white transition-all duration-200 disabled:opacity-40 flex items-center justify-center gap-2 text-sm mt-2"
                 >
                   {loading ? (
                     <span className="flex items-center gap-2">
-                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       Sending OTP...
                     </span>
                   ) : (
-                    <>
-                      <span>Send Verification OTP</span>
-                      <Sparkles className="w-4 h-4 text-[var(--gold-light)]" />
-                    </>
+                    <span>Send Verification OTP</span>
                   )}
                 </button>
 
@@ -392,23 +317,23 @@ export default function Signup() {
                     setGoogleUser(null);
                     setStep(1);
                   }}
-                  className="text-xs text-[var(--text-muted)] hover:underline flex items-center gap-1.5 justify-center mt-1"
+                  className="text-xs text-neutral-500 hover:underline flex items-center gap-1.5 justify-center mt-1 font-sans"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5" /> Back to Google Sign-in
+                  <ArrowLeft className="w-3 h-3" /> Back to Google Sign-in
                 </button>
               </form>
             )}
 
             {/* STEP 3: OTP verification */}
             {step === 3 && googleUser && (
-              <form onSubmit={handleVerifyAndRegister} className="flex flex-col gap-4" style={{ animation: 'fadeUp 0.5s ease both' }}>
-                <div className="text-center">
-                  <p className="text-xs text-[var(--text-muted)]">Verification code sent to</p>
-                  <p className="font-semibold text-sm mt-0.5 text-white">+91 {phoneNumber}</p>
+              <form onSubmit={goToPrivacyStep} className="flex flex-col gap-4 font-sans text-left">
+                <div className="text-center font-sans">
+                  <p className="text-[11px] text-neutral-500 font-sans">Verification code sent to</p>
+                  <p className="font-semibold text-xs mt-0.5 text-neutral-800 font-sans">+91 {phoneNumber}</p>
                 </div>
 
                 <div>
-                  <label className="block mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--gold)]">
+                  <label className="block mb-2 text-[10px] font-semibold text-neutral-500 uppercase tracking-wider font-sans">
                     Enter 4-Digit OTP
                   </label>
                   <input
@@ -416,11 +341,11 @@ export default function Signup() {
                     required
                     maxLength={6}
                     placeholder="• • • •"
-                    className="input-luxury text-center tracking-[0.5em] text-xl font-bold py-3.5"
+                    className="w-full rounded-xl p-3 outline-none border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-black text-neutral-900 text-center tracking-[0.5em] text-lg font-bold transition-all font-sans"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
                   />
-                  <p className="text-[10px] text-center text-[var(--text-muted)] mt-1.5">
+                  <p className="text-[10px] text-center text-neutral-400 mt-1.5 font-sans">
                     Enter the OTP shown in your backend console terminal.
                   </p>
                 </div>
@@ -428,19 +353,12 @@ export default function Signup() {
                 <button
                   type="submit"
                   disabled={loading || !otp}
-                  className="w-full font-bold py-4 rounded-2xl transition-all duration-300 disabled:opacity-40 flex items-center justify-center gap-2 btn-crimson mt-2"
+                  className="w-full font-medium py-3 rounded-full bg-black hover:bg-neutral-900 text-white transition-all duration-200 disabled:opacity-40 flex items-center justify-center gap-2 text-sm mt-2 font-sans"
                 >
-                  {loading ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Registering...
-                    </span>
-                  ) : (
-                    'Verify & Complete Registration ✨'
-                  )}
+                  Next: Security Preferences
                 </button>
 
-                <div className="flex justify-between items-center px-1 mt-2">
+                <div className="flex justify-between items-center px-1 mt-2 font-sans">
                   <button
                     type="button"
                     onClick={() => {
@@ -450,7 +368,7 @@ export default function Signup() {
                         setTransitioning(false);
                       }, 300);
                     }}
-                    className="text-xs text-[var(--text-muted)] hover:underline flex items-center gap-1"
+                    className="text-xs text-neutral-500 hover:underline flex items-center gap-1"
                   >
                     Change number
                   </button>
@@ -468,17 +386,102 @@ export default function Signup() {
                         setLoading(false);
                       }
                     }}
-                    className="text-xs text-[var(--gold)] font-medium hover:underline"
+                    className="text-xs text-[#0071E3] font-medium hover:underline"
                   >
                     Resend OTP
                   </button>
                 </div>
               </form>
             )}
+
+            {/* STEP 4: Phone Visibility Privacy Choice */}
+            {step === 4 && googleUser && (
+              <form onSubmit={handleVerifyAndRegister} className="flex flex-col gap-4 font-sans text-left">
+                <div className="text-center mb-2 font-sans">
+                  <span className="text-3xl select-none">🔒</span>
+                  <h2 className="text-sm font-bold text-neutral-800 tracking-tight mt-2 font-sans">Phone Number Privacy</h2>
+                  <p className="text-[10px] text-neutral-400 mt-1 leading-normal font-sans">
+                    Choose how your phone number is displayed to matches.
+                  </p>
+                </div>
+
+                {/* Selection Options */}
+                <div className="flex flex-col gap-3 font-sans">
+                  {/* Option 1: Lock & Unlock for 5 Roses */}
+                  <div
+                    onClick={() => setPhoneVisible(true)}
+                    className={`rounded-2xl p-4 border-2 transition-all cursor-pointer flex items-start gap-3 ${
+                      phoneVisible
+                        ? 'border-black bg-neutral-50/50'
+                        : 'border-neutral-200 hover:border-neutral-300 bg-white'
+                    }`}
+                  >
+                    <div className="w-4 h-4 rounded-full flex items-center justify-center border border-black/10 mt-0.5 text-[8px]">
+                      {phoneVisible ? '●' : '○'}
+                    </div>
+                    <div>
+                      <p className="font-bold text-xs text-neutral-800 font-sans">Allow Unlock (Recommended)</p>
+                      <p className="text-[10px] leading-relaxed text-neutral-500 mt-0.5 font-sans">
+                        Your number starts locked. Matches can pay <strong>5 Roses</strong> to view it.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Option 2: Keep Hidden */}
+                  <div
+                    onClick={() => setPhoneVisible(false)}
+                    className={`rounded-2xl p-4 border-2 transition-all cursor-pointer flex items-start gap-3 ${
+                      !phoneVisible
+                        ? 'border-black bg-neutral-50/50'
+                        : 'border-neutral-200 hover:border-neutral-300 bg-white'
+                    }`}
+                  >
+                    <div className="w-4 h-4 rounded-full flex items-center justify-center border border-black/10 mt-0.5 text-[8px]">
+                      {!phoneVisible ? '●' : '○'}
+                    </div>
+                    <div>
+                      <p className="font-bold text-xs text-neutral-800 font-sans">Keep Completely Private</p>
+                      <p className="text-[10px] leading-relaxed text-neutral-500 mt-0.5 font-sans">
+                        Do not share your phone number. Other users cannot view or request it.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full font-medium py-3.5 rounded-full bg-black hover:bg-neutral-900 text-white transition-all duration-200 disabled:opacity-40 flex items-center justify-center gap-2 text-sm mt-3 font-sans"
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Creating account...
+                    </span>
+                  ) : (
+                    'Complete Registration'
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTransitioning(true);
+                    setTimeout(() => {
+                      setStep(3);
+                      setTransitioning(false);
+                    }, 300);
+                  }}
+                  className="text-xs text-neutral-500 hover:underline flex items-center gap-1.5 justify-center mt-1 font-sans"
+                >
+                  <ArrowLeft className="w-3 h-3" /> Back to OTP Code
+                </button>
+              </form>
+            )}
           </div>
 
           {/* Card footer */}
-          <p className="text-center text-[10px] mt-6 text-white/40 leading-normal border-t border-white/5 pt-4">
+          <p className="text-center text-[10px] mt-6 text-neutral-400 leading-normal border-t border-neutral-100 pt-4 font-sans">
             By creating an account, you agree to our Terms of Service & Privacy Policy.
           </p>
         </div>

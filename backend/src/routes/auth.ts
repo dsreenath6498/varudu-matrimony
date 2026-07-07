@@ -110,7 +110,7 @@ router.post('/google-login', async (req, res) => {
 
 // Google Signup Endpoint
 router.post('/google-signup', async (req, res) => {
-  const { idToken, phoneNumber, otp } = req.body;
+  const { idToken, phoneNumber, otp, phoneVisible } = req.body;
   
   if (!idToken || !phoneNumber || !otp) {
     return res.status(400).json({ error: 'Missing required parameters (idToken, phoneNumber, otp)' });
@@ -142,8 +142,8 @@ router.post('/google-signup', async (req, res) => {
     const id = randomUUID();
     // Insert new user
     await db.run(
-      'INSERT INTO users (id, phone_number, email, name, is_onboarded) VALUES ($1, $2, $3, $4, $5)', 
-      [id, phoneNumber, googleUser.email, googleUser.name, 0]
+      'INSERT INTO users (id, phone_number, email, name, is_onboarded, phone_visible) VALUES ($1, $2, $3, $4, $5, $6)', 
+      [id, phoneNumber, googleUser.email, googleUser.name, 0, phoneVisible === true || phoneVisible === 1 || phoneVisible === 'true']
     );
 
     const newUser = await db.get('SELECT * FROM users WHERE id = $1', [id]);

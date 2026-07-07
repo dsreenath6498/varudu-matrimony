@@ -4,26 +4,26 @@ import api from '../api';
 import { Camera, ArrowRight, Sparkles } from 'lucide-react';
 
 const inputStyle: React.CSSProperties = {
-  background: 'var(--bg-surface)',
-  border: '1px solid var(--glass-border)',
-  color: 'var(--text-primary)',
-  borderRadius: '14px',
-  padding: '14px 18px',
+  background: '#F5F5F7',
+  border: '1px solid #D2D2D7',
+  color: '#1D1D1F',
+  borderRadius: '12px',
+  padding: '12px 16px',
   width: '100%',
   fontFamily: 'Inter, sans-serif',
-  fontSize: '15px',
-  transition: 'all 0.3s',
+  fontSize: '14px',
+  transition: 'all 0.2s',
   outline: 'none',
 };
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
   fontSize: '11px',
-  fontWeight: 600,
+  fontWeight: 500,
   textTransform: 'uppercase',
-  letterSpacing: '0.15em',
-  color: 'rgba(212,175,55,0.7)',
-  marginBottom: '8px',
+  letterSpacing: '0.05em',
+  color: '#6E6E73',
+  marginBottom: '6px',
 };
 
 export default function Onboarding() {
@@ -41,6 +41,14 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [phoneVisible, setPhoneVisible] = useState(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      return user.phone_visible === true || user.phone_visible === 1 || user.phone_visible === 'true';
+    }
+    return false;
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -75,6 +83,7 @@ export default function Onboarding() {
 
     const submitData = new FormData();
     submitData.append('userId', user.id);
+    submitData.append('phoneVisible', String(phoneVisible));
     Object.entries(formData).forEach(([key, value]) => {
       submitData.append(key, value);
     });
@@ -98,78 +107,38 @@ export default function Onboarding() {
   const getFocusStyle = (field: string): React.CSSProperties =>
     focusedField === field
       ? {
-          borderColor: 'rgba(212,175,55,0.5)',
-          background: 'rgba(212,175,55,0.04)',
-          boxShadow: '0 0 0 3px rgba(212,175,55,0.1)',
+          borderColor: '#0071E3',
+          background: '#FFFFFF',
+          boxShadow: '0 0 0 3px rgba(0, 113, 227, 0.15)',
         }
       : {};
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ background: 'radial-gradient(ellipse at 60% 80%, var(--bg-raised) 0%, var(--bg-base) 60%, var(--bg-deep) 100%)' }}
+      className="min-h-screen flex items-center justify-center p-4 bg-[#F5F5F7]"
     >
-      {/* Orbs */}
       <div
-        className="absolute w-[500px] h-[500px] rounded-full pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle, rgba(225,29,72,0.15) 0%, transparent 70%)',
-          top: '-10%', right: '-10%',
-          animation: 'orbFloat 14s ease-in-out infinite',
-        }}
-      />
-      <div
-        className="absolute w-[350px] h-[350px] rounded-full pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle, var(--gold-glow) 0%, transparent 70%)',
-          bottom: '-5%', left: '-5%',
-          animation: 'orbFloat 18s ease-in-out infinite reverse',
-        }}
-      />
-
-      <div
-        className="relative w-full max-w-md z-10 my-8"
-        style={{ animation: 'slideInScale 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) both' }}
+        className="w-full max-w-md my-8"
+        style={{ animation: 'fadeUp 0.5s ease both' }}
       >
         <div
-          className="rounded-3xl p-8 relative overflow-hidden glass"
-          style={{
-            boxShadow: 'var(--shadow-card)',
-          }}
+          className="rounded-3xl p-8 bg-white border border-neutral-200/80 shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
         >
-          {/* Top shimmer line */}
-          <div
-            className="absolute top-0 left-0 right-0 h-px"
-            style={{ background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent)' }}
-          />
-
           {/* Header */}
           <div
-            className="flex flex-col items-center mb-8"
-            style={{ animation: 'fadeUp 0.5s 0.1s ease both' }}
+            className="flex flex-col items-center mb-8 animate-fadeUp"
           >
             <div
-              className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
-              style={{
-                background: 'linear-gradient(135deg, #7A0B2A, #E11D48)',
-                boxShadow: '0 0 20px rgba(225,29,72,0.5)',
-              }}
+              className="w-10 h-10 rounded-full flex items-center justify-center mb-4 bg-black text-white"
             >
-              <Sparkles className="w-5 h-5 text-white" />
+              <Sparkles className="w-5 h-5" />
             </div>
             <h2
-              className="text-3xl font-bold text-center mb-1"
-              style={{
-                fontFamily: '"Cormorant Garamond", serif',
-                background: 'linear-gradient(135deg, var(--gold-light), var(--gold))',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
+              className="text-2xl font-bold text-center mb-1 text-neutral-900 tracking-tight font-sans"
             >
               Build Your Profile
             </h2>
-            <p className="text-xs" style={{ color: 'rgba(180,120,150,0.6)', letterSpacing: '0.1em' }}>
+            <p className="text-xs text-neutral-500 font-sans tracking-wide">
               Let the world see the real you
             </p>
           </div>
@@ -238,91 +207,73 @@ export default function Onboarding() {
               />
             </div>
 
-            {/* Gender */}
-            <div style={{ animation: 'fadeUp 0.5s 0.3s ease both' }}>
-              <label style={labelStyle}>I am a</label>
-              <div className="grid grid-cols-2 gap-3">
-                {['Male', 'Female'].map((g) => (
-                  <button
-                    key={g}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, gender: g })}
-                    className="py-4 rounded-2xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2"
-                    style={{
-                      background: formData.gender === g
-                        ? g === 'Male'
-                          ? 'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(37,99,235,0.05))'
-                          : 'linear-gradient(135deg, rgba(212,138,133,0.15), rgba(181,101,93,0.08))'
-                        : 'var(--bg-surface)',
-                      border: formData.gender === g
-                        ? g === 'Male' ? '1px solid rgba(59,130,246,0.3)' : '1px solid rgba(212,138,133,0.4)'
-                        : '1px solid var(--glass-border)',
-                      color: formData.gender === g
-                        ? g === 'Male' ? '#93C5FD' : '#FDA4AF'
-                        : 'rgba(180,120,150,0.5)',
-                      boxShadow: formData.gender === g
-                        ? g === 'Male' ? '0 0 20px rgba(59,130,246,0.2)' : '0 0 20px rgba(225,29,72,0.2)'
-                        : 'none',
-                      transform: formData.gender === g ? 'scale(1.02)' : 'scale(1)',
-                    }}
-                  >
-                    <span>{g === 'Male' ? '👨' : '👩'}</span>
-                    <span>{g === 'Male' ? 'Man' : 'Woman'}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Interested In */}
-            <div style={{ animation: 'fadeUp 0.5s 0.35s ease both' }}>
-              <label style={labelStyle}>Looking for a</label>
-              <div className="grid grid-cols-2 gap-3">
-                {['Male', 'Female'].map((g) => (
-                  <button
-                    key={g}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, interested_in: g })}
-                    className="py-4 rounded-2xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2"
-                    style={{
-                      background: formData.interested_in === g
-                        ? g === 'Male'
-                          ? 'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(37,99,235,0.05))'
-                          : 'linear-gradient(135deg, rgba(212,138,133,0.15), rgba(181,101,93,0.08))'
-                        : 'var(--bg-surface)',
-                      border: formData.interested_in === g
-                        ? g === 'Male' ? '1px solid rgba(59,130,246,0.3)' : '1px solid rgba(212,138,133,0.4)'
-                        : '1px solid var(--glass-border)',
-                      color: formData.interested_in === g
-                        ? g === 'Male' ? '#93C5FD' : '#FDA4AF'
-                        : 'rgba(180,120,150,0.5)',
-                      transform: formData.interested_in === g ? 'scale(1.02)' : 'scale(1)',
-                    }}
-                  >
-                    <span>{g === 'Male' ? '👨' : '👩'}</span>
-                    <span>{g === 'Male' ? 'Man' : 'Woman'}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+             {/* Gender */}
+             <div style={{ animation: 'fadeUp 0.5s 0.3s ease both' }}>
+               <label style={labelStyle}>I am a</label>
+               <div className="grid grid-cols-2 gap-3">
+                 {['Male', 'Female'].map((g) => (
+                   <button
+                     key={g}
+                     type="button"
+                     onClick={() => setFormData({ ...formData, gender: g })}
+                     className="py-3 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2"
+                     style={{
+                       background: formData.gender === g ? '#1D1D1F' : '#F5F5F7',
+                       border: '1px solid transparent',
+                       color: formData.gender === g ? '#FFFFFF' : '#1D1D1F',
+                       borderRadius: '12px',
+                     }}
+                   >
+                     <span>{g === 'Male' ? '👨' : '👩'}</span>
+                     <span>{g === 'Male' ? 'Man' : 'Woman'}</span>
+                   </button>
+                 ))}
+               </div>
+             </div>
+ 
+             {/* Interested In */}
+             <div style={{ animation: 'fadeUp 0.5s 0.35s ease both' }}>
+               <label style={labelStyle}>Looking for a</label>
+               <div className="grid grid-cols-2 gap-3">
+                 {['Male', 'Female'].map((g) => (
+                   <button
+                     key={g}
+                     type="button"
+                     onClick={() => setFormData({ ...formData, interested_in: g })}
+                     className="py-3 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2"
+                     style={{
+                       background: formData.interested_in === g ? '#1D1D1F' : '#F5F5F7',
+                       border: '1px solid transparent',
+                       color: formData.interested_in === g ? '#FFFFFF' : '#1D1D1F',
+                       borderRadius: '12px',
+                     }}
+                   >
+                     <span>{g === 'Male' ? '👨' : '👩'}</span>
+                     <span>{g === 'Male' ? 'Man' : 'Woman'}</span>
+                   </button>
+                 ))}
+               </div>
+             </div>
 
             {/* Photo Upload */}
             <div style={{ animation: 'fadeUp 0.5s 0.4s ease both' }}>
               <label style={labelStyle}>Profile Photos (up to 5)</label>
               <label
-                className="cursor-pointer block"
+                className="cursor-pointer block animate-none"
                 onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
                 onDrop={handleDrop}
               >
                 <div
-                  className="rounded-2xl p-6 text-center transition-all duration-300"
+                  className="rounded-2xl p-6 text-center transition-all duration-200 border-2 dashed"
                   style={{
                     background: dragOver
-                      ? 'rgba(225,29,72,0.08)'
+                      ? 'rgba(0, 113, 227, 0.05)'
                       : photos.length > 0
-                      ? 'rgba(212,175,55,0.05)'
-                      : 'rgba(255,255,255,0.02)',
-                    border: `2px dashed ${dragOver ? 'rgba(225,29,72,0.5)' : photos.length > 0 ? 'rgba(212,175,55,0.4)' : 'rgba(255,255,255,0.08)'}`,
+                      ? 'rgba(0, 0, 0, 0.02)'
+                      : '#F5F5F7',
+                    border: `2px dashed ${dragOver ? '#0071E3' : photos.length > 0 ? '#1D1D1F' : '#D2D2D7'}`,
+                    borderRadius: '12px',
                   }}
                 >
                   <input
@@ -333,19 +284,18 @@ export default function Onboarding() {
                     onChange={handlePhotoChange}
                   />
                   <Camera
-                    className="w-8 h-8 mx-auto mb-2"
-                    style={{ color: photos.length > 0 ? '#D4AF37' : 'rgba(180,120,150,0.4)' }}
+                    className="w-8 h-8 mx-auto mb-2 text-neutral-500"
                   />
                   {photos.length > 0 ? (
-                    <p className="font-semibold text-sm" style={{ color: '#D4AF37' }}>
+                    <p className="font-semibold text-sm text-neutral-800">
                       ✓ {photos.length} photo{photos.length > 1 ? 's' : ''} selected
                     </p>
                   ) : (
                     <>
-                      <p className="text-sm font-medium" style={{ color: 'rgba(180,120,150,0.6)' }}>
+                      <p className="text-sm font-medium text-neutral-500">
                         Drop photos here or click to upload
                       </p>
-                      <p className="text-xs mt-1" style={{ color: 'rgba(120,80,100,0.5)' }}>
+                      <p className="text-xs mt-1 text-neutral-400">
                         PNG, JPG up to 5 files
                       </p>
                     </>
@@ -369,32 +319,37 @@ export default function Onboarding() {
               />
             </div>
 
+            {/* Phone Visibility Toggle */}
+            <div style={{ animation: 'fadeUp 0.5s 0.48s ease both' }} className="flex items-start gap-2.5 mt-2 pl-1 mb-4">
+              <input
+                type="checkbox"
+                id="phoneVisible"
+                className="mt-0.5 rounded border-neutral-300 text-black focus:ring-black cursor-pointer"
+                checked={phoneVisible}
+                onChange={(e) => setPhoneVisible(e.target.checked)}
+              />
+              <label htmlFor="phoneVisible" className="text-[11px] text-neutral-500 leading-normal select-none cursor-pointer font-sans">
+                Allow other users to view/unlock my phone number (costs them 5 Roses)
+              </label>
+            </div>
+
             {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full font-bold py-4 rounded-2xl transition-all duration-300 disabled:opacity-40 flex items-center justify-center gap-3 mt-2"
-              style={{
-                background: 'linear-gradient(135deg, #7A0B2A, #C41E3A, #E11D48)',
-                color: 'white',
-                fontSize: '16px',
-                border: '1px solid rgba(255,100,120,0.3)',
-                boxShadow: loading ? 'none' : '0 10px 30px rgba(225,29,72,0.4)',
-                animation: 'fadeUp 0.5s 0.5s ease both',
-              }}
+              className="w-full font-medium py-3.5 rounded-full bg-black hover:bg-neutral-900 text-white transition-all duration-200 disabled:opacity-40 flex items-center justify-center gap-2 mt-4 text-sm font-sans"
             >
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span
-                    className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                    style={{ animation: 'spinSlow 0.8s linear infinite' }}
+                    className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
                   />
                   Setting up your profile...
                 </span>
               ) : (
                 <>
                   <span>Start Your Journey</span>
-                  <ArrowRight className="w-5 h-5" />
+                  <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>

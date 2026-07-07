@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import api from '../api';
-import { ShieldCheck, ArrowLeft, ShieldAlert, Users, Pencil, X, Sparkles } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, ShieldAlert, Users, Pencil, X, Sparkles, Lock, Unlock } from 'lucide-react';
 
 export interface FamilyDetails {
   father_name: string;
@@ -31,6 +31,7 @@ interface UserData {
   tob?: string;
   pob?: string;
   family_details?: FamilyDetails;
+  phone_visible?: boolean;
 }
 
 export default function Profile() {
@@ -309,7 +310,7 @@ export default function Profile() {
   if (loading) return null;
 
   return (
-    <div className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-64" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-44" style={{ background: 'var(--bg-base)' }}>
       {/* Header */}
       <div className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3" style={{ background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid var(--glass-border)' }}>
         <button onClick={() => navigate(-1)} className="rounded-full p-2 flex items-center justify-center transition-all hover:scale-110" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: 'rgba(212,175,55,0.7)' }}>
@@ -456,6 +457,51 @@ export default function Profile() {
                     </button>
                   )}
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Phone Privacy Settings Card */}
+          <div className="p-5 rounded-2xl border bg-white/5 backdrop-blur-md" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+            <div className="flex items-start gap-4">
+              <div className={`p-3 rounded-full ${user?.phone_visible ? 'bg-green-500/10 text-green-400' : 'bg-neutral-500/10 text-neutral-400'}`}>
+                {user?.phone_visible ? (
+                  <Unlock className="w-6 h-6" />
+                ) : (
+                  <Lock className="w-6 h-6" />
+                )}
+              </div>
+              <div className="flex-1 text-left">
+                <h3 className="text-lg font-semibold text-white">
+                  Phone Number Visibility
+                </h3>
+                <p className="text-sm text-gray-400 mt-1">
+                  {user?.phone_visible 
+                    ? 'Matches pay 5 Roses to view your locked phone number.' 
+                    : 'Your phone number is private and hidden from all users.'}
+                </p>
+                <button 
+                  onClick={async () => {
+                    if (!user) return;
+                    try {
+                      const nextVal = !user.phone_visible;
+                      const res = await api.put('/profile/toggle-phone-privacy', {
+                        userId: user.id,
+                        phoneVisible: nextVal
+                      });
+                      if (res.data.success) {
+                        setUser(res.data.user);
+                        localStorage.setItem('user', JSON.stringify(res.data.user));
+                        alert(`Phone number visibility updated. It is now ${nextVal ? 'visible to matches (locked)' : 'completely private'}.`);
+                      }
+                    } catch (err: any) {
+                      alert('Failed to update phone visibility settings');
+                    }
+                  }}
+                  className="mt-4 px-5 py-2 bg-gradient-to-r from-neutral-800 to-neutral-900 hover:from-neutral-700 hover:to-neutral-850 text-white text-xs font-bold rounded-lg border border-white/10 transition-all uppercase tracking-wider shadow-md"
+                >
+                  {user?.phone_visible ? 'Keep Private' : 'Allow Unlock'}
+                </button>
               </div>
             </div>
           </div>

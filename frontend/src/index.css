@@ -6,36 +6,52 @@
    ============================================================ */
 
 :root {
-  /* Background - Light Beige/Cream Theme */
-  --bg-deep: #F4EFE6;
-  --bg-base: #FDFBF7;
+  /* Background - Minimalist Apple White */
+  --bg-deep: #FFFFFF;
+  --bg-base: #FFFFFF;
   --bg-surface: #FFFFFF;
-  --bg-raised: #FAF7F2;
+  --bg-raised: #FFFFFF;
 
-  /* Primary Accent - Soft Rose/Terracotta */
-  --crimson: #D48A85;
-  --crimson-dark: #B5655D;
-  --crimson-glow: rgba(212, 138, 133, 0.3);
+  /* Primary Accent - Classic Apple Blue/Black */
+  --crimson: #0071E3;
+  --crimson-dark: #0066CC;
+  --crimson-glow: rgba(0, 113, 227, 0.12);
 
-  /* Secondary Accent - Vintage Brass/Gold */
-  --gold: #A88655;
-  --gold-light: #C2A67A;
-  --gold-glow: rgba(168, 134, 85, 0.2);
+  /* Secondary Accent - Dark Charcoal/Gray */
+  --gold: #1D1D1F;
+  --gold-light: #6E6E73;
+  --gold-glow: rgba(0, 0, 0, 0.04);
 
-  /* Text - Rich Browns */
-  --text-primary: #3E2723;
-  --text-secondary: #5D4037;
-  --text-muted: #8D6E63;
+  /* Text - Crisp Blacks and Grays */
+  --text-primary: #1D1D1F;
+  --text-secondary: #6E6E73;
+  --text-muted: #86868B;
 
-  /* Glassmorphism - Light Mode */
-  --glass-bg: rgba(255, 255, 255, 0.6);
-  --glass-border: rgba(141, 110, 99, 0.15);
-  --glass-border-gold: rgba(168, 134, 85, 0.3);
+  /* Glassmorphism - Apple Translucent */
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-border-gold: rgba(0, 0, 0, 0.08);
 
-  /* Shadows - Soft Brown Shadows */
-  --shadow-glow-crimson: 0 10px 25px rgba(212, 138, 133, 0.2);
-  --shadow-glow-gold: 0 10px 25px rgba(168, 134, 85, 0.2);
-  --shadow-card: 0 15px 35px rgba(93, 64, 55, 0.08), 0 5px 15px rgba(93, 64, 55, 0.04);
+  /* Shadows - Soft Minimal Shadows */
+  --shadow-glow-crimson: 0 4px 12px rgba(0, 113, 227, 0.1);
+  --shadow-glow-gold: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+/* Font and Accent Overrides globally for Apple design */
+[style*="font-family"] {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+.font-serif,
+.font-serif * {
+  font-family: 'Cormorant Garamond', Georgia, serif !important;
+}
+.gradient-text-gold, .gradient-text-crimson {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: initial !important;
+  color: var(--text-primary) !important;
 }
 
 
@@ -277,17 +293,15 @@ body {
    ============================================================ */
 
 .gradient-text-gold {
-  background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, #C8951A 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
+  background: none;
+  -webkit-text-fill-color: initial;
 }
 
 .gradient-text-crimson {
-  background: linear-gradient(135deg, #FF6B8A 0%, var(--crimson) 50%, var(--crimson-dark) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--crimson);
+  background: none;
+  -webkit-text-fill-color: initial;
 }
 
 /* ============================================================
@@ -295,52 +309,46 @@ body {
    ============================================================ */
 
 .btn-crimson {
-  background: linear-gradient(135deg, #C41E3A 0%, #E11D48 50%, #FF4D6D 100%);
+  background: #1D1D1F;
   color: white;
-  font-weight: 700;
-  border-radius: 16px;
-  padding: 14px 28px;
-  border: 1px solid rgba(255, 100, 120, 0.3);
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  font-weight: 500;
+  border-radius: 980px;
+  padding: 12px 24px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease-in-out;
   position: relative;
   overflow: hidden;
-}
-
-.btn-crimson::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.btn-crimson:hover::before {
-  opacity: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-crimson:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(225, 29, 72, 0.5), 0 0 0 1px rgba(255, 100, 120, 0.4);
+  background: #000000;
+  transform: scale(1.01);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .btn-crimson:active {
-  transform: translateY(0px);
+  transform: scale(0.99);
 }
 
 .btn-gold {
-  background: linear-gradient(135deg, #B8860B 0%, #D4AF37 50%, #FFD700 100%);
-  color: #0a0008;
-  font-weight: 700;
-  border-radius: 16px;
-  padding: 14px 28px;
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  background: #F5F5F7;
+  color: #1D1D1F;
+  font-weight: 500;
+  border-radius: 980px;
+  padding: 12px 24px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-gold:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5);
+  background: #E8E8ED;
+  transform: scale(1.01);
 }
 
 /* ============================================================
@@ -384,19 +392,15 @@ body {
    ============================================================ */
 
 .bg-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  animation: orbFloat 12s ease-in-out infinite;
-  pointer-events: none;
+  display: none !important;
 }
 
 .bg-orb-crimson {
-  background: radial-gradient(circle, rgba(225, 29, 72, 0.3) 0%, transparent 70%);
+  display: none !important;
 }
 
 .bg-orb-gold {
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.2) 0%, transparent 70%);
+  display: none !important;
 }
 
 /* ============================================================
@@ -422,21 +426,11 @@ body {
    ============================================================ */
 
 .petal-canvas {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
+  display: none !important;
 }
 
 .petal {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 120, 150, 0.9), rgba(180, 50, 80, 0.5));
-  border-radius: 50% 0 50% 0;
-  animation: petalFall linear infinite;
-  opacity: 0;
+  display: none !important;
 }
 
 @keyframes petalFall {
@@ -460,4 +454,54 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
+}
+
+/* ============================================================
+   DOUBLE TAP HEART POP ANIMATION
+   ============================================================ */
+@keyframes heartPop {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    transform: scale(1.3) rotate(-12deg);
+    opacity: 0.95;
+  }
+  30% {
+    transform: scale(0.9) rotate(8deg);
+    opacity: 0.95;
+  }
+  80% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(1.6) rotate(0deg);
+    opacity: 0;
+  }
+}
+
+.animate-heartPop {
+  animation: heartPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Hide scrollbars but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Snap scroll utilities */
+.snap-y-mandatory {
+  scroll-snap-type: y mandatory;
+}
+.snap-start {
+  scroll-snap-align: start;
+}
+.snap-always {
+  scroll-snap-stop: always;
 }

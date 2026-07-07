@@ -206,7 +206,7 @@ export default function Chat() {
   if (!activeMatch) {
     return (
       <div
-        className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-64 transition-all"
+        className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-44 transition-all"
         style={{ background: 'var(--bg-base)' }}
       >
         {/* Header */}
@@ -367,7 +367,7 @@ export default function Chat() {
   // ── ACTIVE CHAT VIEW ──
   return (
     <div
-      className="min-h-screen flex flex-col md:ml-64 transition-all"
+      className="min-h-screen flex flex-col md:ml-44 transition-all"
       style={{ background: 'var(--bg-base)' }}
     >
       {/* Chat Header */}
@@ -545,16 +545,14 @@ export default function Chat() {
                       style={{ animation: `${isMe ? 'slideInRight' : 'slideInLeft'} 0.3s ease both` }}
                     >
                       <div
-                        className="max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed"
+                        className="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm leading-normal font-sans"
                         style={isMe ? {
-                          background: 'linear-gradient(135deg, #7A0B2A, #E11D48)',
-                          color: 'white',
+                          background: '#0071E3',
+                          color: '#FFFFFF',
                           borderBottomRightRadius: '4px',
-                          boxShadow: '0 4px 16px rgba(225,29,72,0.3)',
                         } : {
-                          background: 'var(--bg-surface)',
-                          color: 'var(--text-primary)',
-                          border: '1px solid var(--glass-border)',
+                          background: '#E9E9EB',
+                          color: '#1D1D1F',
                           borderBottomLeftRadius: '4px',
                         }}
                       >
@@ -570,45 +568,28 @@ export default function Chat() {
 
           {/* Message Input */}
           <div
-            className="fixed bottom-0 left-0 right-0 p-3 md:left-64 z-20 transition-all"
+            className="fixed bottom-0 left-0 right-0 p-3 md:left-64 z-20 transition-all bg-white border-t border-neutral-200"
             style={{
-              background: 'rgba(255, 255, 255, 0.9)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              borderTop: '1px solid var(--glass-border)',
               paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
             }}
           >
-            <form onSubmit={sendMessage} className="flex gap-2 max-w-2xl mx-auto">
+            <form onSubmit={sendMessage} className="flex gap-2 max-w-2xl mx-auto items-center">
               <input
                 type="text"
                 placeholder="Type a message..."
-                className="flex-1 rounded-2xl px-4 py-3 text-sm outline-none transition-all duration-300"
-                style={{
-                  background: 'var(--bg-surface)',
-                  border: `1px solid ${newMessage ? 'var(--gold)' : 'var(--glass-border)'}`,
-                  color: 'var(--text-primary)',
-                  fontFamily: 'Inter, sans-serif',
-                }}
+                className="flex-1 rounded-full px-4.5 py-2.5 text-sm outline-none transition-all duration-200 border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-400 text-neutral-900 font-sans"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
               />
               <button
                 type="submit"
-                className="rounded-2xl px-4 flex items-center justify-center transition-all duration-300 flex-shrink-0"
+                className="rounded-full flex items-center justify-center transition-all duration-200 flex-shrink-0"
                 style={{
-                  background: newMessage.trim()
-                    ? 'linear-gradient(135deg, var(--gold), var(--gold-light))'
-                    : 'var(--bg-surface)',
-                  border: newMessage.trim()
-                    ? '1px solid var(--gold)'
-                    : '1px solid var(--glass-border)',
-                  color: newMessage.trim() ? 'white' : 'var(--text-muted)',
-                  boxShadow: newMessage.trim() ? '0 4px 16px rgba(212,175,55,0.3)' : 'none',
-                  transform: newMessage.trim() ? 'scale(1)' : 'scale(0.95)',
-                  width: '48px',
-                  height: '48px',
-                  animation: newMessage.trim() ? 'pulseGlow 2s ease-in-out infinite' : 'none',
+                  background: newMessage.trim() ? '#0071E3' : '#F5F5F7',
+                  border: '1px solid transparent',
+                  color: newMessage.trim() ? '#FFFFFF' : '#86868B',
+                  width: '40px',
+                  height: '40px',
                 }}
               >
                 <Send className="w-4 h-4" />

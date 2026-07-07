@@ -41,7 +41,7 @@ export default function MyInterests() {
 
   return (
     <div
-      className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-64 transition-all"
+      className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-44 transition-all"
       style={{ background: 'var(--bg-base)' }}
     >
       {/* Header */}

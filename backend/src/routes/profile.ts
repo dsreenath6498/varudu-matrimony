@@ -27,7 +27,7 @@ const upload = multer({ storage });
 // 1. Create/Update Profile (Onboarding)
 router.post('/create', upload.array('photos', 5), async (req, res) => {
   try {
-    const { userId, name, age, dob, place, gender, interested_in, referred_by } = req.body;
+    const { userId, name, age, dob, place, gender, interested_in, referred_by, phoneVisible } = req.body;
     
     if (!userId) return res.status(400).json({ error: 'User ID is required' });
     if (parseInt(age) < 18) return res.status(400).json({ error: 'You must be at least 18 years old to join.' });
@@ -85,9 +85,9 @@ router.post('/create', upload.array('photos', 5), async (req, res) => {
 
     await db.run(`
       UPDATE users 
-      SET name = $1, age = $2, dob = $3, place = $4, gender = $5, interested_in = $6, photos = $7, is_onboarded = 1, referral_code = $8, referred_by = COALESCE(referred_by, $9), roses_balance = COALESCE(roses_balance, 0) + $10
-      WHERE id = $11
-    `, [name, parseInt(age), dob, place, gender, interested_in, JSON.stringify(photoUrls), referralCode, finalReferredBy, extraRoses, userId]);
+      SET name = $1, age = $2, dob = $3, place = $4, gender = $5, interested_in = $6, photos = $7, is_onboarded = 1, referral_code = $8, referred_by = COALESCE(referred_by, $9), roses_balance = COALESCE(roses_balance, 0) + $10, phone_visible = $11
+      WHERE id = $12
+    `, [name, parseInt(age), dob, place, gender, interested_in, JSON.stringify(photoUrls), referralCode, finalReferredBy, extraRoses, phoneVisible === true || phoneVisible === 1 || phoneVisible === 'true', userId]);
 
     if (extraRoses > 0 && referrerNameForLog) {
       const crypto = require('crypto');
@@ -127,9 +127,30 @@ router.get('/feed', async (req, res) => {
     `;
     
     const profiles = await db.all(query, [interestedIn]);
+    
+    // Fetch user's unlocked target IDs
+    const unlocks = await db.all('SELECT unlocked_user_id FROM public.phone_unlocks WHERE unlocker_id = $1', [userId]);
+    const unlockedSet = new Set(unlocks.map(u => u.unlocked_user_id));
+
     profiles.forEach(p => {
       p.photos = JSON.parse(p.photos || '[]');
       p.family_details = JSON.parse(p.family_details || '{}');
+      
+      const isVisible = p.phone_visible === true || p.phone_visible === 1 || p.phone_visible === 'true';
+      p.phone_visible = isVisible;
+      
+      if (isVisible) {
+        if (unlockedSet.has(p.id)) {
+          p.phone_unlocked = true;
+          // Keep p.phone_number intact
+        } else {
+          p.phone_unlocked = false;
+          p.phone_number = null; // Remove/mask phone number
+        }
+      } else {
+        p.phone_unlocked = false;
+        p.phone_number = null; // Remove/mask phone number
+      }
     });
 
     res.json({ profiles });
@@ -338,6 +359,96 @@ router.post('/verify-face', async (req, res) => {
   } catch (error: any) {
     console.error('Error during face verification:', error);
     return res.status(500).json({ error: error.message || 'An error occurred during verification' });
+  }
+});
+
+// 9. Unlock Phone Number
+router.post('/unlock-phone', async (req, res) => {
+  const { userId, targetUserId } = req.body;
+  if (!userId || !targetUserId) {
+    return res.status(400).json({ error: 'Missing userId or targetUserId' });
+  }
+
+  const db = getDb();
+  try {
+    // 1. Fetch target user
+    const targetUser = await db.get('SELECT * FROM users WHERE id = $1', [targetUserId]);
+    if (!targetUser) {
+      return res.status(404).json({ error: 'Target user not found' });
+    }
+
+    // 2. Check if target user has phone visibility enabled
+    if (!targetUser.phone_visible) {
+      return res.status(400).json({ error: 'This user has not shared their phone number.' });
+    }
+
+    // 3. Check if already unlocked
+    const existingUnlock = await db.get(
+      'SELECT 1 FROM public.phone_unlocks WHERE unlocker_id = $1 AND unlocked_user_id = $2',
+      [userId, targetUserId]
+    );
+    if (existingUnlock) {
+      return res.json({ success: true, phoneNumber: targetUser.phone_number });
+    }
+
+    // 4. Fetch current user balance
+    const currentUser = await db.get('SELECT roses_balance FROM users WHERE id = $1', [userId]);
+    if (!currentUser) {
+      return res.status(404).json({ error: 'Current user not found' });
+    }
+
+    const cost = 5; // Costs 5 Roses
+    if ((currentUser.roses_balance || 0) < cost) {
+      return res.status(400).json({ error: 'Insufficient Roses. Unlock costs 5 Roses. Please purchase more from the Boutique.' });
+    }
+
+    // 5. Deduct roses
+    await db.run(
+      'UPDATE users SET roses_balance = roses_balance - $1 WHERE id = $2',
+      [cost, userId]
+    );
+
+    // 6. Record transaction
+    const { randomUUID } = require('crypto');
+    const txId = randomUUID();
+    await db.run(
+      'INSERT INTO rose_transactions (id, user_id, amount, transaction_type, description) VALUES ($1, $2, $3, $4, $5)',
+      [txId, userId, -cost, 'unlock_phone', `Unlocked phone number of ${targetUser.name || 'User'}`]
+    );
+
+    // 7. Record unlock
+    const unlockId = randomUUID();
+    await db.run(
+      'INSERT INTO public.phone_unlocks (id, unlocker_id, unlocked_user_id) VALUES ($1, $2, $3)',
+      [unlockId, userId, targetUserId]
+    );
+
+    return res.json({ success: true, phoneNumber: targetUser.phone_number });
+  } catch (err: any) {
+    console.error('Error unlocking phone:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 10. Toggle Phone Privacy
+router.put('/toggle-phone-privacy', async (req, res) => {
+  const { userId, phoneVisible } = req.body;
+  if (!userId) {
+    return res.status(400).json({ error: 'Missing userId' });
+  }
+
+  const db = getDb();
+  try {
+    const isVisible = phoneVisible === true || phoneVisible === 1 || phoneVisible === 'true';
+    await db.run('UPDATE users SET phone_visible = $1 WHERE id = $2', [isVisible, userId]);
+    const updatedUser = await db.get('SELECT * FROM users WHERE id = $1', [userId]);
+    updatedUser.photos = JSON.parse(updatedUser.photos || '[]');
+    updatedUser.family_details = JSON.parse(updatedUser.family_details || '{}');
+    
+    return res.json({ success: true, user: updatedUser });
+  } catch (err: any) {
+    console.error('Error toggling phone privacy:', err);
+    res.status(500).json({ error: err.message });
   }
 });
 

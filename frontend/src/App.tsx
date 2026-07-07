@@ -5,7 +5,6 @@ import Signup from './pages/Signup';
 import Onboarding from './pages/Onboarding';
 import Home from './pages/Home';
 import MyInterests from './pages/MyInterests';
-import Requests from './pages/Requests';
 import Chat from './pages/Chat';
 import RoseBoutique from './pages/RoseBoutique';
 import Profile from './pages/Profile';
@@ -41,7 +40,6 @@ function App() {
               <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
               <Route path="/" element={<ProtectedRoute><><FloatingRose /><Home /></></ProtectedRoute>} />
               <Route path="/interests" element={<ProtectedRoute><><FloatingRose /><MyInterests /></></ProtectedRoute>} />
-              <Route path="/requests" element={<ProtectedRoute><><FloatingRose /><Requests /></></ProtectedRoute>} />
               <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
               <Route path="/store" element={<ProtectedRoute><RoseBoutique /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
