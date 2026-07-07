@@ -11,7 +11,7 @@ const navItems = [
   { to: '/profile', icon: User, label: 'Profile' },
 ];
 
-export default function Navbar() {
+export default function Navbar({ hideMobileBottom = false }: { hideMobileBottom?: boolean }) {
   const { unreadCount } = useSocket();
   const location = useLocation();
   const [mounted, setMounted] = useState(false);
@@ -23,11 +23,12 @@ export default function Navbar() {
   return (
     <>
       {/* ── MOBILE BOTTOM BAR ── */}
-      <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/85 backdrop-blur-md border-t border-neutral-200/40 py-4 flex justify-around shadow-sm"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-      >
-        {navItems.map(({ to, icon: Icon }) => {
+      {!hideMobileBottom && (
+        <nav
+          className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/85 backdrop-blur-md border-t border-neutral-200/40 py-4 flex justify-around shadow-sm"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        >
+          {navItems.map(({ to, icon: Icon }) => {
           const isActive = location.pathname === to;
           const isChatTab = to === '/chat';
           return (
@@ -61,6 +62,7 @@ export default function Navbar() {
           );
         })}
       </nav>
+      )}
 
       {/* ── DESKTOP TRANSPARENT SIDEBAR ── */}
       <nav

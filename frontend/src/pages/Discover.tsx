@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import api from '../api';
 import Navbar from '../components/Navbar';
-import { MapPin, Info, LogOut, MessageSquareHeart, X, Heart, Sparkles } from 'lucide-react';
+import { MapPin, Info, LogOut, MessageSquareHeart, X, Heart, Sparkles, ArrowLeft } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 interface FamilyDetails {
@@ -52,7 +52,13 @@ export default function Discover() {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  
+  // Extract query filters
   const searchQuery = (searchParams.get('search') || '').trim().toLowerCase();
+  const minAge = parseInt(searchParams.get('minAge') || '18');
+  const maxAge = parseInt(searchParams.get('maxAge') || '60');
+  const selectedCity = (searchParams.get('city') || '').trim().toLowerCase();
+  const isFiltering = !!(searchQuery || minAge > 18 || maxAge < 60 || selectedCity);
 
   const pendingInteraction = useRef({ type: 'standard', message: null as string | null });
 
@@ -206,20 +212,47 @@ export default function Discover() {
     executeInteraction('right', profileId);
   };
 
-  // Filter profiles based on search query parameter
+  // Filter profiles based on search and advanced options
   const filteredProfiles = profiles.filter(profile => {
-    if (!searchQuery) return true;
-    const name = (profile.name || '').toLowerCase();
-    const place = (profile.place || '').toLowerCase();
-    return name.includes(searchQuery) || place.includes(searchQuery);
+    // 1. Search Query filter (matches name or location)
+    if (searchQuery) {
+      const name = (profile.name || '').toLowerCase();
+      const place = (profile.place || '').toLowerCase();
+      if (!name.includes(searchQuery) && !place.includes(searchQuery)) {
+        return false;
+      }
+    }
+
+    // 2. Age Range filter
+    if (profile.age < minAge || profile.age > maxAge) {
+      return false;
+    }
+
+    // 3. City filter
+    if (selectedCity) {
+      const place = (profile.place || '').toLowerCase();
+      if (!place.includes(selectedCity)) {
+        return false;
+      }
+    }
+
+    return true;
   });
 
   return (
     <div className="min-h-screen flex flex-col md:ml-44 bg-white overflow-x-hidden">
+      
       {/* ── HEADER (Shown only in Stack View mode) ── */}
       {viewMode === 'stack' && (
         <div className="flex items-center justify-between px-6 py-4 sticky top-0 z-30 bg-white border-b border-neutral-100">
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('/')}
+              className="p-1 rounded-full hover:bg-neutral-150 text-neutral-800 transition-colors"
+              title="Back"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
             <h2 className="text-lg font-bold tracking-tight text-neutral-900">Discover</h2>
           </div>
 
@@ -276,6 +309,22 @@ export default function Discover() {
 
       {/* Content Feed Layout */}
       <div className="flex-1 flex flex-col items-center justify-center p-0 md:p-4 w-full">
+        
+        {/* Stack Mode: Clear Filters Banner */}
+        {viewMode === 'stack' && isFiltering && !loading && (
+          <div className="w-full max-w-[480px] px-5 py-3 mt-4 bg-neutral-50 border border-neutral-200/50 rounded-2xl flex justify-between items-center text-xs font-semibold text-neutral-600 animate-fadeUp">
+            <span className="flex items-center gap-1.5">
+              🔍 Filtering Active
+            </span>
+            <button
+              onClick={() => navigate('/discover')}
+              className="text-[#0071E3] font-bold hover:underline"
+            >
+              Clear Filters
+            </button>
+          </div>
+        )}
+
         {loading ? (
           <div className="flex flex-col items-center gap-3 font-sans">
             <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black text-white animate-spin">
@@ -291,19 +340,19 @@ export default function Discover() {
               <Heart className="w-5 h-5 text-neutral-800" />
             </div>
             <h2 className="text-xl font-bold mb-1 text-neutral-900 tracking-tight">
-              {searchQuery ? 'No results found' : "You're all caught up!"}
+              {isFiltering ? 'No matching profiles' : "You're all caught up!"}
             </h2>
             <p className="text-xs leading-relaxed text-neutral-500">
-              {searchQuery 
-                ? `No profiles matched "${searchQuery}". Try broadening your search.`
+              {isFiltering 
+                ? "No profiles match your search criteria. Try modifying or clearing your filters."
                 : "We've finished showing all matching profiles. Check back later for new entries."}
             </p>
-            {searchQuery && (
+            {isFiltering && (
               <button
                 onClick={() => navigate('/discover')}
-                className="mt-4 px-4 py-2 bg-black text-white text-xs font-semibold rounded-full hover:bg-neutral-900 transition-colors"
+                className="mt-4 px-5 py-2 bg-black text-white text-xs font-semibold rounded-full hover:bg-neutral-900 transition-colors"
               >
-                Clear Search Filter
+                Clear All Filters
               </button>
             )}
           </div>
@@ -361,9 +410,8 @@ export default function Discover() {
                         </div>
                       </div>
 
-                      {/* Right: Quick Outline Action Buttons */}
+                      {/* Right: Quick Action Buttons */}
                       <div className="flex items-center gap-2 mt-2 md:mt-0 flex-shrink-0">
-                        {/* Info Button */}
                         <button
                           onClick={(e) => { e.stopPropagation(); setActiveShowMoreProfileId(profile.id); }}
                           className="w-9 h-9 rounded-full bg-neutral-50 hover:bg-neutral-100 border border-neutral-200/60 flex items-center justify-center text-neutral-600 transition-colors"
@@ -372,7 +420,6 @@ export default function Discover() {
                           <Info className="w-3.5 h-3.5" />
                         </button>
 
-                        {/* Pass Button */}
                         <button
                           onClick={() => executeInteraction('left', profile.id)}
                           className="w-9 h-9 rounded-full border border-neutral-200/80 flex items-center justify-center text-neutral-400 hover:text-black hover:border-black hover:bg-neutral-50 transition-all"
@@ -381,7 +428,6 @@ export default function Discover() {
                           <X className="w-3.5 h-3.5" />
                         </button>
 
-                        {/* Note Button */}
                         <button
                           onClick={() => handleNoteClick(profile.id)}
                           className="w-9 h-9 rounded-full border border-neutral-200/80 flex items-center justify-center text-neutral-400 hover:text-black hover:border-black hover:bg-neutral-50 transition-all relative"
@@ -390,7 +436,6 @@ export default function Discover() {
                           <MessageSquareHeart className="w-3.5 h-3.5 text-neutral-600" />
                         </button>
 
-                        {/* Super Like / Rose Button */}
                         <button
                           onClick={() => executeInteraction('right', profile.id, 'rose')}
                           className="w-9 h-9 rounded-full border border-neutral-200/80 flex items-center justify-center hover:bg-neutral-50 transition-all relative text-xs"
@@ -399,7 +444,6 @@ export default function Discover() {
                           🌹
                         </button>
 
-                        {/* Like Button */}
                         <button
                           onClick={() => executeInteraction('right', profile.id)}
                           className="w-10 h-10 rounded-full bg-black text-white hover:bg-neutral-900 transition-all flex items-center justify-center"
@@ -410,7 +454,7 @@ export default function Discover() {
                       </div>
                     </div>
 
-                    {/* Details Panel Drawer (Takes 70% space) */}
+                    {/* Details Drawer */}
                     <div
                       className="w-[70%] h-full flex-shrink-0 bg-white px-5 flex items-center justify-between absolute right-0 text-left transition-transform duration-300 z-20"
                       style={{
@@ -422,13 +466,11 @@ export default function Discover() {
                           <h4 className="font-extrabold text-xs text-neutral-900 truncate">
                             {profile.name}, {profile.age} · {profile.place}
                           </h4>
-                          
                           {profile.dob && (
                             <p className="text-[9px] text-neutral-400 mt-0.5">
                               DOB: {profile.dob} {profile.tob ? `· TOB: ${profile.tob}` : ''}
                             </p>
                           )}
-
                           <div className="mt-1 flex items-center gap-1.5">
                             {profile.phone_visible ? (
                               profile.phone_unlocked || unlockedPhones[profile.id] ? (
@@ -457,7 +499,6 @@ export default function Discover() {
                           </div>
                         </div>
                       </div>
-
                       <button
                         onClick={(e) => { e.stopPropagation(); setActiveShowMoreProfileId(null); }}
                         className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-[10px] font-bold uppercase tracking-wider rounded-full transition-all flex-shrink-0"
@@ -472,12 +513,21 @@ export default function Discover() {
             })}
           </div>
         ) : (
-          /* ── REELS VIEW (Instagram Snap-Scroll - Full Screen mobile aspect ratio) ── */
+          /* ── REELS VIEW (Instagram Full Screen Snap-Scroll) ── */
           <div
             className="w-full overflow-y-scroll snap-y snap-mandatory scroll-smooth no-scrollbar bg-black
                        fixed inset-0 h-screen w-screen z-40
                        md:relative md:inset-auto md:w-full md:max-w-[420px] md:h-[75vh] md:max-h-[720px] md:rounded-[32px] md:border md:border-neutral-200/80 md:shadow-[0_12px_40px_rgba(0,0,0,0.06)] md:z-auto"
           >
+            {/* ── TOP LEFT BACK BUTTON ── */}
+            <button
+              onClick={() => navigate('/')}
+              className="absolute top-6 left-6 z-50 bg-black/35 text-white border border-white/10 hover:bg-black/50 backdrop-blur-md px-3 py-3 rounded-full flex items-center justify-center transition-all shadow-md active:scale-95"
+              title="Back to Welcome Page"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+
             {/* ── FLOATING VIEW SWITCHER (STACK / REELS) ── */}
             <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 bg-black/35 backdrop-blur-md px-1 py-1 rounded-full flex border border-white/10 shadow-sm opacity-80 hover:opacity-100 transition-all duration-200">
               <button
@@ -493,6 +543,17 @@ export default function Discover() {
               </button>
             </div>
 
+            {/* ── FLOATING "CLEAR FILTERS" BADGE ── */}
+            {isFiltering && (
+              <div
+                onClick={() => navigate('/discover')}
+                className="absolute top-20 left-1/2 -translate-x-1/2 z-50 bg-white/20 hover:bg-white/30 text-white backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 text-[10px] font-extrabold tracking-wider uppercase transition-all duration-200 shadow-md flex items-center gap-1 cursor-pointer active:scale-95 select-none"
+                title="Showing Filtered Profiles. Click to Clear Filters."
+              >
+                Filtered ✕
+              </div>
+            )}
+
             {filteredProfiles.map((profile) => {
               const currentPhotoIdx = photoIndices[profile.id] || 0;
               const isLiked = likedProfiles[profile.id];
@@ -505,7 +566,6 @@ export default function Discover() {
                   onDoubleClick={() => !isShowMore && handleReelDoubleClick(profile.id)}
                   className="snap-start snap-always h-full w-full relative flex shrink-0 overflow-hidden select-none bg-black md:rounded-[32px]"
                 >
-                  {/* Outer Sliding wrapper for card elements */}
                   <div
                     className="w-full h-full flex transition-transform duration-300 relative"
                     style={{
@@ -570,7 +630,7 @@ export default function Discover() {
                       )}
 
                       {/* Bottom Metadata Details */}
-                      <div className="absolute bottom-6 left-4 right-16 z-20 flex flex-col pointer-events-none font-sans text-left pb-24 md:pb-0">
+                      <div className="absolute bottom-6 left-4 right-16 z-20 flex flex-col pointer-events-none font-sans text-left pb-12 md:pb-0">
                         <h3 className="font-extrabold text-2xl text-white tracking-tight flex items-center gap-1.5">
                           {profile.name}, <span className="font-normal text-white/80">{profile.age}</span>
                           {profile.face_verified && (
@@ -592,8 +652,7 @@ export default function Discover() {
                       </div>
 
                       {/* Right Side Vertical Action Buttons */}
-                      <div className="absolute right-3 bottom-6 z-20 flex flex-col gap-3.5 items-center pb-24 md:pb-0">
-                        {/* Info / Show More Toggle */}
+                      <div className="absolute right-3 bottom-6 z-20 flex flex-col gap-3.5 items-center pb-12 md:pb-0">
                         <button
                           onClick={(e) => { e.stopPropagation(); setActiveShowMoreProfileId(profile.id); }}
                           className="w-10 h-10 rounded-full flex items-center justify-center transition-all bg-white/10 text-white border border-white/10 hover:bg-white/20 backdrop-blur-md"
@@ -601,7 +660,6 @@ export default function Discover() {
                           <Info className="w-4.5 h-4.5" />
                         </button>
 
-                        {/* Pass Button */}
                         <button
                           onClick={() => executeInteraction('left', profile.id)}
                           className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center text-white transition-all backdrop-blur-md"
@@ -609,7 +667,6 @@ export default function Discover() {
                           <X className="w-4 h-4" />
                         </button>
 
-                        {/* Like Button */}
                         <button
                           onClick={() => executeInteraction('right', profile.id)}
                           className="w-11 h-11 rounded-full bg-white flex items-center justify-center text-black hover:scale-105 active:scale-95 transition-all shadow-md"
@@ -617,7 +674,6 @@ export default function Discover() {
                           <Heart className="w-4.5 h-4.5 fill-current text-black" />
                         </button>
 
-                        {/* Super Like / Rose Button */}
                         <button
                           onClick={() => executeInteraction('right', profile.id, 'rose')}
                           className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center text-white transition-all backdrop-blur-md relative"
@@ -625,7 +681,6 @@ export default function Discover() {
                           <span className="text-base select-none">🌹</span>
                         </button>
 
-                        {/* Note Button */}
                         <button
                           onClick={() => handleNoteClick(profile.id)}
                           className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center text-white transition-all backdrop-blur-md relative"
@@ -635,7 +690,7 @@ export default function Discover() {
                       </div>
                     </div>
 
-                    {/* Reels Details Panel Drawer (Takes 70% space on mobile/desktop side-by-side) */}
+                    {/* Reels Details Panel Drawer */}
                     <div
                       className="w-[70%] h-full flex-shrink-0 bg-white border-l border-neutral-200/80 p-5 flex flex-col justify-between absolute right-0 text-left transition-transform duration-300 z-30"
                       style={{
@@ -667,7 +722,6 @@ export default function Discover() {
                           </div>
                         )}
 
-                        {/* Birth Astro details */}
                         {(profile.dob || profile.tob || profile.pob) && (
                           <div>
                             <h4 className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest">Birth Astro</h4>
@@ -679,7 +733,6 @@ export default function Discover() {
                           </div>
                         )}
 
-                        {/* Family details block */}
                         {profile.family_details && Object.keys(profile.family_details).length > 0 && (
                           <div>
                             <h4 className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest">Family</h4>
@@ -690,7 +743,6 @@ export default function Discover() {
                           </div>
                         )}
 
-                        {/* Phone Lock Status Block */}
                         {profile.phone_visible ? (
                           profile.phone_unlocked || unlockedPhones[profile.id] ? (
                             <div className="p-3 bg-green-50 border border-green-100 rounded-xl">
@@ -782,7 +834,7 @@ export default function Discover() {
         </div>
       )}
 
-      <Navbar />
+      <Navbar hideMobileBottom={viewMode === 'reels'} />
     </div>
   );
 }
