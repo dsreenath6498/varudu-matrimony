@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import api from '../api';
 
 // Define the shape of our messages
 interface Message {
     text: string;
     sender: 'user' | 'bot';
-    profiles?: any[]; // <-- New field to hold the rich data!
+    profiles?: any[];
 }
 
 const ChatbotWidget = () => {
@@ -17,6 +17,56 @@ const ChatbotWidget = () => {
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    // Draggable position state (pixels from bottom-right corner)
+    const [position, setPosition] = useState({ x: 24, y: 24 });
+    const [isDragging, setIsDragging] = useState(false);
+    const dragStart = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+
+    const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+        dragStart.current = {
+            x: e.clientX,
+            y: e.clientY,
+            posX: position.x,
+            posY: position.y
+        };
+        setIsDragging(false);
+        e.currentTarget.setPointerCapture(e.pointerId);
+    };
+
+    const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+        // Only drag when primary pointer button is pressed (1 for mouse/touch down)
+        if (e.buttons !== 1) return;
+
+        const deltaX = e.clientX - dragStart.current.x;
+        const deltaY = e.clientY - dragStart.current.y;
+
+        // Mark as dragging if moved more than a minor threshold (5px)
+        if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+            setIsDragging(true);
+        }
+
+        // position.x is from right, moving right (positive deltaX) decreases position.x
+        // position.y is from bottom, moving down (positive deltaY) decreases position.y
+        const newX = Math.max(12, dragStart.current.posX - deltaX);
+        const newY = Math.max(12, dragStart.current.posY - deltaY);
+
+        const maxX = window.innerWidth - 60;
+        const maxY = window.innerHeight - 60;
+
+        setPosition({
+            x: Math.min(newX, maxX),
+            y: Math.min(newY, maxY)
+        });
+    };
+
+    const handlePointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+        if (!isDragging) {
+            toggleChat();
+        }
+        setIsDragging(false);
+    };
+
     const toggleChat = () => {
         setIsOpen(!isOpen);
         if (isOpen) setIsExpanded(false); // Reset expand state when closing
@@ -27,14 +77,12 @@ const ChatbotWidget = () => {
     const sendMessage = async () => {
         if (!input.trim()) return;
 
-        // Add user message to UI immediately
         const userMsg = input;
         setMessages(prev => [...prev, { text: userMsg, sender: 'user' }]);
         setInput('');
         setIsLoading(true);
 
         try {
-            // Send message to our new backend route using central API client
             const response = await api.post('/chatbot/message', { 
                 message: userMsg, 
                 history: messages 
@@ -42,7 +90,6 @@ const ChatbotWidget = () => {
 
             const data = response.data;
 
-            // Add bot's reply to UI, including the profiles array!
             if (data.reply) {
                 setMessages(prev => [...prev, { text: data.reply, sender: 'bot', profiles: data.profiles }]);
             } else if (data.error) {
@@ -56,7 +103,14 @@ const ChatbotWidget = () => {
     };
 
     return (
-        <div className={`z-[100] flex flex-col items-end ${isExpanded ? 'fixed inset-4' : 'fixed bottom-6 right-6'}`}>
+        <div 
+            className="z-[100] flex flex-col items-end fixed"
+            style={
+                isExpanded 
+                    ? { top: '16px', left: '16px', right: '16px', bottom: '16px' } 
+                    : { right: `${position.x}px`, bottom: `${position.y}px` }
+            }
+        >
             {/* Chat Window */}
             {isOpen && (
                 <div 
@@ -75,7 +129,6 @@ const ChatbotWidget = () => {
                             borderBottom: '1px solid rgba(74,46,27,0.1)'
                         }}
                     >
-                        {/* Shimmer effect */}
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
                         
                         <div className="flex items-center gap-3 relative z-10">
@@ -100,8 +153,6 @@ const ChatbotWidget = () => {
 
                     {/* Messages Area */}
                     <div className="flex-1 p-5 overflow-y-auto flex flex-col gap-4 relative">
-                        {/* Decorative background logo/watermark could go here */}
-                        
                         {messages.map((msg, index) => (
                             <div key={index} className={`flex flex-col w-full ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
                                 <div
@@ -174,17 +225,22 @@ const ChatbotWidget = () => {
                 </div>
             )}
 
-            {/* Floating Toggle Button (Hidden when expanded) */}
+            {/* Sleek Smaller Floating Toggle Button (Hidden when expanded, draggable) */}
             {!isExpanded && (
                 <button
-                    onClick={toggleChat}
-                    className="w-16 h-16 rounded-full shadow-[0_8px_25px_rgba(212,175,55,0.4)] flex items-center justify-center text-3xl hover:scale-110 transition-all duration-300 ease-out mt-auto border-2 border-white/20 relative group"
-                    style={{ background: 'linear-gradient(135deg, #D4AF37, #A88655)' }}
+                    onPointerDown={handlePointerDown}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={handlePointerUp}
+                    className="w-12 h-12 rounded-full shadow-[0_4px_15px_rgba(212,175,55,0.3)] flex items-center justify-center text-xl hover:scale-115 active:scale-95 transition-transform duration-150 ease-out mt-auto border-2 border-white/20 relative group select-none cursor-grab active:cursor-grabbing"
+                    style={{ 
+                        background: 'linear-gradient(135deg, #D4AF37, #A88655)',
+                        touchAction: 'none' // Prevents default touchscreen scrolling while dragging
+                    }}
                 >
                     {/* Pulsing ring effect */}
-                    {!isOpen && <div className="absolute inset-0 rounded-full border-2 border-[#D4AF37] animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite] opacity-40" />}
+                    {!isOpen && <div className="absolute inset-0 rounded-full border-2 border-[#D4AF37] animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite] opacity-40 pointer-events-none" />}
                     
-                    <span className="relative z-10 transform group-hover:rotate-12 transition-transform duration-300">
+                    <span className="relative z-10 transform group-hover:rotate-12 transition-transform duration-300 pointer-events-none">
                         {isOpen ? '✕' : '✨'}
                     </span>
                 </button>
