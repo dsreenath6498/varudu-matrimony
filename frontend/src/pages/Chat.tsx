@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar';
-import { Send, ArrowLeft, Lock, Sparkles, Phone, X } from 'lucide-react';
+import { Send, ArrowLeft, Lock, Sparkles, Phone, X, ChevronRight, TrendingUp, BarChart2 } from 'lucide-react';
 import api from '../api';
 import { useSocket } from '../context/SocketContext';
 import { useCall } from '../context/CallContext';
@@ -204,61 +204,49 @@ export default function Chat() {
   };
 
   if (!activeMatch) {
+    const fullyUnlockedCount = matches.filter(m => m.isFullyUnlocked).length;
+    const responseRate = matches.length > 0 ? Math.round((fullyUnlockedCount / matches.length) * 100) : 0;
+
     return (
-      <div
-        className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-44 transition-all"
-        style={{ background: 'var(--bg-base)' }}
-      >
+      <div className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-44 bg-white font-sans text-[#1D1D1F]">
         {/* Header */}
-        <div className="sticky top-0 z-10 px-4 py-4" style={headerStyle}>
-          <div className="max-w-2xl mx-auto">
-            <h1
-              className="text-2xl font-bold"
-              style={{
-                fontFamily: '"Cormorant Garamond", serif',
-                background: 'linear-gradient(135deg, #FFD700, #D4AF37)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              Matches
-            </h1>
-            {!loadingMatches && matches.length > 0 && (
-              <p className="text-xs mt-0.5" style={{ color: 'rgba(180,120,150,0.5)' }}>
-                {matches.length} mutual connection{matches.length !== 1 ? 's' : ''}
-              </p>
-            )}
+        <div className="sticky top-0 z-10 px-6 py-4 bg-white border-b border-neutral-150">
+          <div className="max-w-2xl mx-auto flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-bold text-[#1D1D1F] tracking-tight">
+                Matches
+              </h1>
+              {!loadingMatches && matches.length > 0 && (
+                <p className="text-[10px] text-neutral-450 font-bold uppercase tracking-wider mt-0.5">
+                  {matches.length} mutual connection{matches.length !== 1 ? 's' : ''}
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="flex-1 p-4">
-          <div className="max-w-2xl mx-auto">
+        <div className="flex-1 p-6">
+          <div className="max-w-2xl mx-auto space-y-6">
+            
+
+
             {loadingMatches ? (
               <div className="space-y-3 mt-4">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="rounded-2xl shimmer-skeleton" style={{ height: '80px' }} />
+                  <div key={i} className="rounded-2xl shimmer-skeleton bg-neutral-50 border border-neutral-150" style={{ height: '80px' }} />
                 ))}
               </div>
             ) : matches.length === 0 ? (
-              <div
-                className="flex flex-col items-center justify-center mt-24 text-center"
-                style={{ animation: 'fadeUp 0.6s ease both' }}
-              >
-                <div
-                  className="w-24 h-24 rounded-full flex items-center justify-center mb-4"
-                  style={{
-                    background: 'rgba(225,29,72,0.07)',
-                    border: '1px solid rgba(225,29,72,0.12)',
-                    animation: 'pulseGlow 3s ease-in-out infinite',
-                  }}
-                >
-                  <Sparkles className="w-10 h-10" style={{ color: 'rgba(212,175,55,0.4)' }} />
+              <div className="flex flex-col items-center justify-center py-20 text-center animate-fadeUp">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5 bg-neutral-100 border border-neutral-200">
+                  <Sparkles className="w-6 h-6 text-neutral-400" />
                 </div>
-                <p className="text-xl font-semibold" style={{ fontFamily: '"Cormorant Garamond", serif', color: 'rgba(255,248,240,0.4)' }}>
+                <p className="text-lg font-bold text-black tracking-tight mb-1">
                   No matches yet
                 </p>
-                <p className="text-sm mt-1" style={{ color: 'rgba(180,120,150,0.3)' }}>Keep swiping!</p>
+                <p className="text-xs text-neutral-500 max-w-xs leading-relaxed">
+                  Keep swiping in Discover feed to find mutual connections!
+                </p>
               </div>
             ) : (
               <div className="space-y-3 mt-4">
@@ -266,67 +254,44 @@ export default function Chat() {
                   <div
                     key={match.matchId}
                     onClick={() => openChat(match)}
-                    className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.01] hover:shadow-lg"
+                    className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer border border-neutral-200 bg-white hover:shadow-md transition-shadow duration-200 text-left animate-fadeUp"
                     style={{
-                      background: match.isFullyUnlocked
-                        ? 'var(--bg-surface)'
-                        : 'var(--glass-bg)',
-                      border: '1px solid var(--glass-border)',
-                      opacity: match.isFullyUnlocked ? 1 : 0.6,
-                      animation: `fadeUp 0.5s ${i * 0.08}s ease both`,
+                      opacity: match.isFullyUnlocked ? 1 : 0.75,
+                      animationDelay: `${i * 0.05}s`,
                     }}
                   >
+                    {/* Avatar */}
                     <div className="relative flex-shrink-0">
                       <img
                         src={match.user.photos[0] || 'https://via.placeholder.com/150'}
                         alt={match.user.name}
-                        className="w-14 h-14 rounded-xl object-cover"
-                        style={{
-                          border: match.isFullyUnlocked
-                            ? '2px solid rgba(212,175,55,0.4)'
-                            : '2px solid rgba(255,255,255,0.05)',
-                          filter: match.isFullyUnlocked ? 'none' : 'grayscale(30%)',
-                        }}
+                        className="w-14 h-14 rounded-xl object-cover border border-neutral-150"
                       />
+                      {/* Fully unlocked green dot indicator */}
                       {match.isFullyUnlocked && (
-                        <div
-                          className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 flex items-center justify-center"
-                          style={{
-                            background: '#22C55E',
-                            borderColor: '#050005',
-                            boxShadow: '0 0 6px rgba(34,197,94,0.5)',
-                          }}
-                        />
+                        <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border border-white bg-green-500 shadow-sm" />
                       )}
                     </div>
 
+                    {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-sm flex items-center gap-1" style={{ color: 'var(--text-primary)' }}>
+                        <h3 className="font-extrabold text-sm text-neutral-900 truncate flex items-center gap-1.5">
                           {match.user.name}
                           {match.user.face_verified && (
-                            <span className="inline-flex items-center justify-center bg-blue-500 text-white rounded-full p-0.5" style={{ width: '14px', height: '14px' }} title="Face Verified">
-                              <svg className="w-2.5 h-2.5 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="20 6 9 17 4 12" />
-                              </svg>
+                            <span className="inline-flex items-center justify-center bg-[#0071E3] text-white rounded-full w-3.5 h-3.5 text-[8px] font-bold select-none">
+                              ✓
                             </span>
                           )}
                         </h3>
                         {!match.isFullyUnlocked && (
-                          <span
-                            className="text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1"
-                            style={{
-                              background: 'rgba(255,255,255,0.06)',
-                              color: 'rgba(180,120,150,0.6)',
-                              border: '1px solid rgba(255,255,255,0.06)',
-                            }}
-                          >
-                            <Lock className="w-2.5 h-2.5" />
+                          <span className="text-[8px] font-extrabold text-neutral-550 bg-neutral-50 border border-neutral-200/50 px-2 py-0.5 rounded-full flex items-center gap-1 uppercase tracking-wider">
+                            <Lock className="w-2.5 h-2.5 text-neutral-400" />
                             Locked
                           </span>
                         )}
                       </div>
-                      <p className="text-xs mt-0.5 truncate" style={{ color: 'rgba(180,120,150,0.5)' }}>
+                      <p className="text-xs mt-1 text-neutral-500 font-medium">
                         {match.isFullyUnlocked
                           ? 'Tap to start chatting!'
                           : !match.myUnlockStatus
@@ -336,21 +301,12 @@ export default function Chat() {
                     </div>
 
                     <div className="flex-shrink-0">
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center"
-                        style={{
-                          background: match.isFullyUnlocked
-                            ? 'rgba(212,175,55,0.1)'
-                            : 'rgba(255,255,255,0.04)',
-                          border: match.isFullyUnlocked
-                            ? '1px solid rgba(212,175,55,0.2)'
-                            : '1px solid rgba(255,255,255,0.05)',
-                        }}
-                      >
-                        {match.isFullyUnlocked
-                          ? <span style={{ fontSize: '14px' }}>💬</span>
-                          : <Lock className="w-3.5 h-3.5" style={{ color: 'rgba(180,120,150,0.4)' }} />
-                        }
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-neutral-50 border border-neutral-200">
+                        {match.isFullyUnlocked ? (
+                          <ChevronRight className="w-4 h-4 text-neutral-600" />
+                        ) : (
+                          <Lock className="w-3.5 h-3.5 text-neutral-400" />
+                        )}
                       </div>
                     </div>
                   </div>
