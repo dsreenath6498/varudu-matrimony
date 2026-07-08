@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar';
-import { Send, ArrowLeft, Lock, Sparkles, Phone, X, ChevronRight, TrendingUp, BarChart2 } from 'lucide-react';
+import { Send, ArrowLeft, Lock, Sparkles, Phone, X, ChevronRight } from 'lucide-react';
 import api from '../api';
 import { useSocket } from '../context/SocketContext';
 import { useCall } from '../context/CallContext';
@@ -204,9 +204,6 @@ export default function Chat() {
   };
 
   if (!activeMatch) {
-    const fullyUnlockedCount = matches.filter(m => m.isFullyUnlocked).length;
-    const responseRate = matches.length > 0 ? Math.round((fullyUnlockedCount / matches.length) * 100) : 0;
-
     return (
       <div className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-44 bg-white font-sans text-[#1D1D1F]">
         {/* Header */}

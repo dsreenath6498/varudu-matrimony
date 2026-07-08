@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
 import Navbar from '../components/Navbar';
-import { Heart, Clock, CheckCircle, MapPin, ArrowLeft, ArrowUpRight, TrendingUp } from 'lucide-react';
+import { Heart, Clock, CheckCircle, MapPin, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Interest {
@@ -40,10 +40,6 @@ export default function MyInterests() {
     };
     fetchInterests();
   }, []);
-
-  const acceptedCount = interests.filter(i => i.status === 'accepted').length;
-  const pendingCount = interests.filter(i => i.status === 'pending').length;
-  const matchRate = interests.length > 0 ? Math.round((acceptedCount / interests.length) * 100) : 0;
 
   return (
     <div className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-44 bg-white font-sans text-[#1D1D1F]">
