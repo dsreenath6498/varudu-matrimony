@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar';
-import { Send, ArrowLeft, Lock, Sparkles, Phone, X, ChevronRight } from 'lucide-react';
+import { Send, ArrowLeft, Lock, Sparkles, Phone, X, ChevronRight, MapPin, Heart } from 'lucide-react';
 import api from '../api';
 import { useSocket } from '../context/SocketContext';
 import { useCall } from '../context/CallContext';
@@ -45,23 +45,67 @@ export default function Chat() {
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [showStory, setShowStory] = useState(false);
 
+  // Requests and tabs states
+  const [requests, setRequests] = useState<any[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(true);
+  const [activeTab, setActiveTab] = useState<'matches' | 'requests'>('matches');
+  const [activeRequest, setActiveRequest] = useState<any | null>(null);
+
   const currentUserStr = localStorage.getItem('user');
   const currentUser = currentUserStr ? JSON.parse(currentUserStr) : null;
 
-  useEffect(() => {
+  const fetchMatches = async () => {
     if (!currentUser) return;
-    const fetchMatches = async () => {
-      try {
-        const response = await api.get('/chat/matches', { params: { userId: currentUser.id } });
-        setMatches(response.data.matches);
-      } catch (error) {
-        console.error('Error fetching matches', error);
-      } finally {
-        setLoadingMatches(false);
-      }
-    };
+    try {
+      setLoadingMatches(true);
+      const response = await api.get('/chat/matches', { params: { userId: currentUser.id } });
+      setMatches(response.data.matches);
+    } catch (error) {
+      console.error('Error fetching matches', error);
+    } finally {
+      setLoadingMatches(false);
+    }
+  };
+
+  const fetchRequests = async () => {
+    if (!currentUser) return;
+    try {
+      setLoadingRequests(true);
+      const response = await api.get('/interactions/requests', { params: { userId: currentUser.id } });
+      setRequests(response.data.requests);
+    } catch (error) {
+      console.error('Error fetching requests', error);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  useEffect(() => {
     fetchMatches();
+    fetchRequests();
   }, []);
+
+  const handleAcceptRequest = async (interestId: string) => {
+    try {
+      await api.post('/interactions/accept', { interestId });
+      await fetchMatches();
+      await fetchRequests();
+      setActiveRequest(null);
+      setActiveTab('matches');
+    } catch (err) {
+      console.error('Failed to accept request', err);
+    }
+  };
+
+  const handleDeclineRequest = async (interestId: string) => {
+    try {
+      await api.post('/interactions/decline', { interestId });
+      await fetchRequests();
+      setActiveRequest(null);
+    } catch (err) {
+      console.error('Failed to decline request', err);
+    }
+  };
 
   useEffect(() => {
     if (!socket) return;
@@ -211,108 +255,314 @@ export default function Chat() {
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-[#1D1D1F] tracking-tight">
-                Matches
+                Inbox
               </h1>
-              {!loadingMatches && matches.length > 0 && (
-                <p className="text-[10px] text-neutral-450 font-bold uppercase tracking-wider mt-0.5">
-                  {matches.length} mutual connection{matches.length !== 1 ? 's' : ''}
-                </p>
-              )}
+              <p className="text-[10px] text-neutral-450 font-bold uppercase tracking-wider mt-0.5">
+                Manage your connections and likes
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 p-6">
-          <div className="max-w-2xl mx-auto space-y-6">
-            
+        {/* Segmented Pill Selector */}
+        <div className="px-6 pt-4 max-w-2xl mx-auto w-full">
+          <div className="flex bg-neutral-100 p-0.5 rounded-full border border-neutral-200">
+            <button
+              onClick={() => setActiveTab('matches')}
+              className={`flex-1 py-2 text-xs font-bold rounded-full transition-all ${
+                activeTab === 'matches'
+                  ? 'bg-white text-black shadow-sm'
+                  : 'text-neutral-500 hover:text-black'
+              }`}
+            >
+              Matches ({matches.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('requests')}
+              className={`flex-1 py-2 text-xs font-bold rounded-full transition-all ${
+                activeTab === 'requests'
+                  ? 'bg-white text-black shadow-sm'
+                  : 'text-neutral-500 hover:text-black'
+              }`}
+            >
+              Requests ({requests.length})
+            </button>
+          </div>
+        </div>
 
-
-            {loadingMatches ? (
-              <div className="space-y-3 mt-4">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="rounded-2xl shimmer-skeleton bg-neutral-50 border border-neutral-150" style={{ height: '80px' }} />
-                ))}
-              </div>
-            ) : matches.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center animate-fadeUp">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5 bg-neutral-100 border border-neutral-200">
-                  <Sparkles className="w-6 h-6 text-neutral-400" />
+        <div className="flex-1 p-6 overflow-y-auto">
+          <div className="max-w-2xl mx-auto">
+            {activeTab === 'matches' ? (
+              /* MATCHES TAB */
+              loadingMatches ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="rounded-2xl shimmer-skeleton bg-neutral-50 border border-neutral-150" style={{ height: '80px' }} />
+                  ))}
                 </div>
-                <p className="text-lg font-bold text-black tracking-tight mb-1">
-                  No matches yet
-                </p>
-                <p className="text-xs text-neutral-500 max-w-xs leading-relaxed">
-                  Keep swiping in Discover feed to find mutual connections!
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3 mt-4">
-                {matches.map((match, i) => (
-                  <div
-                    key={match.matchId}
-                    onClick={() => openChat(match)}
-                    className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer border border-neutral-200 bg-white hover:shadow-md transition-shadow duration-200 text-left animate-fadeUp"
-                    style={{
-                      opacity: match.isFullyUnlocked ? 1 : 0.75,
-                      animationDelay: `${i * 0.05}s`,
-                    }}
-                  >
-                    {/* Avatar */}
-                    <div className="relative flex-shrink-0">
-                      <img
-                        src={match.user.photos[0] || 'https://via.placeholder.com/150'}
-                        alt={match.user.name}
-                        className="w-14 h-14 rounded-xl object-cover border border-neutral-150"
-                      />
-                      {/* Fully unlocked green dot indicator */}
-                      {match.isFullyUnlocked && (
-                        <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border border-white bg-green-500 shadow-sm" />
-                      )}
-                    </div>
+              ) : matches.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center animate-fadeUp">
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5 bg-neutral-100 border border-neutral-200">
+                    <Sparkles className="w-6 h-6 text-neutral-400" />
+                  </div>
+                  <p className="text-lg font-bold text-black tracking-tight mb-1">
+                    No matches yet
+                  </p>
+                  <p className="text-xs text-neutral-500 max-w-xs leading-relaxed">
+                    Keep swiping in Discover feed to find mutual connections!
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {matches.map((match, i) => (
+                    <div
+                      key={match.matchId}
+                      onClick={() => openChat(match)}
+                      className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer border border-neutral-200 bg-white hover:shadow-md transition-shadow duration-200 text-left animate-fadeUp"
+                      style={{
+                        opacity: match.isFullyUnlocked ? 1 : 0.85,
+                        animationDelay: `${i * 0.05}s`,
+                      }}
+                    >
+                      {/* Avatar */}
+                      <div className="relative flex-shrink-0">
+                        <img
+                          src={match.user.photos[0] || 'https://via.placeholder.com/150'}
+                          alt={match.user.name}
+                          className="w-14 h-14 rounded-xl object-cover border border-neutral-150"
+                        />
+                        {/* Fully unlocked green dot indicator */}
+                        {match.isFullyUnlocked && (
+                          <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border border-white bg-green-500 shadow-sm" />
+                        )}
+                      </div>
 
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-extrabold text-sm text-neutral-900 truncate flex items-center gap-1.5">
-                          {match.user.name}
-                          {match.user.face_verified && (
-                            <span className="inline-flex items-center justify-center bg-[#0071E3] text-white rounded-full w-3.5 h-3.5 text-[8px] font-bold select-none">
-                              ✓
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-extrabold text-sm text-neutral-900 truncate flex items-center gap-1.5">
+                            {match.user.name}
+                            {match.user.face_verified && (
+                              <span className="inline-flex items-center justify-center bg-[#0071E3] text-white rounded-full w-3.5 h-3.5 text-[8px] font-bold select-none">
+                                ✓
+                              </span>
+                            )}
+                          </h3>
+                          {!match.isFullyUnlocked && (
+                            <span className="text-[8px] font-extrabold text-neutral-550 bg-neutral-50 border border-neutral-200/50 px-2 py-0.5 rounded-full flex items-center gap-1 uppercase tracking-wider">
+                              <Lock className="w-2.5 h-2.5 text-neutral-400" />
+                              Locked
                             </span>
                           )}
-                        </h3>
-                        {!match.isFullyUnlocked && (
-                          <span className="text-[8px] font-extrabold text-neutral-550 bg-neutral-50 border border-neutral-200/50 px-2 py-0.5 rounded-full flex items-center gap-1 uppercase tracking-wider">
-                            <Lock className="w-2.5 h-2.5 text-neutral-400" />
-                            Locked
+                        </div>
+                        <p className="text-xs mt-1 text-neutral-500 font-medium">
+                          {match.isFullyUnlocked
+                            ? 'Tap to start chatting!'
+                            : !match.myUnlockStatus
+                            ? 'Unlock required · 1 Rose'
+                            : 'Waiting for their commitment...'}
+                        </p>
+                      </div>
+
+                      <div className="flex-shrink-0">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-neutral-50 border border-neutral-200">
+                          {match.isFullyUnlocked ? (
+                            <ChevronRight className="w-4 h-4 text-neutral-600" />
+                          ) : (
+                            <Lock className="w-3.5 h-3.5 text-neutral-400" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : (
+              /* REQUESTS TAB */
+              loadingRequests ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="rounded-2xl shimmer-skeleton bg-neutral-50 border border-neutral-150" style={{ height: '80px' }} />
+                  ))}
+                </div>
+              ) : requests.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center animate-fadeUp">
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5 bg-neutral-100 border border-neutral-200">
+                    <Heart className="w-6 h-6 text-neutral-400 animate-pulse" />
+                  </div>
+                  <p className="text-lg font-bold text-black tracking-tight mb-1">
+                    No requests yet
+                  </p>
+                  <p className="text-xs text-neutral-500 max-w-xs leading-relaxed">
+                    Incoming likes from other users will show up here. Check back soon!
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {requests.map((req, i) => (
+                    <div
+                      key={req.id}
+                      onClick={() => setActiveRequest(req)}
+                      className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer border border-neutral-200 bg-white hover:shadow-md transition-shadow duration-200 text-left animate-fadeUp"
+                      style={{
+                        animationDelay: `${i * 0.05}s`,
+                      }}
+                    >
+                      {/* Avatar */}
+                      <div className="relative flex-shrink-0">
+                        <img
+                          src={req.users.photos[0] || 'https://via.placeholder.com/150'}
+                          alt={req.users.name}
+                          className="w-14 h-14 rounded-xl object-cover border border-neutral-150"
+                        />
+                        {req.interaction_type === 'rose' && (
+                          <span className="absolute -top-1 -left-1 text-xs select-none">
+                            🌹
                           </span>
                         )}
                       </div>
-                      <p className="text-xs mt-1 text-neutral-500 font-medium">
-                        {match.isFullyUnlocked
-                          ? 'Tap to start chatting!'
-                          : !match.myUnlockStatus
-                          ? 'Unlock required · 1 Rose'
-                          : 'Waiting for their commitment...'}
-                      </p>
-                    </div>
 
-                    <div className="flex-shrink-0">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-neutral-50 border border-neutral-200">
-                        {match.isFullyUnlocked ? (
-                          <ChevronRight className="w-4 h-4 text-neutral-600" />
-                        ) : (
-                          <Lock className="w-3.5 h-3.5 text-neutral-400" />
-                        )}
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-extrabold text-sm text-neutral-900 truncate flex items-center gap-1.5">
+                            {req.users.name}, <span className="font-normal text-neutral-500">{req.users.age}</span>
+                            {req.users.face_verified && (
+                              <span className="inline-flex items-center justify-center bg-[#0071E3] text-white rounded-full w-3.5 h-3.5 text-[8px] font-bold select-none">
+                                ✓
+                              </span>
+                            )}
+                          </h3>
+                          {req.interaction_type === 'rose' && (
+                            <span className="text-[7px] font-extrabold text-red-600 bg-red-50 border border-red-150 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                              Rose
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 mt-1 text-neutral-400 font-semibold">
+                          <MapPin className="w-3.5 h-3.5 text-neutral-300" />
+                          <span className="text-xs truncate">{req.users.place}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex-shrink-0">
+                        <span className="text-[10px] font-bold text-[#0071E3] hover:underline flex items-center gap-0.5">
+                          View Profile
+                          <ChevronRight className="w-3 h-3" />
+                        </span>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )
             )}
           </div>
         </div>
         <Navbar />
+
+        {/* ── SPLIT DRAWER OVERLAY FOR REQUEST DETAILS ── */}
+        {activeRequest && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-[4px] animate-fadeIn">
+            <div 
+              className="bg-white border border-neutral-200 p-6 rounded-3xl w-full max-w-sm relative text-left shadow-2xl h-[85vh] flex flex-col justify-between"
+              style={{ animation: 'slideLeft 0.25s ease-out' }}
+            >
+              <button 
+                onClick={() => setActiveRequest(null)} 
+                className="absolute top-4 right-4 text-neutral-400 hover:text-black w-6 h-6 flex items-center justify-center rounded-full bg-neutral-100"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              
+              <div className="flex-1 overflow-y-auto pr-1 no-scrollbar space-y-5 mt-4">
+                {/* Photo */}
+                <div className="relative h-56 rounded-2xl overflow-hidden bg-neutral-50 border border-neutral-200">
+                  <img 
+                    src={activeRequest.users.photos && activeRequest.users.photos.length > 0 ? activeRequest.users.photos[0] : 'https://via.placeholder.com/150'}
+                    alt={activeRequest.users.name}
+                    className="w-full h-full object-cover"
+                  />
+                  {activeRequest.interaction_type === 'rose' && (
+                    <div className="absolute top-3 left-3 bg-red-50 text-red-600 border border-red-100 px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-wider flex items-center gap-1">
+                      <span>🌹 Sent you a Rose</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Identity & Location */}
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <h2 className="text-lg font-bold text-black">{activeRequest.users.name}, {activeRequest.users.age}</h2>
+                    {activeRequest.users.face_verified && (
+                      <span className="inline-flex items-center justify-center bg-[#0071E3] text-white rounded-full w-3.5 h-3.5 text-[8px] font-bold select-none">
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-neutral-500 mt-0.5">{activeRequest.users.place}</p>
+                </div>
+
+                {/* Astro Birth details */}
+                {(activeRequest.users.dob || activeRequest.users.tob || activeRequest.users.pob) && (
+                  <div className="p-3.5 rounded-2xl border border-neutral-150 bg-neutral-50/50">
+                    <h4 className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5">Birth Astro</h4>
+                    <div className="grid grid-cols-3 gap-2 text-xs">
+                      <div>
+                        <span className="block text-[8px] font-bold text-neutral-400 uppercase tracking-wider">Date</span>
+                        <span className="font-semibold text-neutral-800">{activeRequest.users.dob || '—'}</span>
+                      </div>
+                      <div>
+                        <span className="block text-[8px] font-bold text-neutral-400 uppercase tracking-wider">Time</span>
+                        <span className="font-semibold text-neutral-800">{activeRequest.users.tob || '—'}</span>
+                      </div>
+                      <div>
+                        <span className="block text-[8px] font-bold text-neutral-400 uppercase tracking-wider">Place</span>
+                        <span className="font-semibold text-neutral-800 truncate block">{activeRequest.users.pob || '—'}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Family details */}
+                {activeRequest.users.family_details && Object.keys(activeRequest.users.family_details).length > 0 && (
+                  <div className="p-3.5 rounded-2xl border border-neutral-150 bg-neutral-50/50">
+                    <h4 className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5">Family details</h4>
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      {activeRequest.users.family_details.father_name && (
+                        <div>
+                          <span className="block text-[8px] font-bold text-neutral-400 uppercase tracking-wider">Father</span>
+                          <span className="font-semibold text-neutral-800">{activeRequest.users.family_details.father_name}</span>
+                        </div>
+                      )}
+                      {activeRequest.users.family_details.mother_name && (
+                        <div>
+                          <span className="block text-[8px] font-bold text-neutral-400 uppercase tracking-wider">Mother</span>
+                          <span className="font-semibold text-neutral-800">{activeRequest.users.family_details.mother_name}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-4 border-t border-neutral-150 grid grid-cols-2 gap-3">
+                <button 
+                  onClick={() => handleDeclineRequest(activeRequest.id)}
+                  className="py-3 border border-neutral-250 hover:bg-neutral-50 text-neutral-700 text-xs font-bold rounded-xl transition-all"
+                >
+                  Decline
+                </button>
+                <button 
+                  onClick={() => handleAcceptRequest(activeRequest.id)}
+                  className="py-3 bg-[#0071E3] hover:bg-[#0077ED] text-white text-xs font-bold rounded-xl transition-all shadow-sm active:scale-98"
+                >
+                  Accept Match
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

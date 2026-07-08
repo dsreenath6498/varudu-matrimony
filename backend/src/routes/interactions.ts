@@ -38,9 +38,10 @@ router.post('/swipe', async (req, res) => {
     }
 
     const id = randomUUID();
+    const senderUnlocked = (interactionType === 'rose' || interactionType === 'rose_message') ? 1 : 0;
     await db.run(
-      'INSERT INTO interests (id, sender_id, receiver_id, status, interaction_type, attached_message) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (sender_id, receiver_id) DO NOTHING', 
-      [id, senderId, receiverId, status, interactionType, attachedMessage]
+      'INSERT INTO interests (id, sender_id, receiver_id, status, interaction_type, attached_message, sender_unlocked) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (sender_id, receiver_id) DO NOTHING', 
+      [id, senderId, receiverId, status, interactionType, attachedMessage, senderUnlocked]
     );
     res.json({ message: 'Swipe recorded successfully', status });
   } catch (error: any) {
@@ -90,7 +91,7 @@ router.get('/requests', async (req, res) => {
   const db = getDb();
   try {
     const data = await db.all(`
-      SELECT i.id, i.status, i.interaction_type, i.attached_message, u.id as u_id, u.name, u.age, u.place, u.photos, u.face_verified
+      SELECT i.id, i.status, i.interaction_type, i.attached_message, u.id as u_id, u.name, u.age, u.place, u.photos, u.face_verified, u.dob, u.tob, u.pob, u.family_details
       FROM interests i
       JOIN users u ON i.sender_id = u.id
       WHERE i.receiver_id = $1 AND i.status = 'pending'
@@ -113,7 +114,11 @@ router.get('/requests', async (req, res) => {
         age: row.age,
         place: row.place,
         photos: JSON.parse(row.photos || '[]'),
-        face_verified: row.face_verified === 1 || row.face_verified === true
+        face_verified: row.face_verified === 1 || row.face_verified === true,
+        dob: row.dob,
+        tob: row.tob,
+        pob: row.pob,
+        family_details: JSON.parse(row.family_details || '{}')
       }
     }));
 
@@ -133,21 +138,29 @@ router.post('/accept', async (req, res) => {
     const interest = await db.get('SELECT * FROM interests WHERE id = $1', [interestId]);
     if (!interest) return res.status(404).json({ error: 'Interest not found' });
 
-    // If it's a premium interaction (Rose), both users are instantly unlocked
-    let senderUnlocked = 0;
-    let receiverUnlocked = 0;
-    
-    if (interest.interaction_type === 'rose' || interest.interaction_type === 'rose_message') {
-      senderUnlocked = 1;
-      receiverUnlocked = 1;
-    }
-
     await db.run(
-      "UPDATE interests SET status = 'accepted', sender_unlocked = $1, receiver_unlocked = $2, accepted_at = CURRENT_TIMESTAMP WHERE id = $3", 
-      [senderUnlocked, receiverUnlocked, interestId]
+      "UPDATE interests SET status = 'accepted', accepted_at = CURRENT_TIMESTAMP WHERE id = $1", 
+      [interestId]
     );
 
     res.json({ message: 'Request accepted!' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Decline/Ignore Request
+router.post('/decline', async (req, res) => {
+  const { interestId } = req.body;
+  if (!interestId) return res.status(400).json({ error: 'Interest ID required' });
+
+  const db = getDb();
+  try {
+    await db.run(
+      "UPDATE interests SET status = 'rejected' WHERE id = $1",
+      [interestId]
+    );
+    res.json({ message: 'Request declined!' });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

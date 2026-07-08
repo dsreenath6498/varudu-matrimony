@@ -680,13 +680,6 @@ export default function Discover() {
                         >
                           <span className="text-base select-none">🌹</span>
                         </button>
-
-                        <button
-                          onClick={() => handleNoteClick(profile.id)}
-                          className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center text-white transition-all backdrop-blur-md relative"
-                        >
-                          <MessageSquareHeart className="w-4.5 h-4.5 text-white" />
-                        </button>
                       </div>
                     </div>
 
