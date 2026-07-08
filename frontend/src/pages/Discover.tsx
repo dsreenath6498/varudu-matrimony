@@ -564,10 +564,10 @@ export default function Discover() {
                 <div
                   key={profile.id}
                   onDoubleClick={() => !isShowMore && handleReelDoubleClick(profile.id)}
-                  className="snap-start snap-always h-full w-full relative flex shrink-0 overflow-hidden select-none bg-black md:rounded-[32px]"
+                  className="snap-start snap-always h-full w-full relative overflow-hidden select-none bg-black md:rounded-[32px]"
                 >
                   <div
-                    className="w-[150%] h-full flex transition-transform duration-300 relative"
+                    className="w-[150%] h-full flex shrink-0 transition-transform duration-300 relative"
                     style={{
                       transform: isShowMore ? 'translateX(-33.333%)' : 'translateX(0)',
                     }}
