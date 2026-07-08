@@ -127,7 +127,7 @@ router.get('/feed', async (req, res) => {
     const query = `
       SELECT * FROM users 
       WHERE gender = $1 AND is_onboarded = 1 AND id NOT IN (${swipedIds.join(',')})
-      ORDER BY created_at DESC
+      ORDER BY is_mock ASC, created_at DESC
       LIMIT 20
     `;
     

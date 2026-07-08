@@ -36,7 +36,8 @@ export async function initDb() {
         family_details TEXT DEFAULT '{}',
         email TEXT UNIQUE,
         tob TEXT,
-        pob TEXT
+        pob TEXT,
+        is_mock BOOLEAN DEFAULT false
       );
 
       CREATE TABLE IF NOT EXISTS interests (
@@ -114,6 +115,14 @@ export async function initDb() {
       console.log('Successfully added pob column to users table (or it already existed).');
     } catch (migErr) {
       console.error('Migration error for pob:', migErr);
+    }
+
+    // Migration for adding is_mock column
+    try {
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_mock BOOLEAN DEFAULT false;`);
+      console.log('Successfully added is_mock column to users table (or it already existed).');
+    } catch (migErr) {
+      console.error('Migration error for is_mock:', migErr);
     }
 
     // Migration for adding astro_unlocked column to interests

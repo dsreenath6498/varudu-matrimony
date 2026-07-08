@@ -567,13 +567,13 @@ export default function Discover() {
                   className="snap-start snap-always h-full w-full relative flex shrink-0 overflow-hidden select-none bg-black md:rounded-[32px]"
                 >
                   <div
-                    className="w-full h-full flex transition-transform duration-300 relative"
+                    className="w-[150%] h-full flex transition-transform duration-300 relative"
                     style={{
-                      transform: isShowMore ? 'translateX(-50%)' : 'translateX(0)',
+                      transform: isShowMore ? 'translateX(-33.333%)' : 'translateX(0)',
                     }}
                   >
                     {/* Reel Main View */}
-                    <div className="w-full h-full flex-shrink-0 relative">
+                    <div className="w-[66.666%] h-full flex-shrink-0 relative">
                       {/* Reel Image Background */}
                       <div
                         className="absolute inset-0 bg-cover bg-center transition-all duration-300"
@@ -692,10 +692,7 @@ export default function Discover() {
 
                     {/* Reels Details Panel Drawer */}
                     <div
-                      className="w-[50%] h-full flex-shrink-0 bg-white border-l border-neutral-200/80 p-5 flex flex-col justify-between absolute right-0 text-left transition-transform duration-300 z-30"
-                      style={{
-                        transform: isShowMore ? 'translateX(0)' : 'translateX(100%)',
-                      }}
+                      className="w-[33.333%] h-full flex-shrink-0 bg-white border-l border-neutral-200/80 p-5 flex flex-col justify-between relative text-left z-30"
                     >
                       <button
                         onClick={(e) => { e.stopPropagation(); setActiveShowMoreProfileId(null); }}
