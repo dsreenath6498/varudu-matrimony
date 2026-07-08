@@ -44,9 +44,14 @@ router.post('/create', upload.array('photos', 5), async (req, res) => {
     }
 
     if (files && files.length > 0) {
-      // Convert to full URL accessible via browser
-      const baseUrl = req.protocol + '://' + req.get('host');
-      photoUrls = files.map(file => `${baseUrl}/uploads/${file.filename}`);
+      photoUrls = files.map(file => {
+        const filePath = path.join(uploadDir, file.filename);
+        const fileBuffer = fs.readFileSync(filePath);
+        const base64Image = fileBuffer.toString('base64');
+        const mimeType = file.mimetype || 'image/jpeg';
+        try { fs.unlinkSync(filePath); } catch (e) {}
+        return `data:${mimeType};base64,${base64Image}`;
+      });
     } else if (existingUser) {
       photoUrls = JSON.parse(existingUser.photos || '[]');
     }
@@ -203,8 +208,12 @@ router.post('/update-photo', upload.single('photo'), async (req, res) => {
 
   const db = getDb();
   try {
-    const baseUrl = req.protocol + '://' + req.get('host');
-    const photoUrl = `${baseUrl}/uploads/${req.file.filename}`;
+    const filePath = path.join(uploadDir, req.file.filename);
+    const fileBuffer = fs.readFileSync(filePath);
+    const base64Image = fileBuffer.toString('base64');
+    const mimeType = req.file.mimetype || 'image/jpeg';
+    try { fs.unlinkSync(filePath); } catch (e) {}
+    const photoUrl = `data:${mimeType};base64,${base64Image}`;
 
     // Read existing photos or initialize empty array
     const user = await db.get('SELECT photos FROM users WHERE id = $1', [userId]);
@@ -233,6 +242,11 @@ router.post('/update-photo', upload.single('photo'), async (req, res) => {
 
 // Helper to convert profile picture (URL or local path) to base64 string
 async function getImageBase64(imageUrl: string): Promise<string> {
+  if (imageUrl.startsWith('data:')) {
+    const commaIdx = imageUrl.indexOf(',');
+    return commaIdx !== -1 ? imageUrl.substring(commaIdx + 1) : imageUrl;
+  }
+
   // If it's a local upload, read directly from file system
   if (imageUrl.includes('/uploads/')) {
     try {

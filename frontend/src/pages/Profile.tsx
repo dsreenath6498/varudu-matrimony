@@ -397,68 +397,83 @@ export default function Profile() {
           {/* ── LEVELS OF VERIFICATION ── */}
           <div className="space-y-4 pt-2">
             <h3 className="text-base font-bold text-black uppercase tracking-wider">Levels of Verification</h3>
-            
-            {/* Level 1: Aadhaar Identity */}
-            <div className="p-5 rounded-2xl border border-neutral-200 bg-white">
-              <div className="flex items-start gap-4">
-                <div className={`p-3 rounded-full flex-shrink-0 ${user?.aadhaar_verified ? 'bg-blue-50 text-[#0071E3]' : 'bg-neutral-100 text-neutral-400'}`}>
-                  <ShieldCheck className="w-6 h-6" />
-                </div>
-                <div className="flex-1 text-left min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Level 1</span>
-                    {user?.aadhaar_verified && (
-                      <span className="text-[9px] font-extrabold text-[#0071E3] uppercase tracking-wider bg-blue-50 px-2 py-0.5 rounded-full">Complete</span>
-                    )}
-                  </div>
-                  <h4 className="text-base font-bold text-black mt-1">Aadhaar Identity</h4>
-                  <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
-                    {user?.aadhaar_verified 
-                      ? 'Your government identity has been successfully validated. You have the verified badge!' 
-                      : 'Verify your Aadhaar details to activate Level 1 verification on your profile.'}
-                  </p>
-                  {!user?.aadhaar_verified && (
-                    <button 
-                      onClick={() => setShowAadhaarModal(true)}
-                      className="mt-4 px-5 py-2 bg-[#0071E3] hover:bg-[#0077ED] text-white text-xs font-semibold rounded-full shadow-sm transition-all active:scale-98"
-                    >
-                      Verify Aadhaar
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
 
-            {/* Level 2: AI Face Verify */}
-            <div className="p-5 rounded-2xl border border-neutral-200 bg-white">
-              <div className="flex items-start gap-4">
-                <div className={`p-3 rounded-full flex-shrink-0 ${user?.face_verified ? 'bg-blue-50 text-[#0071E3]' : 'bg-neutral-100 text-neutral-400'}`}>
-                  <svg className="w-6 h-6 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                  </svg>
-                </div>
-                <div className="flex-1 text-left min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Level 2</span>
-                    {user?.face_verified && (
-                      <span className="text-[9px] font-extrabold text-[#0071E3] uppercase tracking-wider bg-blue-50 px-2 py-0.5 rounded-full">Complete</span>
+            {/* Verification Progress Slider */}
+            <div className="p-5 rounded-2xl border border-neutral-200 bg-white text-left space-y-3">
+              <div className="flex justify-between items-center text-xs font-bold text-neutral-500 uppercase tracking-wider">
+                <span>Verification Progress</span>
+                <span className="font-extrabold text-[#0071E3]">
+                  {user?.aadhaar_verified && user?.face_verified ? '100% (Complete)' : user?.aadhaar_verified || user?.face_verified ? '50% (Level 1)' : '0%'}
+                </span>
+              </div>
+              <div className="relative w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-[#0071E3] transition-all duration-500 rounded-full"
+                  style={{ 
+                    width: user?.aadhaar_verified && user?.face_verified ? '100%' : user?.aadhaar_verified || user?.face_verified ? '50%' : '0%' 
+                  }}
+                />
+              </div>
+              <p className="text-[10px] text-neutral-400 font-semibold uppercase tracking-wide">
+                Complete Level 1 & Level 2 to get the blue checkmark badge!
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3.5">
+              {/* Level 1: Aadhaar Identity */}
+              <div className="p-4 rounded-2xl border border-neutral-200 bg-white flex flex-col justify-between min-h-[160px]">
+                <div className="text-left">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-neutral-400">Level 1</span>
+                    {user?.aadhaar_verified ? (
+                      <span className="text-[8px] font-extrabold text-[#0071E3] uppercase tracking-wider bg-blue-50 px-2 py-0.5 rounded-full">Complete</span>
+                    ) : (
+                      <span className="text-[8px] font-extrabold text-neutral-450 uppercase tracking-wider bg-neutral-100 px-2 py-0.5 rounded-full">Pending</span>
                     )}
                   </div>
-                  <h4 className="text-base font-bold text-black mt-1">Live AI Selfie Match</h4>
-                  <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
-                    {user?.face_verified 
-                      ? 'AI Face Match check completed successfully. Your profile picture matches your selfie.' 
-                      : 'Complete a quick selfie comparison check to unlock Level 2 verified status.'}
+                  <h4 className="text-sm font-bold text-black mt-2.5">Aadhaar Identity</h4>
+                  <p className="text-[10px] text-neutral-500 mt-1 leading-normal">
+                    {user?.aadhaar_verified 
+                      ? 'Government identity validated.' 
+                      : 'Verify identity to activate Level 1.'}
                   </p>
-                  {!user?.face_verified && (
-                    <button 
-                      onClick={() => setShowFaceModal(true)}
-                      className="mt-4 px-5 py-2 border border-[#0071E3] text-[#0071E3] hover:bg-blue-50/50 text-xs font-semibold rounded-full transition-all active:scale-98"
-                    >
-                      Verify with AI Selfie
-                    </button>
-                  )}
                 </div>
+                {!user?.aadhaar_verified && (
+                  <button 
+                    onClick={() => setShowAadhaarModal(true)}
+                    className="mt-3 w-full py-2 bg-[#0071E3] hover:bg-[#0077ED] text-white text-[10px] font-bold rounded-full shadow-sm transition-all active:scale-95"
+                  >
+                    Verify
+                  </button>
+                )}
+              </div>
+
+              {/* Level 2: AI Face Verify */}
+              <div className="p-4 rounded-2xl border border-neutral-200 bg-white flex flex-col justify-between min-h-[160px]">
+                <div className="text-left">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-neutral-400">Level 2</span>
+                    {user?.face_verified ? (
+                      <span className="text-[8px] font-extrabold text-[#0071E3] uppercase tracking-wider bg-blue-50 px-2 py-0.5 rounded-full">Complete</span>
+                    ) : (
+                      <span className="text-[8px] font-extrabold text-neutral-450 uppercase tracking-wider bg-neutral-100 px-2 py-0.5 rounded-full">Pending</span>
+                    )}
+                  </div>
+                  <h4 className="text-sm font-bold text-black mt-2.5">Live AI Selfie</h4>
+                  <p className="text-[10px] text-neutral-500 mt-1 leading-normal">
+                    {user?.face_verified 
+                      ? 'AI Face Match check complete.' 
+                      : 'Match selfie with DP to activate Level 2.'}
+                  </p>
+                </div>
+                {!user?.face_verified && (
+                  <button 
+                    onClick={() => setShowFaceModal(true)}
+                    className="mt-3 w-full py-2 border border-[#0071E3] text-[#0071E3] hover:bg-blue-50/50 text-[10px] font-bold rounded-full transition-all active:scale-95"
+                  >
+                    Verify
+                  </button>
+                )}
               </div>
             </div>
           </div>
