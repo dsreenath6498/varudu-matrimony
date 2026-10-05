@@ -43,6 +43,7 @@ function App() {
               <Route path="/interests" element={<ProtectedRoute><MyInterests /></ProtectedRoute>} />
               <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
               <Route path="/store" element={<ProtectedRoute><RoseBoutique /></ProtectedRoute>} />
+              <Route path="/roses" element={<ProtectedRoute><RoseBoutique /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             </Routes>
           </div>

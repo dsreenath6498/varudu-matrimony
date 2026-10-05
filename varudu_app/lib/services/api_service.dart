@@ -1,8 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 class ApiService {
-  static const String baseUrl = 'http://192.168.1.6:3000/api';
+  static final String baseUrl = kIsWeb
+      ? 'http://localhost:3000/api'
+      : (Platform.isAndroid ? 'http://10.0.2.2:3000/api' : 'http://localhost:3000/api');
 
   static Future<dynamic> post(String endpoint, Map<String, dynamic> body) async {
     final response = await http.post(

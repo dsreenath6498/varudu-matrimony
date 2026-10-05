@@ -69,66 +69,96 @@ export default function RoseBoutique() {
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
-
-  const loadRazorpay = () => {
+  const loadCashfree = () => {
     return new Promise((resolve) => {
+      if ((window as any).Cashfree) {
+        resolve(true);
+        return;
+      }
       const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
       script.onload = () => resolve(true);
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
     });
   };
 
+  useEffect(() => {
+    fetchData();
+
+    // Check for return redirect from Cashfree
+    const queryParams = new URLSearchParams(window.location.search);
+    const orderIdParam = queryParams.get('order_id');
+    const userStr = localStorage.getItem('user');
+
+    if (orderIdParam && userStr) {
+      const user = JSON.parse(userStr);
+      api.post('/roses/cashfree-verify', { userId: user.id, amount: 1, orderId: orderIdParam })
+        .then(() => {
+          alert('Cashfree Payment Verified Successfully!');
+          fetchData();
+          // Clean URL parameter
+          window.history.replaceState({}, document.title, window.location.pathname);
+        })
+        .catch((err) => {
+          console.error('Redirect Verification Error:', err);
+        });
+    }
+  }, []);
+
   const handleBuy = async (amount: number) => {
     setLoading(true);
     const user = JSON.parse(localStorage.getItem('user')!);
     try {
-      const res = await api.post('/roses/buy-order', { userId: user.id, amount });
-      const { orderId, amount: amountPaise, keyId, mock } = res.data;
+      const res = await api.post('/roses/cashfree-order', { userId: user.id, amount });
+      const { paymentSessionId, orderId, mock, env } = res.data;
+
       if (mock) {
-        await api.post('/roses/buy-verify', { userId: user.id, amount, mock: true });
-        alert('Mock Payment Successful! Roses added.');
+        await api.post('/roses/cashfree-verify', { userId: user.id, amount, mock: true, orderId });
+        alert('Mock Cashfree Payment Successful! Roses added.');
         fetchData();
         setLoading(false);
         return;
       }
-      const resLoad = await loadRazorpay();
-      if (!resLoad) {
-        alert('Razorpay SDK failed to load.');
+
+      const resLoad = await loadCashfree();
+      if (!resLoad || !(window as any).Cashfree) {
+        alert('Cashfree SDK failed to load.');
         setLoading(false);
         return;
       }
-      const options = {
-        key: keyId,
-        amount: amountPaise,
-        currency: 'INR',
-        name: 'Varudu Matrimony',
-        description: `Purchase ${amount} Rose(s)`,
-        order_id: orderId,
-        handler: async function (response: any) {
+
+      const cashfree = (window as any).Cashfree({
+        mode: env === 'production' ? 'production' : 'sandbox',
+      });
+
+      const checkoutOptions = {
+        paymentSessionId: paymentSessionId,
+        redirectTarget: '_modal',
+      };
+
+      cashfree.checkout(checkoutOptions).then(async (result: any) => {
+        if (result.error) {
+          console.error('Cashfree Checkout Error:', result.error);
+          alert(result.error.message || 'Payment cancelled or failed');
+          setLoading(false);
+          return;
+        }
+
+        if (!result.redirect) {
           try {
-            await api.post('/roses/buy-verify', {
-              userId: user.id, amount,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_signature: response.razorpay_signature,
-            });
-            alert('Payment Successful! Roses added to your account.');
+            await api.post('/roses/cashfree-verify', { userId: user.id, amount, orderId });
+            alert('Cashfree Payment Successful! Roses added to your account.');
             fetchData();
           } catch (err: any) {
             alert(err.response?.data?.error || 'Verification Failed');
+          } finally {
+            setLoading(false);
           }
-        },
-        prefill: { name: user.name, contact: user.phone_number || '9999999999' },
-        theme: { color: '#E11D48' },
-      };
-      const paymentObject = new (window as any).Razorpay(options);
-      paymentObject.open();
+        }
+      });
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to initialize payment');
-    } finally {
+      alert(err.response?.data?.error || 'Failed to initialize Cashfree payment');
       setLoading(false);
     }
   };

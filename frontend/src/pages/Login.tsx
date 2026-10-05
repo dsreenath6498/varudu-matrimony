@@ -14,15 +14,23 @@ export default function Login() {
   // Initialize real Google Sign-In GSI client if client ID exists
   useEffect(() => {
     if (googleClientId && (window as any).google) {
-      const google = (window as any).google;
-      google.accounts.id.initialize({
-        client_id: googleClientId,
-        callback: handleGoogleCallback,
-      });
-      google.accounts.id.renderButton(
-        document.getElementById('google-login-btn'),
-        { theme: 'outline', size: 'large', width: '100%' }
-      );
+      try {
+        const google = (window as any).google;
+        google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: handleGoogleCallback,
+        });
+        const btnElem = document.getElementById('google-login-btn');
+        if (btnElem) {
+          btnElem.innerHTML = '';
+          google.accounts.id.renderButton(
+            btnElem,
+            { theme: 'outline', size: 'large', width: 280 }
+          );
+        }
+      } catch (err) {
+        console.warn('Google GSI init warning:', err);
+      }
     }
   }, [googleClientId]);
 

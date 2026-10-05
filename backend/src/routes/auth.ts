@@ -88,10 +88,10 @@ router.post('/google-login', async (req, res) => {
     const db = getDb();
     
     // Check if user exists with this email
-    const user = await db.get('SELECT * FROM users WHERE email = $1', [googleUser.email]);
+    const user = await db.get('SELECT * FROM users WHERE email = $1 OR LOWER(email) = LOWER($2)', [googleUser.email, googleUser.email]);
     
     if (user) {
-      user.photos = JSON.parse(user.photos || '[]');
+      user.photos = typeof user.photos === 'string' ? JSON.parse(user.photos || '[]') : (user.photos || []);
       return res.json({ success: true, user, isNew: !user.is_onboarded });
     } else {
       return res.json({
