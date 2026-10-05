@@ -125,8 +125,14 @@ export async function initDb() {
   // SQLite fallback (dynamically required)
   isSqlite = true;
   const dbPath = path.join(__dirname, '../database.sqlite');
-  const sqlite3 = require('sqlite3');
-  const sqliteDb = new sqlite3.Database(dbPath);
+  let sqliteDb: any = null;
+  try {
+    const sqlite3 = require('sqlite3');
+    sqliteDb = new sqlite3.Database(dbPath);
+  } catch (sqErr: any) {
+    console.error('SQLite native module failed to load:', sqErr.message);
+    console.error('Please ensure DATABASE_URL is set in environment variables to connect to PostgreSQL.');
+  }
 
   sqliteAdapter = {
     get: (sql: string, params: any[] = []): Promise<any> => {
@@ -154,6 +160,11 @@ export async function initDb() {
       });
     }
   };
+
+  if (!sqliteDb) {
+    console.warn('No active database instance. Please configure DATABASE_URL in Render environment variables.');
+    return;
+  }
 
   // Ensure tables exist in SQLite
   await sqliteAdapter.run(`
