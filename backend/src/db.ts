@@ -1,5 +1,4 @@
 import { Pool } from 'pg';
-import sqlite3 from 'sqlite3';
 import path from 'path';
 
 let pool: Pool | null = null;
@@ -123,9 +122,10 @@ export async function initDb() {
     }
   }
 
-  // SQLite fallback
+  // SQLite fallback (dynamically required)
   isSqlite = true;
   const dbPath = path.join(__dirname, '../database.sqlite');
+  const sqlite3 = require('sqlite3');
   const sqliteDb = new sqlite3.Database(dbPath);
 
   sqliteAdapter = {
