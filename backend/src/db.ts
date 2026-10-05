@@ -131,7 +131,7 @@ export async function initDb() {
   sqliteAdapter = {
     get: (sql: string, params: any[] = []): Promise<any> => {
       return new Promise((resolve, reject) => {
-        sqliteDb.get(sql, params, (err, row) => {
+        sqliteDb.get(sql, params, (err: any, row: any) => {
           if (err) reject(err);
           else resolve(row);
         });
@@ -139,7 +139,7 @@ export async function initDb() {
     },
     all: (sql: string, params: any[] = []): Promise<any[]> => {
       return new Promise((resolve, reject) => {
-        sqliteDb.all(sql, params, (err, rows) => {
+        sqliteDb.all(sql, params, (err: any, rows: any) => {
           if (err) reject(err);
           else resolve(rows || []);
         });
@@ -147,7 +147,7 @@ export async function initDb() {
     },
     run: (sql: string, params: any[] = []): Promise<void> => {
       return new Promise((resolve, reject) => {
-        sqliteDb.run(sql, params, (err) => {
+        sqliteDb.run(sql, params, (err: any) => {
           if (err) reject(err);
           else resolve();
         });
