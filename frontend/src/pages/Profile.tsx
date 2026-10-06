@@ -310,18 +310,18 @@ export default function Profile() {
   if (loading) return null;
 
   return (
-    <div className="min-h-screen flex flex-col pt-16 bg-[#FDFBF7] font-sans text-[#1D1D1F]">
+    <div className="min-h-screen flex flex-col pt-16 bg-transparent font-sans text-[#1D1D1F]">
       
       {/* Header */}
-      <div className="sticky top-0 z-10 px-6 py-4 flex items-center justify-between bg-white border-b border-neutral-150">
+      <div className="sticky top-0 z-10 px-6 py-4 flex items-center justify-between bg-white/80 backdrop-blur-md border-b border-[#EBE3D5]">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => navigate(-1)} 
-            className="rounded-full p-2.5 flex items-center justify-center bg-neutral-100 hover:bg-neutral-200 text-neutral-800 transition-colors"
+            className="rounded-full p-2.5 flex items-center justify-center bg-[#F5F0E6] hover:bg-[#EFE8D8] text-[#5C5245] transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <h1 className="text-xl font-bold text-[#1D1D1F] tracking-tight">
+          <h1 className="text-xl font-bold text-[#2C2825] tracking-tight">
             My Profile
           </h1>
         </div>
@@ -399,7 +399,7 @@ export default function Profile() {
             <h3 className="text-base font-bold text-black uppercase tracking-wider">Levels of Verification</h3>
 
             {/* Verification Progress Slider */}
-            <div className="p-5 rounded-2xl border border-neutral-200 bg-white text-left space-y-3">
+            <div className="p-5 rounded-2xl border border-[#EBE3D5] bg-white/75 backdrop-blur-md text-left space-y-3 shadow-xs">
               <div className="flex justify-between items-center text-xs font-bold text-neutral-500 uppercase tracking-wider">
                 <span>Verification Progress</span>
                 <span className="font-extrabold text-[#0071E3]">
@@ -421,7 +421,7 @@ export default function Profile() {
             
             <div className="grid grid-cols-2 gap-3.5">
               {/* Level 1: Aadhaar Identity */}
-              <div className="p-4 rounded-2xl border border-neutral-200 bg-white flex flex-col justify-between min-h-[160px]">
+              <div className="p-4 rounded-2xl border border-[#EBE3D5] bg-white/75 backdrop-blur-md flex flex-col justify-between min-h-[160px] shadow-xs">
                 <div className="text-left">
                   <div className="flex items-center justify-between">
                     <span className="text-[9px] font-bold uppercase tracking-wider text-neutral-400">Level 1</span>
@@ -449,7 +449,7 @@ export default function Profile() {
               </div>
 
               {/* Level 2: AI Face Verify */}
-              <div className="p-4 rounded-2xl border border-neutral-200 bg-white flex flex-col justify-between min-h-[160px]">
+              <div className="p-4 rounded-2xl border border-[#EBE3D5] bg-white/75 backdrop-blur-md flex flex-col justify-between min-h-[160px] shadow-xs">
                 <div className="text-left">
                   <div className="flex items-center justify-between">
                     <span className="text-[9px] font-bold uppercase tracking-wider text-neutral-400">Level 2</span>

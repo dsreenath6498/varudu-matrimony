@@ -185,11 +185,11 @@ export default function RoseBoutique() {
 
   return (
     <div
-      className="min-h-screen flex flex-col pt-16 bg-[#FDFBF7]"
+      className="min-h-screen flex flex-col pt-16 bg-transparent"
     >
       {/* Header */}
       <div
-        className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3 bg-white border-b border-neutral-200"
+        className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3 bg-white/80 backdrop-blur-md border-b border-[#EBE3D5]"
       >
         <button
           onClick={() => navigate(-1)}

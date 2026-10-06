@@ -240,11 +240,11 @@ export default function Discover() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col pt-16 bg-[#FDFBF7] overflow-x-hidden">
+    <div className="min-h-screen flex flex-col pt-16 bg-transparent overflow-x-hidden">
       
       {/* ── HEADER (Shown only in Stack View mode) ── */}
       {viewMode === 'stack' && (
-        <div className="flex items-center justify-between px-6 py-4 sticky top-0 z-30 bg-white border-b border-neutral-100">
+        <div className="flex items-center justify-between px-6 py-4 sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-[#EBE3D5]">
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate('/')}

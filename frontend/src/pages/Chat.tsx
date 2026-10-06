@@ -249,9 +249,9 @@ export default function Chat() {
 
   if (!activeMatch) {
     return (
-      <div className="min-h-screen flex flex-col pt-16 bg-[#FDFBF7] font-sans text-[#1D1D1F]">
+      <div className="min-h-screen flex flex-col pt-16 bg-transparent font-sans text-[#1D1D1F]">
         {/* Header */}
-        <div className="sticky top-0 z-10 px-6 py-4 bg-white border-b border-neutral-150">
+        <div className="sticky top-0 z-10 px-6 py-4 bg-white/80 backdrop-blur-md border-b border-[#EBE3D5]">
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-[#1D1D1F] tracking-tight">
