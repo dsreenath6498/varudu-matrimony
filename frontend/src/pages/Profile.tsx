@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import api from '../api';
-import { ShieldCheck, ArrowLeft, Pencil, X, Lock, Unlock } from 'lucide-react';
+import { ShieldCheck, Pencil, X, Lock, Unlock } from 'lucide-react';
 
 export interface FamilyDetails {
   father_name: string;
@@ -312,26 +312,11 @@ export default function Profile() {
   return (
     <div className="min-h-screen flex flex-col pt-16 bg-transparent font-sans text-[#1D1D1F]">
       
-      {/* Header */}
-      <div className="sticky top-0 z-10 px-6 py-4 flex items-center justify-between bg-white/80 backdrop-blur-md border-b border-[#EBE3D5]">
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => navigate(-1)} 
-            className="rounded-full p-2.5 flex items-center justify-center bg-[#F5F0E6] hover:bg-[#EFE8D8] text-[#5C5245] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <h1 className="text-xl font-bold text-[#2C2825] tracking-tight">
-            My Profile
-          </h1>
-        </div>
-      </div>
-
       <div className="flex-1 p-6 overflow-y-auto max-w-lg mx-auto w-full">
         <div className="space-y-8">
           
           {/* DP Section */}
-          <div className="flex flex-col items-center mt-4">
+          <div className="flex flex-col items-center mt-2">
             <div className="relative">
               <input 
                 type="file" 
@@ -346,8 +331,8 @@ export default function Profile() {
                   user?.aadhaar_verified && user?.face_verified
                     ? 'ring-4 ring-[#0071E3] ring-offset-2' 
                     : user?.aadhaar_verified 
-                      ? 'ring-4 ring-neutral-900 ring-offset-2' 
-                      : 'ring-2 ring-neutral-200'
+                      ? 'ring-4 ring-[#5C3A21] ring-offset-2' 
+                      : 'ring-2 ring-[#5C3A21]/30'
                 }`}
               >
                 {uploadingPhoto ? (
@@ -365,7 +350,7 @@ export default function Profile() {
               {/* Edit Photo Icon Overlay */}
               <div 
                 onClick={() => fileInputRef.current?.click()}
-                className="absolute top-0 right-0 bg-neutral-900 hover:bg-black text-white rounded-full p-2 cursor-pointer transition-all hover:scale-110 shadow-md"
+                className="absolute top-0 right-0 bg-[#5C3A21] hover:bg-[#3D2514] text-white rounded-full p-2 cursor-pointer transition-all hover:scale-110 shadow-md"
                 title="Upload Profile Photo"
               >
                 <Pencil className="w-3.5 h-3.5" />
@@ -388,25 +373,25 @@ export default function Profile() {
               )}
             </div>
 
-            <h2 className="mt-5 text-2xl font-bold text-black tracking-tight flex items-center justify-center gap-1.5">
-              {user?.name}, <span className="font-normal text-neutral-500">{user?.age}</span>
+            <h2 className="mt-5 text-2xl font-bold text-[#2C2825] tracking-tight flex items-center justify-center gap-1.5">
+              {user?.name}, <span className="font-normal text-[#5C5245]">{user?.age}</span>
             </h2>
-            <p className="text-neutral-500 text-sm mt-1">{user?.place}</p>
+            <p className="text-[#7A6B5D] text-sm mt-1">{user?.place}</p>
           </div>
 
           {/* ── LEVELS OF VERIFICATION ── */}
           <div className="space-y-4 pt-2">
-            <h3 className="text-base font-bold text-black uppercase tracking-wider">Levels of Verification</h3>
+            <h3 className="text-sm font-extrabold text-[#5C3A21] uppercase tracking-wider">Levels of Verification</h3>
 
             {/* Verification Progress Slider */}
-            <div className="p-5 rounded-2xl border border-[#EBE3D5] bg-white/75 backdrop-blur-md text-left space-y-3 shadow-xs">
-              <div className="flex justify-between items-center text-xs font-bold text-neutral-500 uppercase tracking-wider">
+            <div className="p-5 rounded-3xl border border-[#5C3A21]/20 bg-white/40 backdrop-blur-md text-left space-y-3 shadow-xs">
+              <div className="flex justify-between items-center text-xs font-bold text-[#5C5245] uppercase tracking-wider">
                 <span>Verification Progress</span>
                 <span className="font-extrabold text-[#0071E3]">
                   {user?.aadhaar_verified && user?.face_verified ? '100% (Complete)' : user?.aadhaar_verified || user?.face_verified ? '50% (Level 1)' : '0%'}
                 </span>
               </div>
-              <div className="relative w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
+              <div className="relative w-full h-2 bg-[#EBE3D5] rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-[#0071E3] transition-all duration-500 rounded-full"
                   style={{ 
@@ -414,25 +399,25 @@ export default function Profile() {
                   }}
                 />
               </div>
-              <p className="text-[10px] text-neutral-400 font-semibold uppercase tracking-wide">
-                Complete Level 1 & Level 2 to get the blue checkmark badge!
+              <p className="text-[10px] text-[#7A6B5D] font-semibold uppercase tracking-wide">
+                Complete Level 1 & Level 2 to get the checkmark badge!
               </p>
             </div>
             
             <div className="grid grid-cols-2 gap-3.5">
               {/* Level 1: Aadhaar Identity */}
-              <div className="p-4 rounded-2xl border border-[#EBE3D5] bg-white/75 backdrop-blur-md flex flex-col justify-between min-h-[160px] shadow-xs">
+              <div className="p-4 rounded-3xl border border-[#5C3A21]/20 bg-white/40 backdrop-blur-md flex flex-col justify-between min-h-[160px] shadow-xs">
                 <div className="text-left">
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-neutral-400">Level 1</span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-[#7A6B5D]">Level 1</span>
                     {user?.aadhaar_verified ? (
                       <span className="text-[8px] font-extrabold text-[#0071E3] uppercase tracking-wider bg-blue-50 px-2 py-0.5 rounded-full">Complete</span>
                     ) : (
-                      <span className="text-[8px] font-extrabold text-neutral-450 uppercase tracking-wider bg-neutral-100 px-2 py-0.5 rounded-full">Pending</span>
+                      <span className="text-[8px] font-extrabold text-[#7A6B5D] uppercase tracking-wider bg-white/50 px-2 py-0.5 rounded-full">Pending</span>
                     )}
                   </div>
-                  <h4 className="text-sm font-bold text-black mt-2.5">Aadhaar Identity</h4>
-                  <p className="text-[10px] text-neutral-500 mt-1 leading-normal">
+                  <h4 className="text-sm font-bold text-[#2C2825] mt-2.5">Aadhaar Identity</h4>
+                  <p className="text-[10px] text-[#7A6B5D] mt-1 leading-normal">
                     {user?.aadhaar_verified 
                       ? 'Government identity validated.' 
                       : 'Verify identity to activate Level 1.'}
@@ -449,18 +434,18 @@ export default function Profile() {
               </div>
 
               {/* Level 2: AI Face Verify */}
-              <div className="p-4 rounded-2xl border border-[#EBE3D5] bg-white/75 backdrop-blur-md flex flex-col justify-between min-h-[160px] shadow-xs">
+              <div className="p-4 rounded-3xl border border-[#5C3A21]/20 bg-white/40 backdrop-blur-md flex flex-col justify-between min-h-[160px] shadow-xs">
                 <div className="text-left">
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-neutral-400">Level 2</span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-[#7A6B5D]">Level 2</span>
                     {user?.face_verified ? (
                       <span className="text-[8px] font-extrabold text-[#0071E3] uppercase tracking-wider bg-blue-50 px-2 py-0.5 rounded-full">Complete</span>
                     ) : (
-                      <span className="text-[8px] font-extrabold text-neutral-450 uppercase tracking-wider bg-neutral-100 px-2 py-0.5 rounded-full">Pending</span>
+                      <span className="text-[8px] font-extrabold text-[#7A6B5D] uppercase tracking-wider bg-white/50 px-2 py-0.5 rounded-full">Pending</span>
                     )}
                   </div>
-                  <h4 className="text-sm font-bold text-black mt-2.5">Live AI Selfie</h4>
-                  <p className="text-[10px] text-neutral-500 mt-1 leading-normal">
+                  <h4 className="text-sm font-bold text-[#2C2825] mt-2.5">Live AI Selfie</h4>
+                  <p className="text-[10px] text-[#7A6B5D] mt-1 leading-normal">
                     {user?.face_verified 
                       ? 'AI Face Match check complete.' 
                       : 'Match selfie with DP to activate Level 2.'}
@@ -479,9 +464,9 @@ export default function Profile() {
           </div>
 
           {/* Phone Privacy Settings Card */}
-          <div className="p-5 rounded-2xl border border-neutral-200 bg-white">
+          <div className="p-5 rounded-3xl border border-[#5C3A21]/20 bg-white/40 backdrop-blur-md">
             <div className="flex items-start gap-4">
-              <div className={`p-3 rounded-full flex-shrink-0 ${user?.phone_visible ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-400'}`}>
+              <div className={`p-3 rounded-full flex-shrink-0 ${user?.phone_visible ? 'bg-[#5C3A21] text-white' : 'bg-[#EBE3D5] text-[#7A6B5D]'}`}>
                 {user?.phone_visible ? (
                   <Unlock className="w-6 h-6" />
                 ) : (
@@ -489,10 +474,10 @@ export default function Profile() {
                 )}
               </div>
               <div className="flex-1 text-left min-w-0">
-                <h3 className="text-base font-bold text-black">
+                <h3 className="text-base font-bold text-[#2C2825]">
                   Phone Number Privacy
                 </h3>
-                <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
+                <p className="text-xs text-[#7A6B5D] mt-1 leading-relaxed">
                   {user?.phone_visible 
                     ? 'Other users can spend 5 Roses to unlock your verified phone number.' 
                     : 'Your phone number is completely private and hidden from matches.'}
@@ -515,7 +500,7 @@ export default function Profile() {
                       alert('Failed to update phone settings');
                     }
                   }}
-                  className="mt-4 px-4 py-2 border border-black text-black hover:bg-neutral-50 text-[10px] font-extrabold uppercase tracking-wider rounded-full transition-all"
+                  className="mt-4 px-4 py-2 border border-[#5C3A21] text-[#5C3A21] hover:bg-[#5C3A21]/10 text-[10px] font-extrabold uppercase tracking-wider rounded-full transition-all backdrop-blur-xs"
                 >
                   {user?.phone_visible ? 'Keep Private' : 'Allow Matches to Unlock'}
                 </button>
@@ -524,9 +509,9 @@ export default function Profile() {
           </div>
 
           {/* Horoscope & Birth Details Card */}
-          <div className="p-5 rounded-2xl border border-neutral-200 bg-white">
-            <div className="flex items-center justify-between mb-4 pb-2 border-b border-neutral-100">
-              <h3 className="text-base font-bold text-black uppercase tracking-wider">Birth Astro Details</h3>
+          <div className="p-5 rounded-3xl border border-[#5C3A21]/20 bg-white/40 backdrop-blur-md">
+            <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#5C3A21]/15">
+              <h3 className="text-sm font-extrabold text-[#5C3A21] uppercase tracking-wider">Birth Astro Details</h3>
               <button 
                 onClick={() => {
                   setBirthData({
@@ -536,7 +521,7 @@ export default function Profile() {
                   });
                   setShowBirthModal(true);
                 }}
-                className="p-2 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-800 transition-colors"
+                className="p-2 rounded-full bg-[#EBE3D5]/80 hover:bg-[#EBE3D5] text-[#5C5245] transition-colors"
                 title="Edit Astro Details"
               >
                 <Pencil className="w-4 h-4" />
@@ -546,21 +531,21 @@ export default function Profile() {
             {user?.dob || user?.tob || user?.pob ? (
               <div className="grid grid-cols-3 gap-4 text-left">
                 <div>
-                  <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Date of Birth</p>
-                  <p className="font-bold text-[#1D1D1F] text-sm mt-1">{user.dob || 'N/A'}</p>
+                  <p className="text-[10px] text-[#7A6B5D] font-bold uppercase tracking-wider">Date of Birth</p>
+                  <p className="font-bold text-[#2C2825] text-sm mt-1">{user.dob || 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Time of Birth</p>
-                  <p className="font-bold text-[#1D1D1F] text-sm mt-1">{user.tob || 'N/A'}</p>
+                  <p className="text-[10px] text-[#7A6B5D] font-bold uppercase tracking-wider">Time of Birth</p>
+                  <p className="font-bold text-[#2C2825] text-sm mt-1">{user.tob || 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Place of Birth</p>
-                  <p className="font-bold text-[#1D1D1F] text-sm mt-1 truncate" title={user.pob}>{user.pob || 'N/A'}</p>
+                  <p className="text-[10px] text-[#7A6B5D] font-bold uppercase tracking-wider">Place of Birth</p>
+                  <p className="font-bold text-[#2C2825] text-sm mt-1 truncate" title={user.pob}>{user.pob || 'N/A'}</p>
                 </div>
               </div>
             ) : (
               <div className="text-center py-4">
-                <p className="text-xs text-neutral-500 mb-3 font-medium">Add your birth details to unlock matching features.</p>
+                <p className="text-xs text-[#7A6B5D] mb-3 font-medium">Add your birth details to unlock matching features.</p>
                 <button 
                   onClick={() => {
                     setBirthData({ dob: '', tob: '', pob: '' });
@@ -575,12 +560,12 @@ export default function Profile() {
           </div>
 
           {/* Family Details Card */}
-          <div className="p-5 rounded-2xl border border-neutral-200 bg-white">
-            <div className="flex items-center justify-between mb-4 pb-2 border-b border-neutral-100">
-              <h3 className="text-base font-bold text-black uppercase tracking-wider">Family Details</h3>
+          <div className="p-5 rounded-3xl border border-[#5C3A21]/20 bg-white/40 backdrop-blur-md">
+            <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#5C3A21]/15">
+              <h3 className="text-sm font-extrabold text-[#5C3A21] uppercase tracking-wider">Family Details</h3>
               <button 
                 onClick={() => setShowFamilyModal(true)}
-                className="p-2 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-800 transition-colors"
+                className="p-2 rounded-full bg-[#EBE3D5]/80 hover:bg-[#EBE3D5] text-[#5C5245] transition-colors"
                 title="Edit Family Details"
               >
                 <Pencil className="w-4 h-4" />
@@ -591,48 +576,48 @@ export default function Profile() {
               <div className="space-y-4 text-left">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Father</p>
-                    <p className="text-sm text-[#1D1D1F] font-bold mt-1">
+                    <p className="text-[10px] text-[#7A6B5D] font-bold uppercase tracking-wider">Father</p>
+                    <p className="text-sm text-[#2C2825] font-bold mt-1">
                       {user.family_details.father_name || 'N/A'}
                       {user.family_details.father_expired ? ' (Late)' : ''}
                     </p>
-                    <p className="text-[10px] text-neutral-500 font-medium">{user.family_details.father_job}</p>
+                    <p className="text-[10px] text-[#7A6B5D] font-medium">{user.family_details.father_job}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Mother</p>
-                    <p className="text-sm text-[#1D1D1F] font-bold mt-1">
+                    <p className="text-[10px] text-[#7A6B5D] font-bold uppercase tracking-wider">Mother</p>
+                    <p className="text-sm text-[#2C2825] font-bold mt-1">
                       {user.family_details.mother_name || 'N/A'}
                       {user.family_details.mother_expired ? ' (Late)' : ''}
                     </p>
-                    <p className="text-[10px] text-neutral-500 font-medium">{user.family_details.mother_job}</p>
+                    <p className="text-[10px] text-[#7A6B5D] font-medium">{user.family_details.mother_job}</p>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-neutral-100">
+                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-[#5C3A21]/15">
                   <div>
-                    <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Family Type</p>
-                    <p className="text-sm text-[#1D1D1F] font-bold mt-1">{user.family_details.family_type || 'N/A'}</p>
+                    <p className="text-[10px] text-[#7A6B5D] font-bold uppercase tracking-wider">Family Type</p>
+                    <p className="text-sm text-[#2C2825] font-bold mt-1">{user.family_details.family_type || 'N/A'}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Status</p>
-                    <p className="text-sm text-[#1D1D1F] font-bold mt-1">{user.family_details.family_status || 'N/A'}</p>
+                    <p className="text-[10px] text-[#7A6B5D] font-bold uppercase tracking-wider">Status</p>
+                    <p className="text-sm text-[#2C2825] font-bold mt-1">{user.family_details.family_status || 'N/A'}</p>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-neutral-100">
+                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-[#5C3A21]/15">
                   <div>
-                    <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Brothers</p>
-                    <p className="text-sm text-[#1D1D1F] font-bold mt-1">{user.family_details.brothers || 0}</p>
+                    <p className="text-[10px] text-[#7A6B5D] font-bold uppercase tracking-wider">Brothers</p>
+                    <p className="text-sm text-[#2C2825] font-bold mt-1">{user.family_details.brothers || 0}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Sisters</p>
-                    <p className="text-sm text-[#1D1D1F] font-bold mt-1">{user.family_details.sisters || 0}</p>
+                    <p className="text-[10px] text-[#7A6B5D] font-bold uppercase tracking-wider">Sisters</p>
+                    <p className="text-sm text-[#2C2825] font-bold mt-1">{user.family_details.sisters || 0}</p>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="text-center py-4">
-                <p className="text-xs text-neutral-500 mb-3 font-medium">Add your family details to get better matches.</p>
+                <p className="text-xs text-[#7A6B5D] mb-3 font-medium">Add your family details to get better matches.</p>
                 <button 
                   onClick={() => setShowFamilyModal(true)}
                   className="px-4 py-2 bg-[#0071E3] hover:bg-[#0077ED] text-white text-xs font-semibold rounded-full shadow-sm transition-all"

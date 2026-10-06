@@ -241,38 +241,25 @@ export default function Chat() {
   }, [showAstroModal, activeMatch]);
 
   const headerStyle: React.CSSProperties = {
-    background: 'rgba(255, 255, 255, 0.9)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
-    borderBottom: '1px solid var(--glass-border)',
+    background: 'rgba(255, 255, 255, 0.4)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    borderBottom: '1px solid rgba(92, 58, 33, 0.15)',
   };
 
   if (!activeMatch) {
     return (
       <div className="min-h-screen flex flex-col pt-16 bg-transparent font-sans text-[#1D1D1F]">
-        {/* Header */}
-        <div className="sticky top-0 z-10 px-6 py-4 bg-white/80 backdrop-blur-md border-b border-[#EBE3D5]">
-          <div className="max-w-2xl mx-auto flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold text-[#1D1D1F] tracking-tight">
-                Inbox
-              </h1>
-              <p className="text-[10px] text-neutral-450 font-bold uppercase tracking-wider mt-0.5">
-                Manage your connections and likes
-              </p>
-            </div>
-          </div>
-        </div>
 
         {/* Segmented Pill Selector */}
         <div className="px-6 pt-4 max-w-2xl mx-auto w-full">
-          <div className="flex bg-neutral-100 p-0.5 rounded-full border border-neutral-200">
+          <div className="flex bg-white/30 backdrop-blur-md p-1 rounded-full border border-[#5C3A21]/20">
             <button
               onClick={() => setActiveTab('matches')}
               className={`flex-1 py-2 text-xs font-bold rounded-full transition-all ${
                 activeTab === 'matches'
-                  ? 'bg-white text-black shadow-sm'
-                  : 'text-neutral-500 hover:text-black'
+                  ? 'bg-[#5C3A21] text-white shadow-sm'
+                  : 'text-[#5C5245] hover:text-[#2C2825]'
               }`}
             >
               Matches ({matches.length})
@@ -281,8 +268,8 @@ export default function Chat() {
               onClick={() => setActiveTab('requests')}
               className={`flex-1 py-2 text-xs font-bold rounded-full transition-all ${
                 activeTab === 'requests'
-                  ? 'bg-white text-black shadow-sm'
-                  : 'text-neutral-500 hover:text-black'
+                  ? 'bg-[#5C3A21] text-white shadow-sm'
+                  : 'text-[#5C5245] hover:text-[#2C2825]'
               }`}
             >
               Requests ({requests.length})
@@ -297,18 +284,18 @@ export default function Chat() {
               loadingMatches ? (
                 <div className="space-y-3">
                   {[1, 2, 3].map(i => (
-                    <div key={i} className="rounded-2xl shimmer-skeleton bg-neutral-50 border border-neutral-150" style={{ height: '80px' }} />
+                    <div key={i} className="rounded-3xl shimmer-skeleton bg-white/20 border border-[#5C3A21]/15" style={{ height: '80px' }} />
                   ))}
                 </div>
               ) : matches.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center animate-fadeUp">
-                  <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5 bg-neutral-100 border border-neutral-200">
-                    <Sparkles className="w-6 h-6 text-neutral-400" />
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5 bg-white/40 backdrop-blur-md border border-[#5C3A21]/20">
+                    <Sparkles className="w-6 h-6 text-[#5C3A21]" />
                   </div>
-                  <p className="text-lg font-bold text-black tracking-tight mb-1">
+                  <p className="text-lg font-bold text-[#2C2825] tracking-tight mb-1">
                     No matches yet
                   </p>
-                  <p className="text-xs text-neutral-500 max-w-xs leading-relaxed">
+                  <p className="text-xs text-[#7A6B5D] max-w-xs leading-relaxed">
                     Keep swiping in Discover feed to find mutual connections!
                   </p>
                 </div>
@@ -318,7 +305,7 @@ export default function Chat() {
                     <div
                       key={match.matchId}
                       onClick={() => openChat(match)}
-                      className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer border border-neutral-200 bg-white hover:shadow-md transition-shadow duration-200 text-left animate-fadeUp"
+                      className="flex items-center gap-4 p-4 rounded-3xl cursor-pointer border border-[#5C3A21]/20 bg-white/40 backdrop-blur-md hover:bg-white/60 hover:shadow-md transition-all duration-200 text-left animate-fadeUp"
                       style={{
                         opacity: match.isFullyUnlocked ? 1 : 0.85,
                         animationDelay: `${i * 0.05}s`,
@@ -329,7 +316,7 @@ export default function Chat() {
                         <img
                           src={match.user.photos[0] || 'https://via.placeholder.com/150'}
                           alt={match.user.name}
-                          className="w-14 h-14 rounded-xl object-cover border border-neutral-150"
+                          className="w-14 h-14 rounded-2xl object-cover border border-[#5C3A21]/20"
                         />
                         {/* Fully unlocked green dot indicator */}
                         {match.isFullyUnlocked && (
@@ -340,7 +327,7 @@ export default function Chat() {
                       {/* Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <h3 className="font-extrabold text-sm text-neutral-900 truncate flex items-center gap-1.5">
+                          <h3 className="font-extrabold text-sm text-[#2C2825] truncate flex items-center gap-1.5">
                             {match.user.name}
                             {match.user.face_verified && (
                               <span className="inline-flex items-center justify-center bg-[#0071E3] text-white rounded-full w-3.5 h-3.5 text-[8px] font-bold select-none">
@@ -349,13 +336,13 @@ export default function Chat() {
                             )}
                           </h3>
                           {!match.isFullyUnlocked && (
-                            <span className="text-[8px] font-extrabold text-neutral-550 bg-neutral-50 border border-neutral-200/50 px-2 py-0.5 rounded-full flex items-center gap-1 uppercase tracking-wider">
-                              <Lock className="w-2.5 h-2.5 text-neutral-400" />
+                            <span className="text-[8px] font-extrabold text-[#7A6B5D] bg-white/50 border border-[#5C3A21]/20 px-2 py-0.5 rounded-full flex items-center gap-1 uppercase tracking-wider">
+                              <Lock className="w-2.5 h-2.5 text-[#7A6B5D]" />
                               Locked
                             </span>
                           )}
                         </div>
-                        <p className="text-xs mt-1 text-neutral-500 font-medium">
+                        <p className="text-xs mt-1 text-[#7A6B5D] font-medium">
                           {match.isFullyUnlocked
                             ? 'Tap to start chatting!'
                             : !match.myUnlockStatus
@@ -365,11 +352,11 @@ export default function Chat() {
                       </div>
 
                       <div className="flex-shrink-0">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-neutral-50 border border-neutral-200">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/50 border border-[#5C3A21]/20">
                           {match.isFullyUnlocked ? (
-                            <ChevronRight className="w-4 h-4 text-neutral-600" />
+                            <ChevronRight className="w-4 h-4 text-[#5C3A21]" />
                           ) : (
-                            <Lock className="w-3.5 h-3.5 text-neutral-400" />
+                            <Lock className="w-3.5 h-3.5 text-[#7A6B5D]" />
                           )}
                         </div>
                       </div>
@@ -382,18 +369,18 @@ export default function Chat() {
               loadingRequests ? (
                 <div className="space-y-3">
                   {[1, 2, 3].map(i => (
-                    <div key={i} className="rounded-2xl shimmer-skeleton bg-neutral-50 border border-neutral-150" style={{ height: '80px' }} />
+                    <div key={i} className="rounded-3xl shimmer-skeleton bg-white/20 border border-[#5C3A21]/15" style={{ height: '80px' }} />
                   ))}
                 </div>
               ) : requests.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center animate-fadeUp">
-                  <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5 bg-neutral-100 border border-neutral-200">
-                    <Heart className="w-6 h-6 text-neutral-400 animate-pulse" />
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5 bg-white/40 backdrop-blur-md border border-[#5C3A21]/20">
+                    <Heart className="w-6 h-6 text-[#5C3A21] animate-pulse" />
                   </div>
-                  <p className="text-lg font-bold text-black tracking-tight mb-1">
+                  <p className="text-lg font-bold text-[#2C2825] tracking-tight mb-1">
                     No requests yet
                   </p>
-                  <p className="text-xs text-neutral-500 max-w-xs leading-relaxed">
+                  <p className="text-xs text-[#7A6B5D] max-w-xs leading-relaxed">
                     Incoming likes from other users will show up here. Check back soon!
                   </p>
                 </div>
@@ -403,7 +390,7 @@ export default function Chat() {
                     <div
                       key={req.id}
                       onClick={() => setActiveRequest(req)}
-                      className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer border border-neutral-200 bg-white hover:shadow-md transition-shadow duration-200 text-left animate-fadeUp"
+                      className="flex items-center gap-4 p-4 rounded-3xl cursor-pointer border border-[#5C3A21]/20 bg-white/40 backdrop-blur-md hover:bg-white/60 hover:shadow-md transition-all duration-200 text-left animate-fadeUp"
                       style={{
                         animationDelay: `${i * 0.05}s`,
                       }}

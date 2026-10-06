@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import api from '../api';
 import Navbar from '../components/Navbar';
-import { MapPin, Info, LogOut, MessageSquareHeart, X, Heart, Sparkles, ArrowLeft } from 'lucide-react';
+import { MapPin, Info, MessageSquareHeart, X, Heart, Sparkles, ArrowLeft } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 interface FamilyDetails {
@@ -173,10 +173,7 @@ export default function Discover() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    navigate('/login');
-  };
+
 
   const handleNoteClick = (profileId: string) => {
     setActiveProfileId(profileId);
@@ -242,42 +239,23 @@ export default function Discover() {
   return (
     <div className="min-h-screen flex flex-col pt-16 bg-transparent overflow-x-hidden">
       
-      {/* ── HEADER (Shown only in Stack View mode) ── */}
+      {/* ── Floating Toggle (Stack / Reels) ── */}
       {viewMode === 'stack' && (
-        <div className="flex items-center justify-between px-6 py-4 sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-[#EBE3D5]">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate('/')}
-              className="p-1 rounded-full hover:bg-neutral-150 text-neutral-800 transition-colors"
-              title="Back"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <h2 className="text-lg font-bold tracking-tight text-neutral-900">Discover</h2>
-          </div>
-
-          <div className="bg-neutral-100 p-0.5 rounded-full flex border border-neutral-200/80">
+        <div className="flex items-center justify-center px-6 py-2 z-30">
+          <div className="bg-white/40 backdrop-blur-md p-1 rounded-full flex border border-[#5C3A21]/20">
             <button
               onClick={() => { setViewMode('stack'); setActiveShowMoreProfileId(null); }}
-              className="bg-white text-black shadow-sm px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-200"
+              className="bg-[#5C3A21] text-white shadow-sm px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider transition-all duration-200"
             >
               Stack
             </button>
             <button
               onClick={() => { setViewMode('reels'); setActiveShowMoreProfileId(null); }}
-              className="text-neutral-500 hover:text-neutral-800 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-200"
+              className="text-[#5C5245] hover:text-[#2C2825] px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider transition-all duration-200"
             >
               Reels
             </button>
           </div>
-
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-800 transition-all font-sans text-[11px] border border-neutral-200/80"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span className="font-semibold">Logout</span>
-          </button>
         </div>
       )}
 

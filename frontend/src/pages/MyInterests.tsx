@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
 import Navbar from '../components/Navbar';
-import { Heart, Clock, CheckCircle, MapPin, ArrowLeft } from 'lucide-react';
+import { Heart, Clock, CheckCircle, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Interest {
@@ -44,30 +44,6 @@ export default function MyInterests() {
   return (
     <div className="min-h-screen flex flex-col pt-16 bg-transparent font-sans text-[#1D1D1F]">
       
-      {/* Header */}
-      <div className="sticky top-0 z-10 px-6 py-4 bg-white/80 backdrop-blur-md border-b border-[#EBE3D5]">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => navigate('/')} 
-              className="rounded-full p-2.5 flex items-center justify-center bg-neutral-100 hover:bg-neutral-200 text-neutral-800 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-            <div>
-              <h1 className="text-xl font-bold text-[#1D1D1F] tracking-tight">
-                My Interests
-              </h1>
-              {!loading && interests.length > 0 && (
-                <p className="text-[10px] text-neutral-450 font-bold uppercase tracking-wider mt-0.5">
-                  {interests.length} profile{interests.length !== 1 ? 's' : ''} liked
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Content */}
       <div className="flex-1 p-6">
         <div className="max-w-2xl mx-auto space-y-6">
@@ -113,7 +89,7 @@ export default function MyInterests() {
               {interests.map((interest, i) => (
                 <div
                   key={interest.id}
-                  className="rounded-2xl overflow-hidden flex items-center gap-4 p-4 border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 text-left cursor-default animate-fadeUp"
+                  className="rounded-3xl overflow-hidden flex items-center gap-4 p-4 border border-[#5C3A21]/20 bg-white/40 backdrop-blur-md hover:bg-white/60 hover:shadow-md transition-all duration-200 text-left cursor-default animate-fadeUp"
                   style={{
                     animationDelay: `${i * 0.05}s`,
                   }}
@@ -123,7 +99,7 @@ export default function MyInterests() {
                     <img
                       src={interest.users.photos && interest.users.photos.length > 0 ? interest.users.photos[0] : 'https://via.placeholder.com/150'}
                       alt={interest.users.name}
-                      className="w-14 h-14 rounded-xl object-cover border border-neutral-150"
+                      className="w-14 h-14 rounded-2xl object-cover border border-[#5C3A21]/20"
                     />
                     {/* Level 1 checkmark badge on avatar */}
                     {interest.users.face_verified && (
@@ -135,11 +111,11 @@ export default function MyInterests() {
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-extrabold text-sm text-neutral-900 truncate flex items-center gap-1.5">
-                      {interest.users.name}, <span className="font-normal text-neutral-500">{interest.users.age}</span>
+                    <h3 className="font-extrabold text-sm text-[#2C2825] truncate flex items-center gap-1.5">
+                      {interest.users.name}, <span className="font-normal text-[#5C5245]">{interest.users.age}</span>
                     </h3>
-                    <div className="flex items-center gap-1 mt-1 text-neutral-400 font-semibold">
-                      <MapPin className="w-3.5 h-3.5 text-neutral-300" />
+                    <div className="flex items-center gap-1 mt-1 text-[#7A6B5D] font-semibold">
+                      <MapPin className="w-3.5 h-3.5 text-[#7A6B5D]" />
                       <span className="text-xs truncate">{interest.users.place}</span>
                     </div>
                   </div>
@@ -147,13 +123,13 @@ export default function MyInterests() {
                   {/* Status Badge */}
                   <div className="flex-shrink-0">
                     {interest.status === 'pending' ? (
-                      <div className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-neutral-50 border border-neutral-200/50 text-neutral-500">
-                        <Clock className="w-3 h-3 text-neutral-400" />
+                      <div className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/50 border border-[#5C3A21]/20 text-[#7A6B5D]">
+                        <Clock className="w-3 h-3 text-[#7A6B5D]" />
                         Pending
                       </div>
                     ) : (
-                      <div className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 border border-blue-100 text-[#0071E3]">
-                        <CheckCircle className="w-3 h-3" />
+                      <div className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-500/10 border border-green-500/30 text-green-700">
+                        <CheckCircle className="w-3 h-3 text-green-600" />
                         Matched
                       </div>
                     )}

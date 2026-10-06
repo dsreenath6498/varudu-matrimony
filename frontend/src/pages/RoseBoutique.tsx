@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import Navbar from '../components/Navbar';
-import { PlaySquare, Users, ArrowLeft, TrendingUp, Gift } from 'lucide-react';
+import { PlaySquare, Users, TrendingUp, Gift } from 'lucide-react';
 
 interface Transaction {
   id: string;
@@ -44,7 +43,6 @@ const rosePacks: RosePack[] = [
 ];
 
 export default function RoseBoutique() {
-  const navigate = useNavigate();
   const [balance, setBalance] = useState(0);
   const [referralCode, setReferralCode] = useState('');
   const [canClaimFree, setCanClaimFree] = useState(false);
@@ -184,51 +182,30 @@ export default function RoseBoutique() {
   };
 
   return (
-    <div
-      className="min-h-screen flex flex-col pt-16 bg-transparent"
-    >
-      {/* Header */}
-      <div
-        className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3 bg-white/80 backdrop-blur-md border-b border-[#EBE3D5]"
-      >
-        <button
-          onClick={() => navigate(-1)}
-          className="rounded-full p-2 flex items-center justify-center transition-all bg-neutral-100 hover:bg-neutral-200 text-neutral-800"
-          style={{
-            border: '1px solid rgba(0,0,0,0.05)',
-          }}
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </button>
-        <h1 className="text-lg font-bold tracking-tight text-neutral-900 font-sans">
-          The Rose Boutique
-        </h1>
-      </div>
+    <div className="min-h-screen flex flex-col pt-16 bg-transparent font-sans text-[#1D1D1F]">
 
       <div className="flex-1 p-4 overflow-y-auto">
         <div className="max-w-2xl mx-auto space-y-8">
 
           {/* Balance Card */}
-          <div
-            className="rounded-3xl p-8 text-center bg-white border border-neutral-200/80 shadow-[0_8px_30px_rgba(0,0,0,0.04)] font-sans"
-          >
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-500 mb-2">
+          <div className="rounded-3xl p-8 text-center bg-white/40 backdrop-blur-md border border-[#5C3A21]/20 shadow-xs font-sans">
+            <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#5C3A21] mb-2">
               Your Balance
             </p>
             <div className="flex items-center justify-center gap-3">
               <span className="text-3xl select-none">🌹</span>
-              <span className="text-5xl font-extrabold text-neutral-900 tracking-tight font-sans">
+              <span className="text-5xl font-extrabold text-[#2C2825] tracking-tight font-sans">
                 {balance}
               </span>
             </div>
-            <p className="text-xs mt-3 text-neutral-400">
+            <p className="text-xs mt-3 text-[#7A6B5D]">
               Roses never expire · Use them wisely
             </p>
           </div>
 
           {/* Buy Roses */}
           <div className="font-sans">
-            <h2 className="text-base font-bold mb-4 flex items-center gap-2 text-neutral-900">
+            <h2 className="text-base font-bold mb-4 flex items-center gap-2 text-[#2C2825]">
               <span>🌹</span>
               Buy Roses
             </h2>
@@ -237,10 +214,10 @@ export default function RoseBoutique() {
                 <div
                   key={index}
                   onClick={() => !loading && handleBuy(pack.roses)}
-                  className="relative rounded-2xl p-6 bg-white border border-neutral-200/80 shadow-sm cursor-pointer hover:border-neutral-400 transition-all duration-200 flex flex-col justify-between min-h-[160px]"
+                  className="relative rounded-3xl p-6 bg-white/40 backdrop-blur-md border border-[#5C3A21]/20 shadow-xs cursor-pointer hover:bg-white/60 hover:border-[#5C3A21]/40 transition-all duration-200 flex flex-col justify-between min-h-[160px]"
                 >
                   {pack.badge && (
-                    <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-black text-white">
+                    <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-[#5C3A21] text-white">
                       {pack.badge}
                     </div>
                   )}
@@ -264,10 +241,10 @@ export default function RoseBoutique() {
                   </div>
 
                   <div>
-                    <h3 className="font-semibold text-center text-xs text-neutral-800 mb-1">
+                    <h3 className="font-semibold text-center text-xs text-[#5C5245] mb-1">
                       {pack.label}
                     </h3>
-                    <p className="text-center font-extrabold text-xl text-neutral-900">
+                    <p className="text-center font-extrabold text-xl text-[#2C2825]">
                       {pack.price}
                     </p>
                   </div>
@@ -278,7 +255,7 @@ export default function RoseBoutique() {
 
           {/* Earn Free Roses */}
           <div className="font-sans">
-            <h2 className="text-base font-bold mb-4 text-neutral-900">
+            <h2 className="text-base font-bold mb-4 text-[#2C2825]">
               Earn Free Roses
             </h2>
             <div className="space-y-3">
@@ -287,26 +264,20 @@ export default function RoseBoutique() {
               <button
                 onClick={() => handleAction('claim-free')}
                 disabled={!canClaimFree || loading}
-                className="w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-200 border text-neutral-800 disabled:opacity-40"
-                style={{
-                  background: canClaimFree ? '#E9F7EF' : '#FFFFFF',
-                  borderColor: canClaimFree ? '#A2D9CE' : '#E8E8ED',
-                }}
+                className="w-full flex items-center justify-between p-4 rounded-3xl transition-all duration-200 border text-[#2C2825] disabled:opacity-40 bg-white/40 backdrop-blur-md border-[#5C3A21]/20 hover:bg-white/60"
               >
                 <div className="flex items-center gap-4">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-neutral-100 border border-neutral-200"
-                  >
-                    <Gift className="w-5 h-5 text-neutral-800" />
+                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white/60 border border-[#5C3A21]/20">
+                    <Gift className="w-5 h-5 text-[#5C3A21]" />
                   </div>
                   <div className="text-left">
-                    <h3 className="font-bold text-xs text-neutral-900">Daily Drop</h3>
-                    <p className="text-[10px] text-neutral-500 mt-0.5">
+                    <h3 className="font-bold text-xs text-[#2C2825]">Daily Drop</h3>
+                    <p className="text-[10px] text-[#7A6B5D] mt-0.5">
                       Claim 1 free rose every 48 hours
                     </p>
                   </div>
                 </div>
-                <span className="font-bold text-xs px-2.5 py-1 rounded-lg bg-black text-white">
+                <span className="font-bold text-xs px-3 py-1.5 rounded-full bg-[#5C3A21] text-white">
                   +1 🌹
                 </span>
               </button>
@@ -318,50 +289,43 @@ export default function RoseBoutique() {
                   setTimeout(() => handleAction('watch-ad'), 2000);
                 }}
                 disabled={loading}
-                className="w-full flex items-center justify-between p-4 rounded-2xl bg-white border border-neutral-200/80 hover:bg-neutral-50 transition-all duration-200 text-neutral-800 disabled:opacity-40"
+                className="w-full flex items-center justify-between p-4 rounded-3xl bg-white/40 backdrop-blur-md border border-[#5C3A21]/20 hover:bg-white/60 transition-all duration-200 text-[#2C2825] disabled:opacity-40"
               >
                 <div className="flex items-center gap-4">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-neutral-100 border border-neutral-200"
-                  >
-                    <PlaySquare className="w-5 h-5 text-neutral-800" />
+                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white/60 border border-[#5C3A21]/20">
+                    <PlaySquare className="w-5 h-5 text-[#5C3A21]" />
                   </div>
                   <div className="text-left">
-                    <h3 className="font-bold text-xs text-neutral-900">Watch a Short Video</h3>
-                    <p className="text-[10px] text-neutral-500 mt-0.5">
+                    <h3 className="font-bold text-xs text-[#2C2825]">Watch a Short Video</h3>
+                    <p className="text-[10px] text-[#7A6B5D] mt-0.5">
                       Help support the app
                     </p>
                   </div>
                 </div>
-                <span className="font-bold text-xs px-2.5 py-1 rounded-lg bg-black text-white">
+                <span className="font-bold text-xs px-3 py-1.5 rounded-full bg-[#5C3A21] text-white">
                   +1 🌹
                 </span>
               </button>
 
               {/* Refer a Friend */}
-              <div
-                className="flex items-center justify-between p-4 rounded-2xl bg-white border border-neutral-200/80"
-              >
+              <div className="flex items-center justify-between p-4 rounded-3xl bg-white/40 backdrop-blur-md border border-[#5C3A21]/20">
                 <div className="flex items-center gap-4">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-neutral-100 border border-neutral-200"
-                  >
-                    <Users className="w-5 h-5 text-neutral-800" />
+                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white/60 border border-[#5C3A21]/20">
+                    <Users className="w-5 h-5 text-[#5C3A21]" />
                   </div>
                   <div className="text-left">
-                    <h3 className="font-bold text-xs text-neutral-900">Refer a Friend</h3>
-                    <p className="text-[10px] text-neutral-500 mt-0.5">
+                    <h3 className="font-bold text-xs text-[#2C2825]">Refer a Friend</h3>
+                    <p className="text-[10px] text-[#7A6B5D] mt-0.5">
                       They get 1, you get 2!
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={copyReferral}
-                  className="font-sans font-semibold text-xs px-3 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1 bg-black text-white hover:bg-neutral-900"
+                  className="font-sans font-semibold text-xs px-4 py-2 rounded-full transition-all duration-200 flex items-center gap-1 bg-[#5C3A21] text-white hover:bg-[#3D2514]"
                   style={{
-                    background: copiedCode ? '#E9F7EF' : '#1D1D1F',
-                    border: copiedCode ? '1px solid #A2D9CE' : 'none',
-                    color: copiedCode ? '#27AE60' : '#FFFFFF',
+                    background: copiedCode ? '#27AE60' : '#5C3A21',
+                    color: '#FFFFFF',
                   }}
                 >
                   {copiedCode ? '✓ Copied!' : (referralCode || '...')}
@@ -372,29 +336,27 @@ export default function RoseBoutique() {
 
           {/* Rose Ledger */}
           <div className="font-sans pb-10">
-            <h2 className="text-base font-bold mb-4 flex items-center gap-2 text-neutral-900">
-              <TrendingUp className="w-4 h-4 text-neutral-800" />
+            <h2 className="text-base font-bold mb-4 flex items-center gap-2 text-[#2C2825]">
+              <TrendingUp className="w-4 h-4 text-[#5C3A21]" />
               Rose Ledger
             </h2>
-            <div
-              className="rounded-3xl overflow-hidden bg-white border border-neutral-200/80 shadow-sm"
-            >
+            <div className="rounded-3xl overflow-hidden bg-white/40 backdrop-blur-md border border-[#5C3A21]/20 shadow-xs">
               {transactions.length === 0 ? (
-                <div className="text-center py-10 text-neutral-400 font-sans">
+                <div className="text-center py-10 text-[#7A6B5D] font-sans">
                   <p className="text-xs">No transactions yet</p>
                 </div>
               ) : (
-                <div className="divide-y divide-neutral-100">
+                <div className="divide-y divide-[#5C3A21]/10">
                   {transactions.map((tx) => (
                     <div
                       key={tx.id}
-                      className="flex items-center justify-between px-5 py-3.5 hover:bg-neutral-50/50 transition-all font-sans"
+                      className="flex items-center justify-between px-5 py-3.5 hover:bg-white/30 transition-all font-sans"
                     >
                       <div className="text-left">
-                        <p className="font-semibold text-xs text-neutral-900">
+                        <p className="font-semibold text-xs text-[#2C2825]">
                           {tx.description}
                         </p>
-                        <p className="text-[10px] mt-0.5 text-neutral-400">
+                        <p className="text-[10px] mt-0.5 text-[#7A6B5D]">
                           {new Date(tx.created_at).toLocaleString()}
                         </p>
                       </div>

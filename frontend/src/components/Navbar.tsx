@@ -27,7 +27,7 @@ export default function Navbar({ hideMobileBottom: _hideMobileBottom }: { hideMo
   const brownColor = '#4A2E19';
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-end px-3 sm:px-6 md:px-12 py-3 sm:py-5 bg-transparent select-none pointer-events-none">
+    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center px-4 py-3 sm:py-4 bg-transparent select-none pointer-events-none">
       {isAuthenticated ? (
         /* Horizontal Nav Icons Floating Directly on Background Image without any white container block */
         <div className="flex items-center gap-3 sm:gap-6 md:gap-8 pointer-events-auto bg-transparent p-0 border-none shadow-none select-none">
