@@ -249,7 +249,7 @@ export default function Chat() {
 
   if (!activeMatch) {
     return (
-      <div className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-44 bg-white font-sans text-[#1D1D1F]">
+      <div className="min-h-screen flex flex-col pt-16 bg-[#FDFBF7] font-sans text-[#1D1D1F]">
         {/* Header */}
         <div className="sticky top-0 z-10 px-6 py-4 bg-white border-b border-neutral-150">
           <div className="max-w-2xl mx-auto flex items-center justify-between">
@@ -570,7 +570,7 @@ export default function Chat() {
   // ── ACTIVE CHAT VIEW ──
   return (
     <div
-      className="min-h-screen flex flex-col md:ml-44 transition-all"
+      className="min-h-screen flex flex-col pt-16 transition-all"
       style={{ background: 'var(--bg-base)' }}
     >
       {/* Chat Header */}

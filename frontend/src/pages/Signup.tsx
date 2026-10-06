@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../api';
-import { Heart, Mail, ArrowLeft } from 'lucide-react';
+import { Mail, ArrowLeft } from 'lucide-react';
 
 // Floating petal component
 export default function Signup() {
@@ -159,29 +159,26 @@ export default function Signup() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4 bg-[#F5F5F7]"
+      className="min-h-screen flex items-center justify-center p-4 bg-transparent"
     >
-      {/* Signup Card */}
+      {/* Transparent Signup Area (No white box container) */}
       <div
-        className="w-full max-w-sm"
+        className="w-full max-w-sm px-4 py-6"
         style={{ animation: 'fadeUp 0.5s ease both' }}
       >
-        <div
-          className="rounded-3xl p-8 bg-white border border-neutral-200/80 shadow-[0_8px_30px_rgba(0,0,0,0.04)] relative overflow-hidden"
-        >
+        <div className="flex flex-col items-center select-none">
           {/* Logo / Header */}
-          <div className="flex flex-col items-center mb-6">
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-black"
+          <div className="flex flex-col items-center mb-6 text-center">
+            <img 
+              src="/varudu_gold_title.png" 
+              alt="Varudu" 
+              className="h-20 md:h-24 w-auto object-contain mix-blend-multiply mb-1 filter contrast-105"
+            />
+            <p 
+              className="text-sm font-serif tracking-widest text-[#5A4533] leading-tight"
+              style={{ fontFamily: '"Times New Roman", Times, serif' }}
             >
-              <Heart className="w-5 h-5 text-white fill-current" />
-            </div>
-
-            <h1 className="text-3xl font-extrabold text-neutral-900 tracking-tight font-sans">
-              create account
-            </h1>
-            <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-[0.15em] mt-1.5 font-sans">
-              Join Varudu Matrimony
+              Meaningful Matches<br />for a Brighter Tomorrow
             </p>
           </div>
 

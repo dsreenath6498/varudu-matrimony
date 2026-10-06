@@ -88,8 +88,19 @@ router.post('/google-login', async (req, res) => {
     const db = getDb();
     
     // Check if user exists with this email
-    const user = await db.get('SELECT * FROM users WHERE email = $1 OR LOWER(email) = LOWER($2)', [googleUser.email, googleUser.email]);
+    let user = await db.get('SELECT * FROM users WHERE email = $1 OR LOWER(email) = LOWER($2)', [googleUser.email, googleUser.email]);
     
+    // If testing via developer sandbox mock token and user doesn't exist yet, auto-create test user
+    if (!user && idToken.startsWith('mock-token-')) {
+      const userId = randomUUID();
+      const mockPhone = '999' + Math.floor(1000000 + Math.random() * 8999999).toString();
+      await db.run(
+        `INSERT INTO users (id, name, email, phone_number, is_onboarded, created_at) VALUES ($1, $2, $3, $4, 1, CURRENT_TIMESTAMP)`,
+        [userId, googleUser.name, googleUser.email, mockPhone]
+      );
+      user = await db.get('SELECT * FROM users WHERE id = $1', [userId]);
+    }
+
     if (user) {
       user.photos = typeof user.photos === 'string' ? JSON.parse(user.photos || '[]') : (user.photos || []);
       return res.json({ success: true, user, isNew: !user.is_onboarded });

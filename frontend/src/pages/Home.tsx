@@ -1,235 +1,250 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { Search, Heart, Sparkles, MessageCircle, LogOut, SlidersHorizontal, X } from 'lucide-react';
+import { Search, LogOut, ChevronDown } from 'lucide-react';
 
 export default function Home() {
-  const [searchVal, setSearchVal] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [maxAge, setMaxAge] = useState(40);
-  const [minAge, setMinAge] = useState(18);
-  const [selectedCity, setSelectedCity] = useState('');
+  const [lookingFor, setLookingFor] = useState('Bride');
+  const [ageRange, setAgeRange] = useState('22 - 30');
+  const [religion, setReligion] = useState('Any');
+  const [location, setLocation] = useState('Any');
+  
+  const isAuthenticated = !!localStorage.getItem('user');
+  
+  // Splash Screen State
+  const [showSplash, setShowSplash] = useState(() => {
+    return !sessionStorage.getItem('splash_shown');
+  });
+  const [splashFading, setSplashFading] = useState(false);
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (showSplash) {
+      const timer = setTimeout(() => {
+        dismissSplash();
+      }, 2200);
+      return () => clearTimeout(timer);
+    }
+  }, [showSplash]);
+
+  const dismissSplash = () => {
+    setSplashFading(true);
+    setTimeout(() => {
+      setShowSplash(false);
+      sessionStorage.setItem('splash_shown', 'true');
+    }, 600);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('user');
+    sessionStorage.removeItem('splash_shown');
     navigate('/login');
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const query = searchVal.trim();
-    
-    // Construct query parameters
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
     const params = new URLSearchParams();
-    if (query) params.append('search', query);
-    if (minAge > 18) params.append('minAge', minAge.toString());
-    if (maxAge < 60) params.append('maxAge', maxAge.toString());
-    if (selectedCity) params.append('city', selectedCity);
+    if (lookingFor !== 'Any') params.append('gender', lookingFor === 'Bride' ? 'Female' : 'Male');
+    if (ageRange !== 'Any') params.append('ageRange', ageRange);
+    if (religion !== 'Any') params.append('religion', religion);
+    if (location !== 'Any') params.append('city', location);
 
     const queryString = params.toString();
-    if (queryString) {
-      navigate(`/discover?${queryString}`);
-    } else {
-      navigate('/discover');
-    }
+    navigate(queryString ? `/discover?${queryString}` : '/discover');
   };
 
-  const cities = [
-    'Mumbai',
-    'Delhi',
-    'Bengaluru',
-    'Hyderabad',
-    'Chennai',
-    'Kolkata',
-    'Pune',
-    'Tirupati'
-  ];
-
   return (
-    <div className="min-h-screen flex flex-col md:ml-44 bg-white font-sans text-[var(--text-primary)]">
+    <div 
+      className="min-h-screen w-full flex flex-col justify-between font-sans text-[#2C2825] relative overflow-hidden bg-cover bg-center bg-no-repeat select-none"
+      style={{ backgroundImage: "url('/varudu_hero_bg.jpg')" }}
+    >
       
-      {/* ── TOP HEADER (SUBTLE LOGOUT) ── */}
-      <div className="w-full flex justify-end px-6 py-4 sticky top-0 bg-white/80 backdrop-blur-md z-30">
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-800 transition-all font-sans text-xs border border-neutral-200/50"
+      {/* ── 1. SPLASH SCREEN ANIMATION OVERLAY ── */}
+      {showSplash && (
+        <div 
+          className={`fixed inset-0 z-50 flex flex-col items-center justify-between p-8 bg-[#FBF9F5] transition-opacity duration-600 ease-out select-none ${
+            splashFading ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
         >
-          <LogOut className="w-3.5 h-3.5" />
-          <span className="font-semibold">Logout</span>
-        </button>
-      </div>
-
-      {/* Main Container */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-24 max-w-lg mx-auto w-full text-center select-none">
-        
-        {/* Decorative Top Heart Icon */}
-        <div className="w-16 h-16 rounded-full bg-neutral-50 border border-neutral-100/80 flex items-center justify-center mb-8 shadow-sm animate-float">
-          <Heart className="w-6 h-6 text-[#0071E3] fill-current" />
-        </div>
-
-        {/* Title */}
-        <h1 className="text-4xl md:text-5xl font-serif italic font-medium tracking-tight mb-3 text-neutral-900">
-          PerfMatch
-        </h1>
-
-        {/* Slogan */}
-        <p className="text-xs md:text-sm text-neutral-500 font-medium max-w-xs leading-relaxed mb-8">
-          Your journey to the perfect union starts here. Discover compatible profiles with a touch of roses.
-        </p>
-
-        {/* Search Bar Form */}
-        <form onSubmit={handleSearchSubmit} className="w-full space-y-4 mb-6">
-          <div className="flex gap-2">
-            <div className="relative flex-1 group">
-              <span className="absolute inset-y-0 left-4 flex items-center justify-center text-neutral-400">
-                <Search className="w-5 h-5 transition-colors group-focus-within:text-black" />
-              </span>
-              <input
-                type="text"
-                placeholder="Search name or location..."
-                value={searchVal}
-                onChange={(e) => setSearchVal(e.target.value)}
-                className="w-full py-4 pl-12 pr-4 bg-neutral-50 border border-neutral-200/80 rounded-2xl outline-none text-base transition-all duration-300 shadow-sm focus:border-neutral-400 focus:bg-white focus:shadow-md"
-              />
-            </div>
-            
-            {/* Filter Toggle Button */}
-            <button
-              type="button"
-              onClick={() => setShowFilters(!showFilters)}
-              className={`px-4 rounded-2xl border transition-all flex items-center justify-center ${
-                showFilters || minAge > 18 || maxAge < 60 || selectedCity
-                  ? 'bg-black border-black text-white'
-                  : 'bg-neutral-50 border-neutral-200/80 text-neutral-600 hover:bg-neutral-100'
-              }`}
-              title="Filter Profiles"
+          {/* Top Skip Button */}
+          <div className="w-full flex justify-end">
+            <button 
+              onClick={dismissSplash}
+              className="text-xs font-semibold tracking-wider text-[#A89F91] hover:text-[#5C5245] transition-colors uppercase py-2 px-3"
             >
-              <SlidersHorizontal className="w-5 h-5" />
+              Skip
             </button>
           </div>
 
-          {/* ── ADVANCED FILTERS PANEL (Modal / Dropdown) ── */}
-          {showFilters && (
-            <div className="bg-neutral-50 border border-neutral-200/60 rounded-2xl p-5 text-left space-y-4 animate-fadeUp">
-              <div className="flex justify-between items-center pb-2 border-b border-neutral-200/40">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-500">Filter Preferences</h4>
-                <button
-                  type="button"
-                  onClick={() => setShowFilters(false)}
-                  className="text-neutral-400 hover:text-black"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+          {/* Center Branding Content */}
+          <div className="flex flex-col items-center text-center my-auto animate-fadeUp">
+            <img 
+              src="/varudu_logo.png" 
+              alt="Varudu" 
+              className="h-16 md:h-20 w-auto object-contain mix-blend-multiply my-4 drop-shadow-sm"
+            />
+            <p className="text-xs md:text-sm text-[#8A827A] font-medium tracking-wide">
+              Find your forever, faster.
+            </p>
+          </div>
 
-              {/* Age Filters */}
-              <div className="space-y-3">
-                <div className="flex justify-between text-xs font-semibold text-neutral-700">
-                  <span>Age Range:</span>
-                  <span className="font-bold text-[#0071E3]">{minAge} - {maxAge} years</span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <span className="text-[10px] text-neutral-400 w-8">Min:</span>
-                    <input
-                      type="range"
-                      min="18"
-                      max="60"
-                      value={minAge}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value);
-                        setMinAge(Math.min(val, maxAge - 1));
-                      }}
-                      className="flex-1 accent-black h-1 bg-neutral-200 rounded-lg appearance-none cursor-pointer"
-                    />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[10px] text-neutral-400 w-8">Max:</span>
-                    <input
-                      type="range"
-                      min="18"
-                      max="60"
-                      value={maxAge}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value);
-                        setMaxAge(Math.max(val, minAge + 1));
-                      }}
-                      className="flex-1 accent-black h-1 bg-neutral-200 rounded-lg appearance-none cursor-pointer"
-                    />
-                  </div>
-                </div>
-              </div>
+          {/* Bottom Dot indicator */}
+          <div className="pb-4 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#C59B63] animate-pulse"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#E5DFC9]"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#E5DFC9]"></span>
+          </div>
+        </div>
+      )}
 
-              {/* City Filter */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-700 block">Select City:</label>
-                <select
-                  value={selectedCity}
-                  onChange={(e) => setSelectedCity(e.target.value)}
-                  className="w-full p-3 bg-white border border-neutral-200 rounded-xl text-sm outline-none focus:border-neutral-400"
-                >
-                  <option value="">All Cities</option>
-                  {cities.map((city) => (
-                    <option key={city} value={city}>{city}</option>
-                  ))}
-                </select>
-              </div>
+      {/* ── 2. TOP HORIZONTAL NAVBAR ── */}
+      <Navbar />
 
-              {/* Clear Panel Controls */}
-              {(minAge > 18 || maxAge < 60 || selectedCity) && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMinAge(18);
-                    setMaxAge(60);
-                    setSelectedCity('');
-                  }}
-                  className="text-[10px] font-bold text-neutral-400 hover:text-black uppercase tracking-wider"
-                >
-                  Reset Filters
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Go For All Profiles Button */}
-          <button
-            type="submit"
-            className="w-full py-4 bg-black text-white hover:bg-neutral-900 text-sm font-bold rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 active:scale-98"
+      {/* ── 3. HERO CONTENT: VARUDU TITLE, TAGLINE, LOTUS & MULTI-FILTER SEARCH BAR ── */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 md:px-8 pt-20 pb-16 w-full max-w-4xl mx-auto z-20 text-center">
+        
+        {/* Golden Varudu Title Logo & Tagline */}
+        <div className="mb-6 flex flex-col items-center animate-fadeUp">
+          <img 
+            src="/varudu_gold_title.png" 
+            alt="Varudu" 
+            className="h-28 sm:h-36 md:h-44 lg:h-48 w-auto object-contain mix-blend-multiply mx-auto drop-shadow-sm filter contrast-105 -mb-2 md:-mb-4"
+          />
+          <p 
+            className="text-sm sm:text-base md:text-lg text-[#5A4533] font-serif tracking-widest leading-tight"
+            style={{ fontFamily: '"Times New Roman", Times, serif' }}
           >
-            Go for profiles
-          </button>
+            Meaningful Matches<br />for a Brighter Tomorrow
+          </p>
+
+          {/* Gold Lotus Icon Divider */}
+          <div className="flex items-center gap-3 my-3 opacity-80">
+            <span className="w-10 h-px bg-[#C59B63]/60"></span>
+            <span className="text-base text-[#C59B63]">🪷</span>
+            <span className="w-10 h-px bg-[#C59B63]/60"></span>
+          </div>
+        </div>
+
+        {/* ── MULTI-FILTER SEARCH WIDGET (Fully Responsive for Mobile Phones & Laptops) ── */}
+        <form onSubmit={handleSearchSubmit} className="w-full max-w-3xl mx-auto animate-fadeUp">
+          <div className="bg-[#FAF7F2]/95 backdrop-blur-md border border-[#E8DFC9] rounded-2xl md:rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.08)] p-3 md:p-3 flex flex-col md:flex-row items-center divide-y md:divide-y-0 md:divide-x divide-[#E5DFC9] text-left gap-3 md:gap-0">
+            
+            <div className="grid grid-cols-2 md:flex md:flex-1 w-full gap-2 md:gap-0 divide-y-0 divide-x-0 md:divide-x divide-[#E5DFC9]">
+              {/* Filter 1: Looking for */}
+              <div className="px-3 md:px-4 py-1.5 md:py-1 w-full relative bg-white/40 md:bg-transparent rounded-xl md:rounded-none p-2 border border-[#E5DFC9]/50 md:border-none">
+                <label className="block text-[10px] sm:text-[11px] font-medium text-[#7A6B5D] mb-0.5">Looking for</label>
+                <div className="relative flex items-center">
+                  <select
+                    value={lookingFor}
+                    onChange={(e) => setLookingFor(e.target.value)}
+                    className="w-full bg-transparent text-xs sm:text-sm md:text-base font-semibold text-[#3A2312] outline-none appearance-none pr-5 cursor-pointer"
+                  >
+                    <option value="Bride">Bride</option>
+                    <option value="Groom">Groom</option>
+                    <option value="Any">Any</option>
+                  </select>
+                  <ChevronDown className="w-3.5 h-3.5 text-[#8A7B6C] absolute right-0 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Filter 2: Age range */}
+              <div className="px-3 md:px-4 py-1.5 md:py-1 w-full relative bg-white/40 md:bg-transparent rounded-xl md:rounded-none p-2 border border-[#E5DFC9]/50 md:border-none">
+                <label className="block text-[10px] sm:text-[11px] font-medium text-[#7A6B5D] mb-0.5">Age range</label>
+                <div className="relative flex items-center">
+                  <select
+                    value={ageRange}
+                    onChange={(e) => setAgeRange(e.target.value)}
+                    className="w-full bg-transparent text-xs sm:text-sm md:text-base font-semibold text-[#3A2312] outline-none appearance-none pr-5 cursor-pointer"
+                  >
+                    <option value="22 - 30">22 - 30</option>
+                    <option value="18 - 25">18 - 25</option>
+                    <option value="25 - 35">25 - 35</option>
+                    <option value="30 - 45">30 - 45</option>
+                    <option value="Any">Any</option>
+                  </select>
+                  <ChevronDown className="w-3.5 h-3.5 text-[#8A7B6C] absolute right-0 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Filter 3: Religion */}
+              <div className="px-3 md:px-4 py-1.5 md:py-1 w-full relative bg-white/40 md:bg-transparent rounded-xl md:rounded-none p-2 border border-[#E5DFC9]/50 md:border-none">
+                <label className="block text-[10px] sm:text-[11px] font-medium text-[#7A6B5D] mb-0.5">Religion</label>
+                <div className="relative flex items-center">
+                  <select
+                    value={religion}
+                    onChange={(e) => setReligion(e.target.value)}
+                    className="w-full bg-transparent text-xs sm:text-sm md:text-base font-semibold text-[#3A2312] outline-none appearance-none pr-5 cursor-pointer"
+                  >
+                    <option value="Any">Any</option>
+                    <option value="Hindu">Hindu</option>
+                    <option value="Muslim">Muslim</option>
+                    <option value="Christian">Christian</option>
+                    <option value="Sikh">Sikh</option>
+                    <option value="Jain">Jain</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <ChevronDown className="w-3.5 h-3.5 text-[#8A7B6C] absolute right-0 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Filter 4: Location */}
+              <div className="px-3 md:px-4 py-1.5 md:py-1 w-full relative bg-white/40 md:bg-transparent rounded-xl md:rounded-none p-2 border border-[#E5DFC9]/50 md:border-none">
+                <label className="block text-[10px] sm:text-[11px] font-medium text-[#7A6B5D] mb-0.5">Location</label>
+                <div className="relative flex items-center">
+                  <select
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    className="w-full bg-transparent text-xs sm:text-sm md:text-base font-semibold text-[#3A2312] outline-none appearance-none pr-5 cursor-pointer"
+                  >
+                    <option value="Any">Any</option>
+                    <option value="Hyderabad">Hyderabad</option>
+                    <option value="Vizag">Vizag</option>
+                    <option value="Vijayawada">Vijayawada</option>
+                    <option value="Bengaluru">Bengaluru</option>
+                    <option value="Chennai">Chennai</option>
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Delhi">Delhi</option>
+                  </select>
+                  <ChevronDown className="w-3.5 h-3.5 text-[#8A7B6C] absolute right-0 pointer-events-none" />
+                </div>
+              </div>
+            </div>
+
+            {/* Search Submit Button */}
+            <div className="px-1 md:px-2 pt-1 md:pt-0 w-full md:w-auto">
+              <button
+                type="submit"
+                className="w-full md:w-auto px-7 py-3 bg-[#5C3A21] hover:bg-[#4A2E19] text-white font-semibold text-xs sm:text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95"
+              >
+                <Search className="w-4 h-4" />
+                <span>Search</span>
+              </button>
+            </div>
+
+          </div>
         </form>
 
-        {/* Small Navigation Shortcuts Grid (Quick Access Cards) */}
-        <div className="w-full grid grid-cols-3 gap-3 mt-6">
-          <button
-            onClick={() => navigate('/interests')}
-            className="flex flex-col items-center justify-center p-3 rounded-2xl border border-neutral-150/70 hover:bg-neutral-50 transition-colors"
-          >
-            <Heart className="w-5 h-5 mb-1.5 text-neutral-600" />
-            <span className="text-[9px] font-semibold text-neutral-600">Interests</span>
-          </button>
-          <button
-            onClick={() => navigate('/store')}
-            className="flex flex-col items-center justify-center p-3 rounded-2xl border border-neutral-150/70 hover:bg-neutral-50 transition-colors"
-          >
-            <Sparkles className="w-5 h-5 mb-1.5 text-neutral-600" />
-            <span className="text-[9px] font-semibold text-neutral-600">Boutique</span>
-          </button>
-          <button
-            onClick={() => navigate('/chat')}
-            className="flex flex-col items-center justify-center p-3 rounded-2xl border border-neutral-150/70 hover:bg-neutral-50 transition-colors"
-          >
-            <MessageCircle className="w-5 h-5 mb-1.5 text-neutral-600" />
-            <span className="text-[9px] font-semibold text-neutral-600">Chats</span>
-          </button>
-        </div>
+        {/* Subtle Logout Option (shown if logged in) */}
+        {isAuthenticated && (
+          <div className="mt-8">
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/60 hover:bg-white/80 text-[#5C5245] transition-all font-sans text-xs border border-[#E8E0D0] shadow-sm backdrop-blur-md"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="font-semibold">Logout</span>
+            </button>
+          </div>
+        )}
 
       </div>
 
-      <Navbar />
     </div>
   );
 }
+

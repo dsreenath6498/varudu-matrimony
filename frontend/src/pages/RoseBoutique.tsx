@@ -185,7 +185,7 @@ export default function RoseBoutique() {
 
   return (
     <div
-      className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-44 bg-white"
+      className="min-h-screen flex flex-col pt-16 bg-[#FDFBF7]"
     >
       {/* Header */}
       <div

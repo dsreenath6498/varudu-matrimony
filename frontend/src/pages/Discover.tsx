@@ -240,7 +240,7 @@ export default function Discover() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col md:ml-44 bg-white overflow-x-hidden">
+    <div className="min-h-screen flex flex-col pt-16 bg-[#FDFBF7] overflow-x-hidden">
       
       {/* ── HEADER (Shown only in Stack View mode) ── */}
       {viewMode === 'stack' && (

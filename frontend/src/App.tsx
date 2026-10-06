@@ -30,7 +30,10 @@ function App() {
     <Router>
       <SocketProvider>
         <CallProvider>
-          <div className="font-sans antialiased min-h-screen relative bg-[var(--bg-base)] text-[var(--text-primary)]">
+          <div 
+            className="font-sans antialiased min-h-screen relative bg-cover bg-center bg-no-repeat bg-fixed text-[#2C2825]"
+            style={{ backgroundImage: "url('/varudu_app_bg.jpg')" }}
+          >
             <FloralOverlay />
             <CallOverlay />
             <ChatbotWidget />
@@ -38,7 +41,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-              <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+              <Route path="/" element={<Home />} />
               <Route path="/discover" element={<ProtectedRoute><Discover /></ProtectedRoute>} />
               <Route path="/interests" element={<ProtectedRoute><MyInterests /></ProtectedRoute>} />
               <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />

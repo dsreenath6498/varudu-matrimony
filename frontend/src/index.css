@@ -6,36 +6,40 @@
    ============================================================ */
 
 :root {
-  /* Background - Minimalist Apple White */
-  --bg-deep: #FFFFFF;
-  --bg-base: #FFFFFF;
-  --bg-surface: #FFFFFF;
-  --bg-raised: #FFFFFF;
+  /* Background - Warm Minimal Beige */
+  --bg-deep: #FDFBF7;
+  --bg-base: #FDFBF7;
+  --bg-surface: #FDFBF7;
+  --bg-raised: #FDFBF7;
 
-  /* Primary Accent - Classic Apple Blue/Black */
-  --crimson: #0071E3;
-  --crimson-dark: #0066CC;
-  --crimson-glow: rgba(0, 113, 227, 0.12);
+  /* Primary Accent - Warm Gold */
+  --crimson: #C59B63;
+  --crimson-dark: #B2874F;
+  --crimson-glow: rgba(197, 155, 99, 0.12);
 
-  /* Secondary Accent - Dark Charcoal/Gray */
-  --gold: #1D1D1F;
-  --gold-light: #6E6E73;
-  --gold-glow: rgba(0, 0, 0, 0.04);
+  /* Secondary Accent - Warm Charcoal */
+  --gold: #C59B63;
+  --gold-light: #A89F91;
+  --gold-glow: rgba(197, 155, 99, 0.05);
 
-  /* Text - Crisp Blacks and Grays */
-  --text-primary: #1D1D1F;
-  --text-secondary: #6E6E73;
-  --text-muted: #86868B;
+  /* Text - Warm Charcoal */
+  --text-primary: #2C2825;
+  --text-secondary: #5C5245;
+  --text-muted: #8A827A;
 
-  /* Glassmorphism - Apple Translucent */
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --glass-border-gold: rgba(0, 0, 0, 0.08);
+  /* Glassmorphism */
+  --glass-bg: rgba(253, 251, 247, 0.9);
+  --glass-border: rgba(235, 227, 213, 0.6);
+  --glass-border-gold: rgba(197, 155, 99, 0.2);
 
-  /* Shadows - Soft Minimal Shadows */
-  --shadow-glow-crimson: 0 4px 12px rgba(0, 113, 227, 0.1);
-  --shadow-glow-gold: 0 4px 12px rgba(0, 0, 0, 0.05);
-  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
+  /* Shadows */
+  --shadow-glow-crimson: 0 4px 12px rgba(197, 155, 99, 0.15);
+  --shadow-glow-gold: 0 4px 12px rgba(197, 155, 99, 0.08);
+  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.03), 0 2px 8px rgba(0, 0, 0, 0.01);
+}
+
+body {
+  background-color: #FDFBF7 !important;
 }
 
 /* Font and Accent Overrides globally for Apple design */

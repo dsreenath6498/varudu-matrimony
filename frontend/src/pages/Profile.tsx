@@ -310,7 +310,7 @@ export default function Profile() {
   if (loading) return null;
 
   return (
-    <div className="min-h-screen flex flex-col pb-24 md:pb-0 md:ml-44 bg-white font-sans text-[#1D1D1F]">
+    <div className="min-h-screen flex flex-col pt-16 bg-[#FDFBF7] font-sans text-[#1D1D1F]">
       
       {/* Header */}
       <div className="sticky top-0 z-10 px-6 py-4 flex items-center justify-between bg-white border-b border-neutral-150">
