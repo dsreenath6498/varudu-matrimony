@@ -29,8 +29,8 @@ export default function Navbar({ hideMobileBottom: _hideMobileBottom }: { hideMo
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-end px-3 sm:px-6 md:px-12 py-3 sm:py-5 bg-transparent select-none pointer-events-none">
       {isAuthenticated ? (
-        /* Horizontal Nav Icons Floating Directly on Background Image when Logged In */
-        <div className="flex items-center gap-2 sm:gap-6 md:gap-8 pointer-events-auto bg-white/60 md:bg-transparent backdrop-blur-md md:backdrop-blur-none px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/30 md:border-none shadow-sm md:shadow-none max-w-full overflow-x-auto">
+        /* Horizontal Nav Icons Floating Directly on Background Image without any white container block */
+        <div className="flex items-center gap-3 sm:gap-6 md:gap-8 pointer-events-auto bg-transparent p-0 border-none shadow-none select-none">
           {navItems.map(({ to, icon: Icon, label }) => {
             const isActive = location.pathname === to;
             const isChatTab = to === '/chat';
@@ -40,7 +40,7 @@ export default function Navbar({ hideMobileBottom: _hideMobileBottom }: { hideMo
                 to={to}
                 title={label}
                 className={`relative flex items-center justify-center p-1.5 sm:p-2 rounded-full transition-all duration-200 ${
-                  isActive ? 'bg-[#4A2E19]/15 scale-105' : 'hover:bg-[#4A2E19]/10'
+                  isActive ? 'bg-[#5C3A21]/15 scale-105' : 'hover:bg-[#5C3A21]/10'
                 }`}
                 style={{
                   opacity: mounted ? 1 : 0,
@@ -48,11 +48,11 @@ export default function Navbar({ hideMobileBottom: _hideMobileBottom }: { hideMo
               >
                 <div className="relative flex items-center justify-center">
                   <Icon
-                    className="w-5 h-5 sm:w-6 sm:h-6 transition-all duration-200"
+                    className="w-5.5 h-5.5 sm:w-6 sm:h-6 transition-all duration-200"
                     style={{
                       color: brownColor,
-                      strokeWidth: 2.8, // Bolder outline
-                      opacity: isActive ? 1 : 0.85,
+                      strokeWidth: 2, // Lighter, clean outline for mobile
+                      opacity: isActive ? 0.95 : 0.75,
                       fill: isActive && to === '/interests' ? brownColor : 'none',
                     }}
                   />

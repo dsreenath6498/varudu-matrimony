@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { Search, LogOut, ChevronDown } from 'lucide-react';
+import { Search, LogOut, ChevronDown, ArrowRight } from 'lucide-react';
 
 export default function Home() {
+  const [searchVal, setSearchVal] = useState('');
   const [lookingFor, setLookingFor] = useState('Bride');
   const [ageRange, setAgeRange] = useState('22 - 30');
   const [religion, setReligion] = useState('Any');
@@ -49,6 +50,7 @@ export default function Home() {
       return;
     }
     const params = new URLSearchParams();
+    if (searchVal.trim()) params.append('search', searchVal.trim());
     if (lookingFor !== 'Any') params.append('gender', lookingFor === 'Bride' ? 'Female' : 'Male');
     if (ageRange !== 'Any') params.append('ageRange', ageRange);
     if (religion !== 'Any') params.append('religion', religion);
@@ -130,19 +132,43 @@ export default function Home() {
           </div>
         </div>
 
-        {/* ── MULTI-FILTER SEARCH WIDGET (Fully Responsive for Mobile Phones & Laptops) ── */}
-        <form onSubmit={handleSearchSubmit} className="w-full max-w-3xl mx-auto animate-fadeUp">
-          <div className="bg-[#FAF7F2]/95 backdrop-blur-md border border-[#E8DFC9] rounded-2xl md:rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.08)] p-3 md:p-3 flex flex-col md:flex-row items-center divide-y md:divide-y-0 md:divide-x divide-[#E5DFC9] text-left gap-3 md:gap-0">
+        {/* ── MOBILE SEARCH & EXPLORE PROFILES BUTTON (Shown only on Mobile Phones) ── */}
+        <form onSubmit={handleSearchSubmit} className="w-full max-w-sm mx-auto md:hidden space-y-3 animate-fadeUp">
+          <div className="relative group shadow-md rounded-full">
+            <input
+              type="text"
+              placeholder="Search name, caste, or location..."
+              value={searchVal}
+              onChange={(e) => setSearchVal(e.target.value)}
+              className="w-full py-3.5 pl-11 pr-4 bg-white/85 hover:bg-white/95 focus:bg-white border border-[#EBE3D5] rounded-full outline-none text-sm text-[#2C2825] placeholder-[#7A6B5D] transition-all duration-300 backdrop-blur-md focus:border-[#5C3A21] focus:shadow-lg"
+            />
+            <span className="absolute inset-y-0 left-3.5 flex items-center justify-center text-[#5C3A21]">
+              <Search className="w-4.5 h-4.5" />
+            </span>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full py-3.5 bg-[#5C3A21] hover:bg-[#4A2E19] text-white font-semibold text-sm rounded-full shadow-md transition-all flex items-center justify-center gap-2 active:scale-95"
+          >
+            <span>Explore Profiles</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </form>
+
+        {/* ── DESKTOP MULTI-FILTER SEARCH WIDGET (Shown only on Laptops/Desktops) ── */}
+        <form onSubmit={handleSearchSubmit} className="w-full max-w-3xl mx-auto hidden md:block animate-fadeUp">
+          <div className="bg-[#FAF7F2]/95 backdrop-blur-md border border-[#E8DFC9] rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.08)] p-3 flex flex-row items-center divide-x divide-[#E5DFC9] text-left">
             
-            <div className="grid grid-cols-2 md:flex md:flex-1 w-full gap-2 md:gap-0 divide-y-0 divide-x-0 md:divide-x divide-[#E5DFC9]">
+            <div className="flex flex-1 w-full divide-x divide-[#E5DFC9]">
               {/* Filter 1: Looking for */}
-              <div className="px-3 md:px-4 py-1.5 md:py-1 w-full relative bg-white/40 md:bg-transparent rounded-xl md:rounded-none p-2 border border-[#E5DFC9]/50 md:border-none">
-                <label className="block text-[10px] sm:text-[11px] font-medium text-[#7A6B5D] mb-0.5">Looking for</label>
+              <div className="px-4 py-1 w-full relative">
+                <label className="block text-[11px] font-medium text-[#7A6B5D] mb-0.5">Looking for</label>
                 <div className="relative flex items-center">
                   <select
                     value={lookingFor}
                     onChange={(e) => setLookingFor(e.target.value)}
-                    className="w-full bg-transparent text-xs sm:text-sm md:text-base font-semibold text-[#3A2312] outline-none appearance-none pr-5 cursor-pointer"
+                    className="w-full bg-transparent text-base font-semibold text-[#3A2312] outline-none appearance-none pr-5 cursor-pointer"
                   >
                     <option value="Bride">Bride</option>
                     <option value="Groom">Groom</option>
@@ -153,13 +179,13 @@ export default function Home() {
               </div>
 
               {/* Filter 2: Age range */}
-              <div className="px-3 md:px-4 py-1.5 md:py-1 w-full relative bg-white/40 md:bg-transparent rounded-xl md:rounded-none p-2 border border-[#E5DFC9]/50 md:border-none">
-                <label className="block text-[10px] sm:text-[11px] font-medium text-[#7A6B5D] mb-0.5">Age range</label>
+              <div className="px-4 py-1 w-full relative">
+                <label className="block text-[11px] font-medium text-[#7A6B5D] mb-0.5">Age range</label>
                 <div className="relative flex items-center">
                   <select
                     value={ageRange}
                     onChange={(e) => setAgeRange(e.target.value)}
-                    className="w-full bg-transparent text-xs sm:text-sm md:text-base font-semibold text-[#3A2312] outline-none appearance-none pr-5 cursor-pointer"
+                    className="w-full bg-transparent text-base font-semibold text-[#3A2312] outline-none appearance-none pr-5 cursor-pointer"
                   >
                     <option value="22 - 30">22 - 30</option>
                     <option value="18 - 25">18 - 25</option>
@@ -172,13 +198,13 @@ export default function Home() {
               </div>
 
               {/* Filter 3: Religion */}
-              <div className="px-3 md:px-4 py-1.5 md:py-1 w-full relative bg-white/40 md:bg-transparent rounded-xl md:rounded-none p-2 border border-[#E5DFC9]/50 md:border-none">
-                <label className="block text-[10px] sm:text-[11px] font-medium text-[#7A6B5D] mb-0.5">Religion</label>
+              <div className="px-4 py-1 w-full relative">
+                <label className="block text-[11px] font-medium text-[#7A6B5D] mb-0.5">Religion</label>
                 <div className="relative flex items-center">
                   <select
                     value={religion}
                     onChange={(e) => setReligion(e.target.value)}
-                    className="w-full bg-transparent text-xs sm:text-sm md:text-base font-semibold text-[#3A2312] outline-none appearance-none pr-5 cursor-pointer"
+                    className="w-full bg-transparent text-base font-semibold text-[#3A2312] outline-none appearance-none pr-5 cursor-pointer"
                   >
                     <option value="Any">Any</option>
                     <option value="Hindu">Hindu</option>
@@ -193,13 +219,13 @@ export default function Home() {
               </div>
 
               {/* Filter 4: Location */}
-              <div className="px-3 md:px-4 py-1.5 md:py-1 w-full relative bg-white/40 md:bg-transparent rounded-xl md:rounded-none p-2 border border-[#E5DFC9]/50 md:border-none">
-                <label className="block text-[10px] sm:text-[11px] font-medium text-[#7A6B5D] mb-0.5">Location</label>
+              <div className="px-4 py-1 w-full relative">
+                <label className="block text-[11px] font-medium text-[#7A6B5D] mb-0.5">Location</label>
                 <div className="relative flex items-center">
                   <select
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    className="w-full bg-transparent text-xs sm:text-sm md:text-base font-semibold text-[#3A2312] outline-none appearance-none pr-5 cursor-pointer"
+                    className="w-full bg-transparent text-base font-semibold text-[#3A2312] outline-none appearance-none pr-5 cursor-pointer"
                   >
                     <option value="Any">Any</option>
                     <option value="Hyderabad">Hyderabad</option>
@@ -216,10 +242,10 @@ export default function Home() {
             </div>
 
             {/* Search Submit Button */}
-            <div className="px-1 md:px-2 pt-1 md:pt-0 w-full md:w-auto">
+            <div className="px-2 w-auto">
               <button
                 type="submit"
-                className="w-full md:w-auto px-7 py-3 bg-[#5C3A21] hover:bg-[#4A2E19] text-white font-semibold text-xs sm:text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95"
+                className="px-7 py-3 bg-[#5C3A21] hover:bg-[#4A2E19] text-white font-semibold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95"
               >
                 <Search className="w-4 h-4" />
                 <span>Search</span>
